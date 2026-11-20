@@ -18,7 +18,6 @@ import (
 
 var mockAdapter = mock.NewMockAdapter()
 
-// In-memory alert store for fast lookup and persistence testing
 type AlertRecord struct {
 	ID                  string    `json:"id"`
 	ServiceNumber       string    `json:"service_number"`
@@ -39,8 +38,8 @@ type CreateAlertRequest struct {
 	Destination         string `json:"destination"`
 	DepartureDate       string `json:"departure_date"`
 	ClassCode           string `json:"class_code"`
-	DesiredState        string `json:"desired_state"`        // "AVAILABLE" or "RAC_OR_BETTER"
-	NotificationChannel string `json:"notification_channel"` // "WHATSAPP", "WEB_PUSH", "EMAIL"
+	DesiredState        string `json:"desired_state"`
+	NotificationChannel string `json:"notification_channel"`
 	PhoneNumber         string `json:"phone_number,omitempty"`
 	Email               string `json:"email,omitempty"`
 }
@@ -55,7 +54,7 @@ type LocationItem struct {
 	Name       string `json:"name"`
 	City       string `json:"city"`
 	Country    string `json:"country"`
-	Type       string `json:"type"` // "railway_station", "airport", "city"
+	Type       string `json:"type"`
 	IsMajorHub bool   `json:"is_major_hub"`
 }
 
@@ -68,12 +67,26 @@ var locationsCatalog = []LocationItem{
 	{Code: "ET", Name: "Itarsi Junction", City: "Itarsi", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "PRYJ", Name: "Prayagraj Junction", City: "Prayagraj", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "BSL", Name: "Bhusaval Junction", City: "Bhusaval", Country: "IN", Type: "railway_station", IsMajorHub: true},
+	{Code: "KNW", Name: "Khandwa Junction", City: "Khandwa", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "BPL", Name: "Bhopal Junction", City: "Bhopal", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "CNB", Name: "Kanpur Central", City: "Kanpur", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "BLR", Name: "KSR Bengaluru", City: "Bengaluru", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "MAS", Name: "Chennai Central", City: "Chennai", Country: "IN", Type: "railway_station", IsMajorHub: true},
 	{Code: "DEL", Name: "Indira Gandhi International Airport", City: "New Delhi", Country: "IN", Type: "airport", IsMajorHub: true},
-	{Code: "BOM_AIR", Name: "Chhatrapati Shivaji International Airport", City: "Mumbai", Country: "IN", Type: "airport", IsMajorHub: true},
+}
+
+var sampleGodanRoute = []routes.TrainStop{
+	{TrainNumber: "11059", StationCode: "LTT", StationName: "Lokmanya Tilak Terminus", SequenceNumber: 1, DistanceKm: 0},
+	{TrainNumber: "11059", StationCode: "KYN", StationName: "Kalyan Junction", SequenceNumber: 2, DistanceKm: 55},
+	{TrainNumber: "11059", StationCode: "NK", StationName: "Nashik Road", SequenceNumber: 3, DistanceKm: 187},
+	{TrainNumber: "11059", StationCode: "MMR", StationName: "Manmad Junction", SequenceNumber: 4, DistanceKm: 260},
+	{TrainNumber: "11059", StationCode: "BSL", StationName: "Bhusaval Junction", SequenceNumber: 5, DistanceKm: 444},
+	{TrainNumber: "11059", StationCode: "KNW", StationName: "Khandwa Junction", SequenceNumber: 6, DistanceKm: 568},
+	{TrainNumber: "11059", StationCode: "ET", StationName: "Itarsi Junction", SequenceNumber: 7, DistanceKm: 751},
+	{TrainNumber: "11059", StationCode: "JBP", StationName: "Jabalpur", SequenceNumber: 8, DistanceKm: 996},
+	{TrainNumber: "11059", StationCode: "KTE", StationName: "Katni Junction", SequenceNumber: 9, DistanceKm: 1087},
+	{TrainNumber: "11059", StationCode: "STA", StationName: "Satna Junction", SequenceNumber: 10, DistanceKm: 1185},
+	{TrainNumber: "11059", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 11, DistanceKm: 1362},
 }
 
 func enableCORS(w http.ResponseWriter) {
@@ -152,7 +165,7 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func handleSegmentHacks(w http.ResponseWriter, r *http.Request) {
+func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 	enableCORS(w)
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
@@ -161,46 +174,78 @@ func handleSegmentHacks(w http.ResponseWriter, r *http.Request) {
 
 	origin := r.URL.Query().Get("origin")
 	dest := r.URL.Query().Get("destination")
+	date := r.URL.Query().Get("date")
+	classCode := r.URL.Query().Get("class")
+
 	if origin == "" {
 		origin = "ET"
 	}
 	if dest == "" {
 		dest = "PRYJ"
 	}
+	if date == "" {
+		date = "2026-12-24"
+	}
+	if classCode == "" {
+		classCode = "3A"
+	}
 
-	hacks := []routes.SegmentHack{
+	// 1. Strategy 1: Upstream Options
+	upstreamOptions := routes.FindUpstreamOptions(sampleGodanRoute, origin, dest, classCode, 2, 350.0)
+
+	// 2. Strategy 2: Delay-Aware Connecting Option
+	now := time.Now()
+	baseDate := time.Date(now.Year(), now.Month(), now.Day()+1, 8, 15, 0, 0, time.UTC)
+	t1Arr := baseDate.Add(9*time.Hour + 45*time.Minute) // Arr: 18:00
+	t2Dep := t1Arr.Add(3 * time.Hour)                   // Dep: 21:00 (3h buffer)
+	t2Arr := t2Dep.Add(6*time.Hour + 30*time.Minute)
+
+	connectingOpt, err := routes.EvaluateConnectingRoute(
+		"Itarsi Junction (ET)",
+		"12155", "Shaan-e-Bhopal Express",
+		baseDate, t1Arr,
+		45, // 45m historical delay
+		"12854", "Amarkantak Express",
+		t2Dep, t2Arr,
+		1680.0,
+	)
+
+	var connectingOptions []routes.DelayAwareConnectingOption
+	if err == nil && connectingOpt != nil {
+		connectingOptions = append(connectingOptions, *connectingOpt)
+	}
+
+	// 3. Strategy 3: Split Segment (Experimental)
+	splitOptions := []routes.SplitSegmentOption{
 		{
-			Type:            "UPSTREAM_BOOKING_WITH_BOARDING_CHANGE",
-			TrainNumber:     "11059 (Godan Express)",
-			BookFrom:        "BSL (Bhusaval)",
-			BoardAt:         "ET (Itarsi)",
-			BookTo:          "PRYJ (Prayagraj)",
-			ClassCode:       "3A",
-			Status:          "AVAILABLE",
-			AvailableBerths: 14,
-			ExtraFareINR:    195.00,
-			Explanation:     "Direct Itarsi->Prayagraj is WL 78. But seats are OPEN from Bhusaval under General Quota! Book from Bhusaval and set Boarding Point to Itarsi. Total extra cost is just ₹195 for a confirmed berth.",
-		},
-		{
-			Type:            "SAME_TRAIN_INTERNAL_SPLIT",
-			TrainNumber:     "12155 (Shaan-e-Bhopal)",
-			BookFrom:        "ET (Itarsi)",
-			BoardAt:         "ET (Itarsi)",
-			BookTo:          "PRYJ (Prayagraj via JBP)",
-			ClassCode:       "3A",
-			Status:          "AVAILABLE",
-			AvailableBerths: 8,
-			ExtraFareINR:    45.00,
-			Explanation:     "Split booking on the exact same train: Leg 1 ET->JBP (Berth B2-24) + Leg 2 JBP->PRYJ (Berth B3-11). Switch berth at Jabalpur without getting off.",
+			Type:                "SPLIT_SEGMENT_EXPERIMENTAL",
+			TrainNumber:         "11059",
+			TrainName:           "Godan Express",
+			IntermediateStation: "Jabalpur (JBP)",
+			Leg1Berth:           "Coach B2, Berth 24 (Lower)",
+			Leg2Berth:           "Coach B3, Berth 11 (Side Lower)",
+			EstimatedFareINR:    1420.00,
+			OperationalWarning:  "Requires physical coach change at Jabalpur. Ensure all luggage is moved during the 15-minute halt.",
 		},
 	}
 
+	resp := routes.JourneyOptimizationResult{
+		RequestedOrigin:      origin,
+		RequestedDestination: dest,
+		TravelDate:           date,
+		ClassCode:            classCode,
+		DirectTrainStatus:    "WAITLIST 42",
+		UpstreamOptions:      upstreamOptions,
+		ConnectingOptions:    connectingOptions,
+		SplitSegmentOptions:  splitOptions,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"origin":      origin,
-		"destination": dest,
-		"hacks":       hacks,
-	})
+	json.NewEncoder(w).Encode(resp)
+}
+
+func handleSegmentHacks(w http.ResponseWriter, r *http.Request) {
+	handleOptimizeJourneys(w, r)
 }
 
 func handleConnectingRoutes(w http.ResponseWriter, r *http.Request) {
@@ -320,7 +365,6 @@ func handleAlerts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// GET: list active alerts count
 	alertsMu.RLock()
 	count := len(alertsList)
 	alertsMu.RUnlock()
@@ -343,6 +387,7 @@ func main() {
 
 	mux.HandleFunc("/v1/locations/search", handleLocations)
 	mux.HandleFunc("/v1/journeys/search", handleSearch)
+	mux.HandleFunc("/v1/journeys/optimize", handleOptimizeJourneys)
 	mux.HandleFunc("/v1/journeys/hacks", handleSegmentHacks)
 	mux.HandleFunc("/v1/journeys/alternatives", handleConnectingRoutes)
 	mux.HandleFunc("/v1/alerts", handleAlerts)

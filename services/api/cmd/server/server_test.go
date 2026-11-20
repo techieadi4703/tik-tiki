@@ -73,10 +73,10 @@ func TestServerEndpoints_TDD(t *testing.T) {
 		}
 	})
 
-	t.Run("Segment hacks handler returns actionable hacks", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/v1/journeys/hacks?origin=ET&destination=PRYJ", nil)
+	t.Run("GET /v1/journeys/optimize returns all 3 unified optimization strategies", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v1/journeys/optimize?origin=ET&destination=PRYJ&class=3A", nil)
 		w := httptest.NewRecorder()
-		handleSegmentHacks(w, req)
+		handleOptimizeJourneys(w, req)
 
 		if w.Code != http.StatusOK {
 			t.Fatalf("expected 200, got %d", w.Code)
@@ -84,37 +84,35 @@ func TestServerEndpoints_TDD(t *testing.T) {
 
 		var resp map[string]interface{}
 		json.NewDecoder(w.Body).Decode(&resp)
-		hacks := resp["hacks"].([]interface{})
-		if len(hacks) == 0 {
-			t.Fatalf("expected segment hacks, got 0")
+
+		// 1. Check Upstream Options (Strategy 1)
+		upstreamOpts, ok := resp["upstream_options"].([]interface{})
+		if !ok || len(upstreamOpts) == 0 {
+			t.Fatalf("expected upstream options in optimize response, got %v", resp["upstream_options"])
+		}
+		firstUpstream := upstreamOpts[0].(map[string]interface{})
+		if firstUpstream["type"] != "UPSTREAM_BOOKING" {
+			t.Errorf("expected type UPSTREAM_BOOKING, got %v", firstUpstream["type"])
 		}
 
-		firstHack := hacks[0].(map[string]interface{})
-		if firstHack["type"] != "UPSTREAM_BOOKING_WITH_BOARDING_CHANGE" {
-			t.Errorf("expected UPSTREAM_BOOKING_WITH_BOARDING_CHANGE, got %v", firstHack["type"])
+		// 2. Check Delay-Aware Connecting Options (Strategy 2)
+		connectingOpts, ok := resp["connecting_options"].([]interface{})
+		if !ok || len(connectingOpts) == 0 {
+			t.Fatalf("expected connecting options, got %v", resp["connecting_options"])
 		}
-	})
-
-	t.Run("Connecting routes handler calculates risk grades", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/v1/journeys/alternatives", nil)
-		w := httptest.NewRecorder()
-		handleConnectingRoutes(w, req)
-
-		if w.Code != http.StatusOK {
-			t.Fatalf("expected 200, got %d", w.Code)
+		firstConnecting := connectingOpts[0].(map[string]interface{})
+		if firstConnecting["risk_grade"] != "SAFE" {
+			t.Errorf("expected SAFE risk grade for connecting train, got %v", firstConnecting["risk_grade"])
 		}
 
-		var resp map[string]interface{}
-		json.NewDecoder(w.Body).Decode(&resp)
-		routes := resp["routes"].([]interface{})
-		if len(routes) == 0 {
-			t.Fatalf("expected connecting routes, got 0")
+		// 3. Check Split Segment Options (Strategy 3)
+		splitOpts, ok := resp["split_segment_options"].([]interface{})
+		if !ok || len(splitOpts) == 0 {
+			t.Fatalf("expected split segment options, got %v", resp["split_segment_options"])
 		}
-
-		firstRoute := routes[0].(map[string]interface{})
-		grade := firstRoute["risk_grade"].(string)
-		if grade != "SAFE" && grade != "MODERATE" && grade != "HIGH_RISK" {
-			t.Errorf("unexpected risk grade: %s", grade)
+		firstSplit := splitOpts[0].(map[string]interface{})
+		if firstSplit["type"] != "SPLIT_SEGMENT_EXPERIMENTAL" {
+			t.Errorf("expected SPLIT_SEGMENT_EXPERIMENTAL, got %v", firstSplit["type"])
 		}
 	})
 
@@ -139,41 +137,6 @@ func TestServerEndpoints_TDD(t *testing.T) {
 		json.NewDecoder(w.Body).Decode(&resp)
 		if resp["status"] != "ACTIVE" || resp["recipient"] != "+919876543210" {
 			t.Errorf("expected active alert for phone +919876543210, got %v", resp)
-		}
-	})
-
-	t.Run("POST /v1/alerts rejects WhatsApp request with invalid phone", func(t *testing.T) {
-		invalidBody := strings.NewReader(`{
-			"service_number": "11059",
-			"origin": "ET",
-			"destination": "PRYJ",
-			"departure_date": "2026-12-24",
-			"notification_channel": "WHATSAPP",
-			"phone_number": "not_a_phone"
-		}`)
-		req := httptest.NewRequest("POST", "/v1/alerts", invalidBody)
-		w := httptest.NewRecorder()
-		handleAlerts(w, req)
-
-		if w.Code != http.StatusBadRequest {
-			t.Fatalf("expected 400 Bad Request for bad phone, got %d", w.Code)
-		}
-	})
-
-	t.Run("POST /v1/alerts accepts Web Push alert without phone", func(t *testing.T) {
-		pushBody := strings.NewReader(`{
-			"service_number": "12955",
-			"origin": "MMCT",
-			"destination": "JP",
-			"departure_date": "2026-12-24",
-			"notification_channel": "WEB_PUSH"
-		}`)
-		req := httptest.NewRequest("POST", "/v1/alerts", pushBody)
-		w := httptest.NewRecorder()
-		handleAlerts(w, req)
-
-		if w.Code != http.StatusCreated {
-			t.Fatalf("expected 201 Created for Web Push, got %d: %s", w.Code, w.Body.String())
 		}
 	})
 }

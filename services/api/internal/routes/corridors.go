@@ -381,8 +381,215 @@ var MasterCorridors = []RealCorridorTrain{
 	},
 
 	// ==========================================
-	// 5. RETURN TRUNKS: Delhi -> Mumbai, Varanasi -> Mumbai, Howrah -> Delhi, Chennai -> Bengaluru
+	// 5. DELHI <-> VARANASI / PRAYAGRAJ CORRIDOR (Both Directions)
 	// ==========================================
+	{
+		TrainNumber:       "22436",
+		TrainName:         "Vande Bharat Express",
+		TrainType:         "VANDE_BHARAT",
+		SourceCode:        "NDLS",
+		DestCode:          "BSB",
+		BaseFare3A:        1750.00,
+		DaysOfRun:         []string{"TUE", "WED", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 98,
+		DeparturePlatform: 16,
+		ArrivalPlatform:   1,
+		Stops: []TrainStop{
+			{TrainNumber: "22436", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "06:00", PlatformNumber: 16, HaltMinutes: 0},
+			{TrainNumber: "22436", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 2, DistanceKm: 440, ScheduledArrive: "10:08", ScheduledDepart: "10:10", PlatformNumber: 5, HaltMinutes: 2},
+			{TrainNumber: "22436", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 3, DistanceKm: 635, ScheduledArrive: "12:08", ScheduledDepart: "12:10", PlatformNumber: 6, HaltMinutes: 2},
+			{TrainNumber: "22436", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 4, DistanceKm: 759, ScheduledArrive: "14:00", PlatformNumber: 1, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "22435",
+		TrainName:         "Vande Bharat Express",
+		TrainType:         "VANDE_BHARAT",
+		SourceCode:        "BSB",
+		DestCode:          "NDLS",
+		BaseFare3A:        1750.00,
+		DaysOfRun:         []string{"TUE", "WED", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 98,
+		DeparturePlatform: 1,
+		ArrivalPlatform:   16,
+		Stops: []TrainStop{
+			{TrainNumber: "22435", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "15:00", PlatformNumber: 1, HaltMinutes: 0},
+			{TrainNumber: "22435", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 124, ScheduledArrive: "16:30", ScheduledDepart: "16:32", PlatformNumber: 6, HaltMinutes: 2},
+			{TrainNumber: "22435", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 319, ScheduledArrive: "18:30", ScheduledDepart: "18:32", PlatformNumber: 5, HaltMinutes: 2},
+			{TrainNumber: "22435", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 759, ScheduledArrive: "23:00", PlatformNumber: 16, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "22415",
+		TrainName:         "Vande Bharat Express (2nd)",
+		TrainType:         "VANDE_BHARAT",
+		SourceCode:        "BSB",
+		DestCode:          "NDLS",
+		BaseFare3A:        1750.00,
+		DaysOfRun:         []string{"MON", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 97,
+		DeparturePlatform: 2,
+		ArrivalPlatform:   1,
+		Stops: []TrainStop{
+			{TrainNumber: "22415", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "06:00", PlatformNumber: 2, HaltMinutes: 0},
+			{TrainNumber: "22415", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 124, ScheduledArrive: "07:34", ScheduledDepart: "07:36", PlatformNumber: 6, HaltMinutes: 2},
+			{TrainNumber: "22415", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 319, ScheduledArrive: "09:30", ScheduledDepart: "09:32", PlatformNumber: 1, HaltMinutes: 2},
+			{TrainNumber: "22415", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 759, ScheduledArrive: "14:05", PlatformNumber: 1, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12559",
+		TrainName:         "Shiv Ganga Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "BSBS",
+		DestCode:          "NDLS",
+		BaseFare3A:        1390.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 94,
+		DeparturePlatform: 8,
+		ArrivalPlatform:   12,
+		Stops: []TrainStop{
+			{TrainNumber: "12559", StationCode: "BSBS", StationName: "Banaras", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "22:15", PlatformNumber: 8, HaltMinutes: 0},
+			{TrainNumber: "12559", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 121, ScheduledArrive: "00:30", ScheduledDepart: "00:35", PlatformNumber: 5, HaltMinutes: 5},
+			{TrainNumber: "12559", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 315, ScheduledArrive: "02:45", ScheduledDepart: "02:50", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "12559", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 755, ScheduledArrive: "08:25", PlatformNumber: 12, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12560",
+		TrainName:         "Shiv Ganga Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "NDLS",
+		DestCode:          "BSBS",
+		BaseFare3A:        1390.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 94,
+		DeparturePlatform: 12,
+		ArrivalPlatform:   8,
+		Stops: []TrainStop{
+			{TrainNumber: "12560", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "20:05", PlatformNumber: 12, HaltMinutes: 0},
+			{TrainNumber: "12560", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 2, DistanceKm: 440, ScheduledArrive: "01:00", ScheduledDepart: "01:05", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "12560", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 3, DistanceKm: 635, ScheduledArrive: "03:45", ScheduledDepart: "03:55", PlatformNumber: 5, HaltMinutes: 10},
+			{TrainNumber: "12560", StationCode: "BSBS", StationName: "Banaras", SequenceNumber: 4, DistanceKm: 755, ScheduledArrive: "06:10", PlatformNumber: 8, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12581",
+		TrainName:         "Banaras - New Delhi Superfast",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "BSBS",
+		DestCode:          "NDLS",
+		BaseFare3A:        1390.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   false,
+		PunctualityRating: 91,
+		DeparturePlatform: 1,
+		ArrivalPlatform:   4,
+		Stops: []TrainStop{
+			{TrainNumber: "12581", StationCode: "BSBS", StationName: "Banaras", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "23:10", PlatformNumber: 1, HaltMinutes: 0},
+			{TrainNumber: "12581", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 121, ScheduledArrive: "01:20", ScheduledDepart: "01:25", PlatformNumber: 6, HaltMinutes: 5},
+			{TrainNumber: "12581", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 315, ScheduledArrive: "04:15", ScheduledDepart: "04:20", PlatformNumber: 1, HaltMinutes: 5},
+			{TrainNumber: "12581", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 755, ScheduledArrive: "11:30", PlatformNumber: 4, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12397",
+		TrainName:         "Mahabodhi Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "DDU",
+		DestCode:          "NDLS",
+		BaseFare3A:        1340.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 92,
+		DeparturePlatform: 3,
+		ArrivalPlatform:   9,
+		Stops: []TrainStop{
+			{TrainNumber: "12397", StationCode: "DDU", StationName: "Pt. Deen Dayal Upadhyaya Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "17:20", PlatformNumber: 3, HaltMinutes: 0},
+			{TrainNumber: "12397", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 153, ScheduledArrive: "19:30", ScheduledDepart: "19:40", PlatformNumber: 2, HaltMinutes: 10},
+			{TrainNumber: "12397", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 347, ScheduledArrive: "22:05", ScheduledDepart: "22:10", PlatformNumber: 1, HaltMinutes: 5},
+			{TrainNumber: "12397", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 787, ScheduledArrive: "04:10", PlatformNumber: 9, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12801",
+		TrainName:         "Purushottam Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "DDU",
+		DestCode:          "NDLS",
+		BaseFare3A:        1360.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 90,
+		DeparturePlatform: 4,
+		ArrivalPlatform:   8,
+		Stops: []TrainStop{
+			{TrainNumber: "12801", StationCode: "DDU", StationName: "Pt. Deen Dayal Upadhyaya Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "17:00", PlatformNumber: 4, HaltMinutes: 0},
+			{TrainNumber: "12801", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 153, ScheduledArrive: "19:20", ScheduledDepart: "19:30", PlatformNumber: 1, HaltMinutes: 10},
+			{TrainNumber: "12801", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 347, ScheduledArrive: "22:00", ScheduledDepart: "22:05", PlatformNumber: 3, HaltMinutes: 5},
+			{TrainNumber: "12801", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 787, ScheduledArrive: "04:00", PlatformNumber: 8, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12309",
+		TrainName:         "Tejas Rajdhani Express (Patna - NDLS)",
+		TrainType:         "RAJDHANI",
+		SourceCode:        "DDU",
+		DestCode:          "NDLS",
+		BaseFare3A:        2480.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 96,
+		DeparturePlatform: 4,
+		ArrivalPlatform:   2,
+		Stops: []TrainStop{
+			{TrainNumber: "12309", StationCode: "DDU", StationName: "Pt. Deen Dayal Upadhyaya Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "22:20", PlatformNumber: 4, HaltMinutes: 0},
+			{TrainNumber: "12309", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 2, DistanceKm: 153, ScheduledArrive: "00:10", ScheduledDepart: "00:12", PlatformNumber: 1, HaltMinutes: 2},
+			{TrainNumber: "12309", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 3, DistanceKm: 347, ScheduledArrive: "02:15", ScheduledDepart: "02:20", PlatformNumber: 1, HaltMinutes: 5},
+			{TrainNumber: "12309", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 4, DistanceKm: 787, ScheduledArrive: "07:40", PlatformNumber: 2, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12313",
+		TrainName:         "Sealdah Rajdhani Express",
+		TrainType:         "RAJDHANI",
+		SourceCode:        "DDU",
+		DestCode:          "NDLS",
+		BaseFare3A:        2580.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 97,
+		DeparturePlatform: 4,
+		ArrivalPlatform:   1,
+		Stops: []TrainStop{
+			{TrainNumber: "12313", StationCode: "DDU", StationName: "Pt. Deen Dayal Upadhyaya Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "22:55", PlatformNumber: 4, HaltMinutes: 0},
+			{TrainNumber: "12313", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 2, DistanceKm: 347, ScheduledArrive: "03:15", ScheduledDepart: "03:20", PlatformNumber: 1, HaltMinutes: 5},
+			{TrainNumber: "12313", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 3, DistanceKm: 787, ScheduledArrive: "10:50", PlatformNumber: 1, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "14257",
+		TrainName:         "Kashi Vishwanath Express",
+		TrainType:         "EXPRESS",
+		SourceCode:        "BSB",
+		DestCode:          "NDLS",
+		BaseFare3A:        1220.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   false,
+		PunctualityRating: 83,
+		DeparturePlatform: 5,
+		ArrivalPlatform:   5,
+		Stops: []TrainStop{
+			{TrainNumber: "14257", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "13:30", PlatformNumber: 5, HaltMinutes: 0},
+			{TrainNumber: "14257", StationCode: "LKO", StationName: "Lucknow Charbagh", SequenceNumber: 2, DistanceKm: 301, ScheduledArrive: "19:50", ScheduledDepart: "20:00", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "14257", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 3, DistanceKm: 792, ScheduledArrive: "06:05", PlatformNumber: 5, HaltMinutes: 0},
+		},
+	},
 	{
 		TrainNumber:       "12952",
 		TrainName:         "Tejas Rajdhani Express (Return)",
@@ -552,9 +759,8 @@ func FindAllTrainsBetweenStations(originCode, destCode string) []RealCorridorTra
 		}
 	}
 
-	// Dynamic fallback synthesizer if not in fixed corridors:
-	// Constructs a comprehensive, realistic multi-train schedule (6 authentic services) for any valid station pair in India
-	if len(matches) == 0 && originCode != "" && destCode != "" && !strings.EqualFold(originCode, destCode) {
+	// Dynamic schedule synthesizer: ensures any route in India has rich multi-train choices (at least 6 diverse trains)
+	if len(matches) < 4 && originCode != "" && destCode != "" && !strings.EqualFold(originCode, destCode) {
 		orig := strings.ToUpper(strings.TrimSpace(originCode))
 		dest := strings.ToUpper(strings.TrimSpace(destCode))
 
@@ -669,10 +875,16 @@ func FindAllTrainsBetweenStations(originCode, destCode string) []RealCorridorTra
 			},
 		}
 
-		matches = append(matches, syntheticServices...)
+		existingNums := make(map[string]bool)
+		for _, m := range matches {
+			existingNums[m.TrainNumber] = true
+		}
+		for _, s := range syntheticServices {
+			if !existingNums[s.TrainNumber] {
+				matches = append(matches, s)
+			}
+		}
 	}
-
-	return matches
 
 	return matches
 }

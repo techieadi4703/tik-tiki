@@ -126,19 +126,36 @@ export function TicketPassbook({ booking }: TicketPassbookProps) {
 
           {/* Passenger Manifest */}
           <div>
-            <span className="text-xs font-bold uppercase text-slate-600 tracking-wider mb-2 block">
-              Passenger Manifest (Valid with Govt ID)
-            </span>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase text-slate-700 tracking-wider block">
+                Passenger Manifest ({booking.passengers.length} {booking.passengers.length === 1 ? 'Traveler' : 'Travelers'})
+              </span>
+              <span className="text-[10px] text-slate-500 font-medium">Valid with Govt Photo ID</span>
+            </div>
+            <div className="flex flex-col gap-2">
               {booking.passengers.map((p, i) => (
-                <div key={i} className="flex items-center justify-between text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                  <span className="font-semibold text-slate-800 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-slate-500" />
-                    {p.full_name} ({p.age}y, {p.gender})
-                  </span>
-                  <span className="text-slate-600 font-mono text-[11px]">
-                    Berth Pref: <strong>{p.berth_preference || 'Lower'}</strong>
-                  </span>
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-200 gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-5 w-5 rounded-full bg-[#1a365d] text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="font-semibold text-slate-900">
+                      {p.full_name} ({p.age}y, {p.gender})
+                    </span>
+                    {p.senior_citizen && (
+                      <span className="text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 px-1 rounded">
+                        Senior
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-500 font-mono text-[11px]">
+                      Pref: {p.berth_preference || 'Lower'}
+                    </span>
+                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono text-xs font-bold px-2 py-0.5 rounded-md">
+                      {p.berth_allocated || `Coach ${booking.coach_number || 'B2'}, Berth ${21 + i * 3}`}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

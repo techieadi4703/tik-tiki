@@ -307,6 +307,7 @@ export async function initiateBooking(payload: {
   departure_at: string;
   arrival_at: string;
   class_code: string;
+  quota?: string;
   total_fare: number;
   irctc_username: string;
   passengers: Passenger[];

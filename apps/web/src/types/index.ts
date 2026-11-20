@@ -114,7 +114,10 @@ export interface Passenger {
   full_name: string;
   age: number;
   gender: string; // 'MALE' | 'FEMALE' | 'TRANSGENDER'
-  berth_preference: string; // 'LOWER' | 'MIDDLE' | 'UPPER' | 'SIDE_LOWER' | 'SIDE_UPPER'
+  berth_preference: string; // 'NO_PREFERENCE' | 'LOWER' | 'MIDDLE' | 'UPPER' | 'SIDE_LOWER' | 'SIDE_UPPER'
+  senior_citizen?: boolean;
+  food_preference?: string; // 'VEG' | 'NON_VEG' | 'NO_FOOD'
+  berth_allocated?: string; // e.g. "Coach B2, Berth 24 (Lower)"
 }
 
 export interface SegmentHack {
@@ -138,6 +141,7 @@ export interface Booking {
   departure_at: string;
   arrival_at: string;
   class_code: string;
+  quota?: string;
   status: 'PENDING_AUTH' | 'CONFIRMED' | 'CANCELLED';
   total_fare: number;
   irctc_username: string;

@@ -14,8 +14,11 @@ import (
 type Passenger struct {
 	FullName        string `json:"full_name"`
 	Age             int    `json:"age"`
-	Gender          string `json:"gender"`           // MALE, FEMALE, TRANSGENDER
-	BerthPreference string `json:"berth_preference"` // LOWER, MIDDLE, UPPER, SIDE_LOWER, SIDE_UPPER
+	Gender          string `json:"gender"`                     // MALE, FEMALE, TRANSGENDER
+	BerthPreference string `json:"berth_preference"`           // NO_PREFERENCE, LOWER, MIDDLE, UPPER, SIDE_LOWER, SIDE_UPPER
+	SeniorCitizen   bool   `json:"senior_citizen,omitempty"`   // Senior citizen lower berth priority
+	FoodPreference  string `json:"food_preference,omitempty"`  // VEG, NON_VEG, NO_FOOD
+	BerthAllocated  string `json:"berth_allocated,omitempty"`  // e.g. "Coach B2, Berth 24 (Lower)"
 }
 
 // Booking represents a native confirmed or pending railway reservation
@@ -30,7 +33,8 @@ type Booking struct {
 	DepartureAt   time.Time   `json:"departure_at"`
 	ArrivalAt     time.Time   `json:"arrival_at"`
 	ClassCode     string      `json:"class_code"`
-	Status        string      `json:"status"` // PENDING_AUTH, CONFIRMED, CANCELLED
+	Quota         string      `json:"quota,omitempty"` // GN, SS, LD, TQ
+	Status        string      `json:"status"`          // PENDING_AUTH, CONFIRMED, CANCELLED
 	TotalFare     float64     `json:"total_fare"`
 	IRCTCUsername string      `json:"irctc_username"`
 	CoachNumber   string      `json:"coach_number,omitempty"`
@@ -51,6 +55,7 @@ type InitiateBookingRequest struct {
 	DepartureAt   string      `json:"departure_at"`
 	ArrivalAt     string      `json:"arrival_at"`
 	ClassCode     string      `json:"class_code"`
+	Quota         string      `json:"quota,omitempty"`
 	TotalFare     float64     `json:"total_fare"`
 	IRCTCUsername string      `json:"irctc_username"`
 	Passengers    []Passenger `json:"passengers"`
@@ -61,26 +66,49 @@ type ConfirmBookingRequest struct {
 	BookingID     string `json:"booking_id"`
 	IRCTCUsername string `json:"irctc_username"`
 	IRCTCPassword string `json:"irctc_password"`
-	AuthMethod    string `json:"auth_method"` // "PASSWORD" or "OTP"
+	AuthMethod    string `json:"auth_method"` // PASSWORD or OTP
 }
 
-// BookingManager handles in-memory and persistence operations for bookings
+// BookingManager thread-safe state store for live railway bookings
 type BookingManager struct {
 	mu       sync.RWMutex
 	bookings map[string]*Booking
 	pnrIndex map[string]*Booking
 }
 
+// NewBookingManager seeds demo bookings for instant passbook demonstration
 func NewBookingManager() *BookingManager {
 	bm := &BookingManager{
 		bookings: make(map[string]*Booking),
 		pnrIndex: make(map[string]*Booking),
 	}
 
-	// Seed with an initial sample confirmed trip for demonstration
-	now := time.Now()
+	// Seed an initial confirmed multi-passenger e-ticket
 	samplePNR := "284-9182741"
-	depTime := now.Add(48 * time.Hour)
+	dep := time.Now().Add(48 * time.Hour)
+	arr := dep.Add(15*time.Hour + 30*time.Minute)
+
+	passengers := []Passenger{
+		{
+			FullName:        "Aditya Srivastava",
+			Age:             26,
+			Gender:          "MALE",
+			BerthPreference: "LOWER",
+			SeniorCitizen:   false,
+			FoodPreference:  "VEG",
+			BerthAllocated:  "Coach B2, Berth 24 (Lower)",
+		},
+		{
+			FullName:        "Sunita Srivastava",
+			Age:             59,
+			Gender:          "FEMALE",
+			BerthPreference: "LOWER",
+			SeniorCitizen:   true,
+			FoodPreference:  "VEG",
+			BerthAllocated:  "Coach B2, Berth 21 (Lower · Senior Quota)",
+		},
+	}
+
 	sampleBooking := &Booking{
 		ID:            "bk_sample_01",
 		UserID:        "usr_demo",
@@ -89,23 +117,29 @@ func NewBookingManager() *BookingManager {
 		TrainName:     "Tejas Rajdhani Express",
 		OriginCode:    "MMCT",
 		DestCode:      "NDLS",
-		DepartureAt:   depTime,
-		ArrivalAt:     depTime.Add(15 * time.Hour + 32 * time.Minute),
+		DepartureAt:   dep,
+		ArrivalAt:     arr,
 		ClassCode:     "3A",
+		Quota:         "GN",
 		Status:        "CONFIRMED",
-		TotalFare:     2850.00,
-		IRCTCUsername: "aditya_srivastava",
+		TotalFare:     5700.00,
+		IRCTCUsername: "ADITYA_CRIS",
 		CoachNumber:   "B2",
 		BerthNumber:   24,
 		BerthType:     "LOWER",
-		Passengers: []Passenger{
-			{FullName: "Aditya Srivastava", Age: 26, Gender: "MALE", BerthPreference: "LOWER"},
-		},
-		QRCodeData: fmt.Sprintf("IRCTC:PNR:%s:TRN:12951:COACH:B2:BERTH:24", samplePNR),
-		CreatedAt:  now.Add(-2 * time.Hour),
+		Passengers:    passengers,
+		QRCodeData:    fmt.Sprintf("IRCTC:PNR:%s:TRN:12951:COACH:B2:BERTH:24", samplePNR),
+		CreatedAt:     time.Now().Add(-2 * time.Hour),
 	}
+
 	bm.bookings[sampleBooking.ID] = sampleBooking
 	bm.pnrIndex[samplePNR] = sampleBooking
+
+	// Also index for seeded user Aditya
+	adityaBooking := *sampleBooking
+	adityaBooking.ID = "bk_sample_aditya"
+	adityaBooking.UserID = "usr_aditya"
+	bm.bookings[adityaBooking.ID] = &adityaBooking
 
 	return bm
 }
@@ -122,6 +156,9 @@ func (bm *BookingManager) InitiateBooking(req InitiateBookingRequest) (*Booking,
 	}
 	if len(req.Passengers) == 0 {
 		return nil, errors.New("at least one passenger is required")
+	}
+	if len(req.Passengers) > 6 {
+		return nil, errors.New("maximum 6 passengers allowed per Indian Railways e-ticket")
 	}
 	if strings.TrimSpace(req.IRCTCUsername) == "" {
 		return nil, errors.New("irctc_username is required for Indian Railways booking")
@@ -142,6 +179,11 @@ func (bm *BookingManager) InitiateBooking(req InitiateBookingRequest) (*Booking,
 		targetUserID = "usr_demo"
 	}
 
+	quota := req.Quota
+	if quota == "" {
+		quota = "GN"
+	}
+
 	b := &Booking{
 		ID:            bookingID,
 		UserID:        targetUserID,
@@ -153,6 +195,7 @@ func (bm *BookingManager) InitiateBooking(req InitiateBookingRequest) (*Booking,
 		DepartureAt:   depTime,
 		ArrivalAt:     arrTime,
 		ClassCode:     req.ClassCode,
+		Quota:         quota,
 		Status:        "PENDING_AUTH",
 		TotalFare:     req.TotalFare,
 		IRCTCUsername: req.IRCTCUsername,
@@ -180,7 +223,7 @@ func (bm *BookingManager) ConfirmBooking(bookingID string, password string) (*Bo
 		return nil, errors.New("booking not found")
 	}
 
-	// Assign coach, berth, and 10-digit official PNR
+	// Assign coach based on class
 	pnr := generatePNR()
 	coach := "B2"
 	if b.ClassCode == "2A" {
@@ -191,18 +234,43 @@ func (bm *BookingManager) ConfirmBooking(bookingID string, password string) (*Bo
 		coach = "S4"
 	}
 
-	berthNo := 24
-	if len(b.Passengers) > 0 && b.Passengers[0].BerthPreference != "" {
-		b.BerthType = b.Passengers[0].BerthPreference
-	} else {
-		b.BerthType = "LOWER"
+	// Allocate realistic berths for each passenger in the manifest
+	startBerth := 21
+	for i := range b.Passengers {
+		berthNum := startBerth + (i * 3) // Cluster around nearby bays
+		if berthNum > 72 {
+			berthNum = ((berthNum - 1) % 72) + 1
+		}
+
+		bType := b.Passengers[i].BerthPreference
+		// Senior citizens and women 58+ get lower berth priority in Indian Railways
+		if b.Passengers[i].SeniorCitizen || b.Passengers[i].Age >= 60 || (b.Passengers[i].Gender == "FEMALE" && b.Passengers[i].Age >= 58) {
+			bType = "LOWER"
+		}
+		if bType == "" || bType == "NO_PREFERENCE" {
+			switch i % 3 {
+			case 0:
+				bType = "LOWER"
+			case 1:
+				bType = "MIDDLE"
+			case 2:
+				bType = "UPPER"
+			}
+		}
+
+		b.Passengers[i].BerthAllocated = fmt.Sprintf("Coach %s, Berth %d (%s)", coach, berthNum, bType)
 	}
 
 	b.PNR = pnr
 	b.Status = "CONFIRMED"
 	b.CoachNumber = coach
-	b.BerthNumber = berthNo
-	b.QRCodeData = fmt.Sprintf("IRCTC:PNR:%s:TRN:%s:COACH:%s:BERTH:%d", pnr, b.TrainNumber, coach, berthNo)
+	b.BerthNumber = startBerth
+	if len(b.Passengers) > 0 {
+		b.BerthType = b.Passengers[0].BerthPreference
+	} else {
+		b.BerthType = "LOWER"
+	}
+	b.QRCodeData = fmt.Sprintf("IRCTC:PNR:%s:TRN:%s:COACH:%s:PAX:%d", pnr, b.TrainNumber, coach, len(b.Passengers))
 
 	bm.pnrIndex[pnr] = b
 	return b, nil
@@ -214,7 +282,7 @@ func (bm *BookingManager) ListUserBookings(userID string) []*Booking {
 
 	var result []*Booking
 	for _, b := range bm.bookings {
-		if b.Status == "CONFIRMED" {
+		if b.UserID == userID || (userID == "usr_aditya" && (b.UserID == "usr_demo" || b.UserID == "usr_aditya")) {
 			result = append(result, b)
 		}
 	}
@@ -225,10 +293,9 @@ func (bm *BookingManager) GetBookingByPNR(pnr string) (*Booking, error) {
 	bm.mu.RLock()
 	defer bm.mu.RUnlock()
 
-	cleanPNR := strings.TrimSpace(pnr)
-	b, exists := bm.pnrIndex[cleanPNR]
+	b, exists := bm.pnrIndex[pnr]
 	if !exists {
-		return nil, errors.New("booking with specified PNR not found")
+		return nil, errors.New("booking with PNR not found")
 	}
 	return b, nil
 }

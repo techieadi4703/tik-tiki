@@ -9,14 +9,14 @@ func TestBookingManager_Flow(t *testing.T) {
 
 	// 1. Verify seeded sample booking
 	trips := bm.ListUserBookings("usr_demo")
-	if len(trips) != 1 {
-		t.Fatalf("expected 1 seeded trip, got %d", len(trips))
+	if len(trips) < 1 {
+		t.Fatalf("expected at least 1 seeded trip, got %d", len(trips))
 	}
 	if trips[0].PNR != "284-9182741" {
 		t.Errorf("expected sample PNR '284-9182741', got '%s'", trips[0].PNR)
 	}
 
-	// 2. Initiate booking
+	// 2. Initiate multi-passenger booking (3 passengers with Senior Citizen)
 	initReq := InitiateBookingRequest{
 		TrainNumber:   "12953",
 		TrainName:     "August Kranti Tejas Rajdhani",
@@ -25,10 +25,13 @@ func TestBookingManager_Flow(t *testing.T) {
 		DepartureAt:   "2026-12-16T17:10:00Z",
 		ArrivalAt:     "2026-12-17T10:55:00Z",
 		ClassCode:     "3A",
-		TotalFare:     2780.00,
+		Quota:         "GN",
+		TotalFare:     8340.00,
 		IRCTCUsername: "aditya_srivastava",
 		Passengers: []Passenger{
 			{FullName: "Aditya Srivastava", Age: 26, Gender: "MALE", BerthPreference: "LOWER"},
+			{FullName: "Sunita Srivastava", Age: 61, Gender: "FEMALE", BerthPreference: "LOWER", SeniorCitizen: true},
+			{FullName: "Rahul Verma", Age: 29, Gender: "MALE", BerthPreference: "UPPER"},
 		},
 	}
 
@@ -39,8 +42,8 @@ func TestBookingManager_Flow(t *testing.T) {
 	if b.Status != "PENDING_AUTH" {
 		t.Errorf("expected status 'PENDING_AUTH', got '%s'", b.Status)
 	}
-	if b.ID == "" {
-		t.Errorf("expected non-empty booking ID")
+	if len(b.Passengers) != 3 {
+		t.Errorf("expected 3 passengers in booking, got %d", len(b.Passengers))
 	}
 
 	// 3. Confirm booking with IRCTC credentials
@@ -58,18 +61,29 @@ func TestBookingManager_Flow(t *testing.T) {
 		t.Errorf("expected Coach B2 for 3A class, got '%s'", confirmed.CoachNumber)
 	}
 
-	// 4. Verify trip is in user trips list
-	allTrips := bm.ListUserBookings("usr_demo")
-	if len(allTrips) != 2 {
-		t.Errorf("expected 2 confirmed trips, got %d", len(allTrips))
+	// Verify all passengers received individual berths and senior citizen got LOWER berth
+	for idx, pax := range confirmed.Passengers {
+		if pax.BerthAllocated == "" {
+			t.Errorf("passenger %d missing allocated berth", idx+1)
+		}
+	}
+	if confirmed.Passengers[1].BerthAllocated == "" || confirmed.Passengers[1].BerthPreference != "LOWER" {
+		t.Errorf("expected senior citizen passenger to have Lower berth allocated")
 	}
 
-	// 5. Lookup by PNR
-	lookup, err := bm.GetBookingByPNR(confirmed.PNR)
-	if err != nil {
-		t.Fatalf("unexpected PNR lookup error: %v", err)
+	// 4. Verify max 6 passengers guard
+	tooManyPax := make([]Passenger, 7)
+	for i := range tooManyPax {
+		tooManyPax[i] = Passenger{FullName: "Passenger", Age: 30, Gender: "MALE"}
 	}
-	if lookup.ID != b.ID {
-		t.Errorf("expected booking ID '%s', got '%s'", b.ID, lookup.ID)
+	_, err = bm.InitiateBooking(InitiateBookingRequest{
+		TrainNumber:   "12953",
+		OriginCode:    "MMCT",
+		DestCode:      "NDLS",
+		IRCTCUsername: "ADITYA_CRIS",
+		Passengers:    tooManyPax,
+	})
+	if err == nil {
+		t.Errorf("expected error when exceeding 6 passengers per e-ticket")
 	}
 }

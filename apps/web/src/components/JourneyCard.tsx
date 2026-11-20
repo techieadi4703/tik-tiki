@@ -16,6 +16,7 @@ import {
   Clock,
   MapPin,
   PlugZap,
+  Briefcase,
 } from 'lucide-react';
 import { NormalizedOffer, ClassOption } from '../types';
 
@@ -225,7 +226,13 @@ export function JourneyCard({
             <div className="text-2xl font-black text-white">
               ₹{Math.round(activeFare).toLocaleString('en-IN')}
             </div>
-            <div className="text-[11px] text-zinc-400 font-medium">Class {selectedClass} · All taxes incl.</div>
+            <div className="text-[11px] text-zinc-400 font-medium">
+              {offer.mode === 'FLIGHT'
+                ? 'Economy Non-stop · Taxes & baggage incl.'
+                : offer.mode === 'BUS'
+                ? 'AC Sleeper · Tolls & GST incl.'
+                : `Class ${selectedClass} · All taxes incl.`}
+            </div>
           </div>
 
           <div>
@@ -320,22 +327,48 @@ export function JourneyCard({
         </div>
       )}
 
-      {/* Action Footer: Amenities & In-App Booking Buttons */}
+      {/* Action Footer: Amenities & Booking Buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-zinc-800/60">
-        {/* Railway Amenities Badges */}
-        <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
-          {offer.pantry_available && (
+        {/* Amenities Badges based on mode */}
+        {offer.mode === 'FLIGHT' ? (
+          <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
             <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
-              <UtensilsCrossed className="w-3 h-3 text-amber-400" /> Pantry Car
+              <Briefcase className="w-3 h-3 text-emerald-400" /> 15 kg Check-in
             </span>
-          )}
-          <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
-            <Zap className="w-3 h-3 text-emerald-400" /> e-Catering Available
-          </span>
-          <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
-            <PlugZap className="w-3 h-3 text-sky-400" /> Charging Sockets
-          </span>
-        </div>
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <Plane className="w-3 h-3 text-sky-400" /> Non-stop Flight
+            </span>
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <UtensilsCrossed className="w-3 h-3 text-amber-400" /> In-flight Meals
+            </span>
+          </div>
+        ) : offer.mode === 'BUS' ? (
+          <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <Bus className="w-3 h-3 text-amber-400" /> AC Sleeper (2+1)
+            </span>
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <PlugZap className="w-3 h-3 text-sky-400" /> Charging Sockets
+            </span>
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-emerald-400" /> Live GPS Tracking
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 self-start sm:self-center flex-wrap">
+            {offer.pantry_available && (
+              <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+                <UtensilsCrossed className="w-3 h-3 text-amber-400" /> Pantry Car
+              </span>
+            )}
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <Zap className="w-3 h-3 text-emerald-400" /> e-Catering Available
+            </span>
+            <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <PlugZap className="w-3 h-3 text-sky-400" /> Charging Sockets
+            </span>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -361,20 +394,50 @@ export function JourneyCard({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() =>
-              onOpenBookingModal?.({
-                ...offer,
-                price: activeFare,
-                status: activeStatus as 'AVAILABLE' | 'WAITLIST',
-                available_seats: activeSeats,
-              })
-            }
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
-          >
-            Book Ticket <Ticket className="w-3.5 h-3.5" />
-          </button>
+          {offer.mode === 'FLIGHT' ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (offer.booking_url) {
+                  window.open(offer.booking_url, '_blank');
+                } else {
+                  onOpenBookingModal?.(offer);
+                }
+              }}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+            >
+              Select Flight <Plane className="w-3.5 h-3.5" />
+            </button>
+          ) : offer.mode === 'BUS' ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (offer.booking_url) {
+                  window.open(offer.booking_url, '_blank');
+                } else {
+                  onOpenBookingModal?.(offer);
+                }
+              }}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+            >
+              Select Bus Seat <Bus className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() =>
+                onOpenBookingModal?.({
+                  ...offer,
+                  price: activeFare,
+                  status: activeStatus as 'AVAILABLE' | 'WAITLIST',
+                  available_seats: activeSeats,
+                })
+              }
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+            >
+              Book Ticket <Ticket className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </div>

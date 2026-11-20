@@ -36,6 +36,58 @@ func parseClock(depDate time.Time, timeStr string, addDays int) time.Time {
 	return time.Date(depDate.Year(), depDate.Month(), depDate.Day()+addDays, hour, min, 0, 0, time.UTC)
 }
 
+func resolveAirport(code string) (airportCode string, airportName string) {
+	clean := strings.ToUpper(strings.TrimSpace(code))
+	switch clean {
+	case "BOM", "MMCT", "CSMT", "LTT", "BDTS", "BVI", "KYN":
+		return "BOM", "CSMIA (Mumbai)"
+	case "DEL", "NDLS", "NZM", "DLI", "ANVT":
+		return "DEL", "IGI Airport (Delhi)"
+	case "BSB", "BSBS", "DDU":
+		return "VNS", "LBS Airport (Varanasi)"
+	case "PRYJ", "PRRB", "NYN":
+		return "IXD", "Bamrauli (Prayagraj)"
+	case "BLR", "SBC", "YPR", "SMVB", "BNC", "KJM":
+		return "BLR", "Kempegowda Intl (BLR)"
+	case "MAS", "MS", "TBM", "AJJ":
+		return "MAA", "Chennai Intl (MAA)"
+	case "HWH", "SDAH", "KOAA", "SHM":
+		return "CCU", "NSCB Intl (Kolkata)"
+	case "PNBE", "DNR", "RJPB":
+		return "PAT", "Jay Prakash Intl (Patna)"
+	case "JP", "JAI":
+		return "JAI", "Jaipur Intl Airport"
+	default:
+		return clean, clean + " Airport"
+	}
+}
+
+func resolveBusTerminal(code string) string {
+	clean := strings.ToUpper(strings.TrimSpace(code))
+	switch clean {
+	case "BOM", "MMCT", "CSMT", "LTT", "BDTS", "BVI", "KYN":
+		return "Borivali / Sion (Mumbai)"
+	case "DEL", "NDLS", "NZM", "DLI", "ANVT":
+		return "ISBT Kashmiri Gate (Delhi)"
+	case "BSB", "BSBS", "DDU":
+		return "Cantt Roadways (Varanasi)"
+	case "PRYJ", "PRRB", "NYN":
+		return "Civil Lines Bus Stand (Prayagraj)"
+	case "BLR", "SBC", "YPR", "SMVB", "BNC", "KJM":
+		return "Majestic / Shantinagar (Bengaluru)"
+	case "MAS", "MS", "TBM", "AJJ":
+		return "CMBT Koyambedu (Chennai)"
+	case "HWH", "SDAH", "KOAA", "SHM":
+		return "Esplanade Bus Terminus (Kolkata)"
+	case "PNBE", "DNR", "RJPB":
+		return "Bairiya ISBT (Patna)"
+	case "JP", "JAI":
+		return "Sindhi Camp (Jaipur)"
+	default:
+		return clean + " Bus Station"
+	}
+}
+
 func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) ([]providers.NormalizedOffer, error) {
 	depDate := query.DepartureDate
 	if depDate.IsZero() {
@@ -83,7 +135,7 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 			// Alternate status for testing
 			status := "AVAILABLE"
 			availSeats := 8 + (idx * 3)
-			if idx%2 == 1 {
+			if idx%3 == 2 {
 				status = "WAITLIST"
 				availSeats = 0
 			}
@@ -159,43 +211,100 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 		}
 	}
 
-	// 2. Add Multi-modal options (Flights / Buses) for multi-modal comparison
+	// 2. Real Multi-Modal Air Travel Options (Real Airport Codes & Realistic Fares)
+	origAirCode, origAirName := resolveAirport(query.OriginCode)
+	destAirCode, destAirName := resolveAirport(query.DestCode)
+
 	offers = append(offers, providers.NormalizedOffer{
-		ProviderID:      "duffel_flight",
-		Mode:            providers.ModeFlight,
-		OperatorName:    "IndiGo (6E-2054)",
-		ServiceNumber:   "6E-2054",
-		OriginCode:      query.OriginCode,
-		DestCode:        query.DestCode,
-		DepartureAt:     parseClock(depDate, "09:30", 0),
-		ArrivalAt:       parseClock(depDate, "11:45", 0),
-		DurationMinutes: 135,
-		Price:           4890.00,
-		Currency:        "INR",
-		Transfers:       0,
-		Status:          "AVAILABLE",
-		AvailableSeats:  12,
-		BookingURL:      "https://www.goindigo.in",
-		RetrievedAt:     time.Now().UTC(),
+		ProviderID:        "duffel_flight",
+		Mode:              providers.ModeFlight,
+		OperatorName:      "IndiGo (6E-6512)",
+		ServiceNumber:     "6E-6512",
+		OriginCode:        origAirCode,
+		DestCode:          destAirCode,
+		DepartureAt:       parseClock(depDate, "08:30", 0),
+		ArrivalAt:         parseClock(depDate, "10:45", 0),
+		DurationMinutes:   135,
+		Price:             4890.00,
+		Currency:          "INR",
+		Transfers:         0,
+		Status:            "AVAILABLE",
+		AvailableSeats:    14,
+		BookingURL:        "https://www.goindigo.in",
+		RetrievedAt:       time.Now().UTC(),
+		PunctualityRating: 94,
+		DeparturePlatform: fmt.Sprintf("Terminal 2 · %s", origAirName),
+		ArrivalPlatform:   fmt.Sprintf("Terminal 1 · %s", destAirName),
 	})
 
 	offers = append(offers, providers.NormalizedOffer{
-		ProviderID:      "redbus_partner",
-		Mode:            providers.ModeBus,
-		OperatorName:    "Zingbus Plus Electric AC Sleeper",
-		ServiceNumber:   "ZB-9921",
-		OriginCode:      query.OriginCode,
-		DestCode:        query.DestCode,
-		DepartureAt:     parseClock(depDate, "20:30", 0),
-		ArrivalAt:       parseClock(depDate, "14:00", 1),
-		DurationMinutes: 1050,
-		Price:           1420.00,
-		Currency:        "INR",
-		Transfers:       0,
-		Status:          "AVAILABLE",
-		AvailableSeats:  18,
-		BookingURL:      "https://www.redbus.in",
-		RetrievedAt:     time.Now().UTC(),
+		ProviderID:        "duffel_flight",
+		Mode:              providers.ModeFlight,
+		OperatorName:      "Air India (AI-864)",
+		ServiceNumber:     "AI-864",
+		OriginCode:        origAirCode,
+		DestCode:          destAirCode,
+		DepartureAt:       parseClock(depDate, "14:15", 0),
+		ArrivalAt:         parseClock(depDate, "16:35", 0),
+		DurationMinutes:   140,
+		Price:             5420.00,
+		Currency:          "INR",
+		Transfers:         0,
+		Status:            "AVAILABLE",
+		AvailableSeats:    8,
+		BookingURL:        "https://www.airindia.com",
+		RetrievedAt:       time.Now().UTC(),
+		PunctualityRating: 91,
+		DeparturePlatform: fmt.Sprintf("Terminal 2 · %s", origAirName),
+		ArrivalPlatform:   fmt.Sprintf("Terminal 1 · %s", destAirName),
+	})
+
+	// 3. Real Premium Intercity Buses (Real Boarding Terminals & Authentic Sleeper Coaches)
+	origBusTerm := resolveBusTerminal(query.OriginCode)
+	destBusTerm := resolveBusTerminal(query.DestCode)
+
+	offers = append(offers, providers.NormalizedOffer{
+		ProviderID:        "redbus_partner",
+		Mode:              providers.ModeBus,
+		OperatorName:      "Zingbus Plus Electric AC Sleeper",
+		ServiceNumber:     "ZB-9921",
+		OriginCode:        origBusTerm,
+		DestCode:          destBusTerm,
+		DepartureAt:       parseClock(depDate, "20:30", 0),
+		ArrivalAt:         parseClock(depDate, "14:00", 1),
+		DurationMinutes:   1050,
+		Price:             1420.00,
+		Currency:          "INR",
+		Transfers:         0,
+		Status:            "AVAILABLE",
+		AvailableSeats:    18,
+		BookingURL:        "https://www.redbus.in",
+		RetrievedAt:       time.Now().UTC(),
+		PunctualityRating: 88,
+		DeparturePlatform: "Boarding: Platform 3",
+		ArrivalPlatform:   "Dropping: Main Terminal",
+	})
+
+	offers = append(offers, providers.NormalizedOffer{
+		ProviderID:        "redbus_partner",
+		Mode:              providers.ModeBus,
+		OperatorName:      "IntrCity SmartBus Multi-Axle Volvo",
+		ServiceNumber:     "IC-4402",
+		OriginCode:        origBusTerm,
+		DestCode:          destBusTerm,
+		DepartureAt:       parseClock(depDate, "18:00", 0),
+		ArrivalAt:         parseClock(depDate, "11:30", 1),
+		DurationMinutes:   1050,
+		Price:             1680.00,
+		Currency:          "INR",
+		Transfers:         0,
+		Status:            "AVAILABLE",
+		AvailableSeats:    12,
+		BookingURL:        "https://www.intrcity.com",
+		RetrievedAt:       time.Now().UTC(),
+		PunctualityRating: 93,
+		DeparturePlatform: "Boarding: Lounge Gate 1",
+		ArrivalPlatform:   "Dropping: Central Stand",
 	})
 
 	// Filter by requested modes if specified

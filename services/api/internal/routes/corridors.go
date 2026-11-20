@@ -148,6 +148,100 @@ var MasterCorridors = []RealCorridorTrain{
 			{TrainNumber: "12167", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 8, DistanceKm: 1475, ScheduledArrive: "23:20", PlatformNumber: 2, HaltMinutes: 0},
 		},
 	},
+	{
+		TrainNumber:       "11071",
+		TrainName:         "Kamayani Express",
+		TrainType:         "EXPRESS",
+		SourceCode:        "LTT",
+		DestCode:          "BSB",
+		BaseFare3A:        1440.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   false,
+		PunctualityRating: 81,
+		DeparturePlatform: 1,
+		ArrivalPlatform:   4,
+		Stops: []TrainStop{
+			{TrainNumber: "11071", StationCode: "LTT", StationName: "Lokmanya Tilak Terminus", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "14:00", PlatformNumber: 1, HaltMinutes: 0},
+			{TrainNumber: "11071", StationCode: "KYN", StationName: "Kalyan Junction", SequenceNumber: 2, DistanceKm: 35, ScheduledArrive: "14:37", ScheduledDepart: "14:40", PlatformNumber: 4, HaltMinutes: 3},
+			{TrainNumber: "11071", StationCode: "NK", StationName: "Nashik Road", SequenceNumber: 3, DistanceKm: 167, ScheduledArrive: "17:15", ScheduledDepart: "17:20", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "11071", StationCode: "BSL", StationName: "Bhusaval Junction", SequenceNumber: 4, DistanceKm: 424, ScheduledArrive: "21:10", ScheduledDepart: "21:15", PlatformNumber: 3, HaltMinutes: 5},
+			{TrainNumber: "11071", StationCode: "KNW", StationName: "Khandwa Junction", SequenceNumber: 5, DistanceKm: 548, ScheduledArrive: "23:40", ScheduledDepart: "23:45", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "11071", StationCode: "ET", StationName: "Itarsi Junction", SequenceNumber: 6, DistanceKm: 731, ScheduledArrive: "02:15", ScheduledDepart: "02:25", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "11071", StationCode: "BPL", StationName: "Bhopal Junction", SequenceNumber: 7, DistanceKm: 823, ScheduledArrive: "04:10", ScheduledDepart: "04:15", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "11071", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 8, DistanceKm: 1510, ScheduledArrive: "16:05", ScheduledDepart: "16:30", PlatformNumber: 7, HaltMinutes: 25},
+			{TrainNumber: "11071", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 9, DistanceKm: 1640, ScheduledArrive: "19:30", PlatformNumber: 4, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "15017",
+		TrainName:         "Kashi Express",
+		TrainType:         "EXPRESS",
+		SourceCode:        "LTT",
+		DestCode:          "BSB",
+		BaseFare3A:        1410.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   false,
+		PunctualityRating: 79,
+		DeparturePlatform: 4,
+		ArrivalPlatform:   1,
+		Stops: []TrainStop{
+			{TrainNumber: "15017", StationCode: "LTT", StationName: "Lokmanya Tilak Terminus", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "06:35", PlatformNumber: 4, HaltMinutes: 0},
+			{TrainNumber: "15017", StationCode: "KYN", StationName: "Kalyan Junction", SequenceNumber: 2, DistanceKm: 35, ScheduledArrive: "07:20", ScheduledDepart: "07:23", PlatformNumber: 4, HaltMinutes: 3},
+			{TrainNumber: "15017", StationCode: "NK", StationName: "Nashik Road", SequenceNumber: 3, DistanceKm: 167, ScheduledArrive: "10:10", ScheduledDepart: "10:15", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "15017", StationCode: "BSL", StationName: "Bhusaval Junction", SequenceNumber: 4, DistanceKm: 424, ScheduledArrive: "14:15", ScheduledDepart: "14:20", PlatformNumber: 3, HaltMinutes: 5},
+			{TrainNumber: "15017", StationCode: "ET", StationName: "Itarsi Junction", SequenceNumber: 5, DistanceKm: 731, ScheduledArrive: "19:40", ScheduledDepart: "19:50", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "15017", StationCode: "JBP", StationName: "Jabalpur", SequenceNumber: 6, DistanceKm: 976, ScheduledArrive: "23:40", ScheduledDepart: "23:50", PlatformNumber: 2, HaltMinutes: 10},
+			{TrainNumber: "15017", StationCode: "STA", StationName: "Satna Junction", SequenceNumber: 7, DistanceKm: 1165, ScheduledArrive: "02:45", ScheduledDepart: "02:50", PlatformNumber: 3, HaltMinutes: 5},
+			{TrainNumber: "15017", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 8, DistanceKm: 1342, ScheduledArrive: "07:45", ScheduledDepart: "08:10", PlatformNumber: 6, HaltMinutes: 25},
+			{TrainNumber: "15017", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 9, DistanceKm: 1475, ScheduledArrive: "11:10", PlatformNumber: 1, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12165",
+		TrainName:         "Ratnagiri Superfast Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "LTT",
+		DestCode:          "BSBS",
+		BaseFare3A:        1540.00,
+		DaysOfRun:         []string{"MON", "THU", "FRI"},
+		PantryAvailable:   true,
+		PunctualityRating: 90,
+		DeparturePlatform: 2,
+		ArrivalPlatform:   2,
+		Stops: []TrainStop{
+			{TrainNumber: "12165", StationCode: "LTT", StationName: "Lokmanya Tilak Terminus", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "06:00", PlatformNumber: 2, HaltMinutes: 0},
+			{TrainNumber: "12165", StationCode: "KYN", StationName: "Kalyan Junction", SequenceNumber: 2, DistanceKm: 35, ScheduledArrive: "06:42", ScheduledDepart: "06:45", PlatformNumber: 4, HaltMinutes: 3},
+			{TrainNumber: "12165", StationCode: "BSL", StationName: "Bhusaval Junction", SequenceNumber: 3, DistanceKm: 424, ScheduledArrive: "12:55", ScheduledDepart: "13:00", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "12165", StationCode: "ET", StationName: "Itarsi Junction", SequenceNumber: 4, DistanceKm: 731, ScheduledArrive: "17:30", ScheduledDepart: "17:40", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "12165", StationCode: "JBP", StationName: "Jabalpur", SequenceNumber: 5, DistanceKm: 976, ScheduledArrive: "21:05", ScheduledDepart: "21:15", PlatformNumber: 2, HaltMinutes: 10},
+			{TrainNumber: "12165", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 6, DistanceKm: 1342, ScheduledArrive: "02:40", ScheduledDepart: "03:05", PlatformNumber: 7, HaltMinutes: 25},
+			{TrainNumber: "12165", StationCode: "BSBS", StationName: "Banaras", SequenceNumber: 7, DistanceKm: 1475, ScheduledArrive: "06:00", PlatformNumber: 2, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "22177",
+		TrainName:         "Mahanagari Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "CSMT",
+		DestCode:          "BSB",
+		BaseFare3A:        1510.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 86,
+		DeparturePlatform: 8,
+		ArrivalPlatform:   2,
+		Stops: []TrainStop{
+			{TrainNumber: "22177", StationCode: "CSMT", StationName: "Chhatrapati Shivaji Maharaj Terminus", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "00:10", PlatformNumber: 8, HaltMinutes: 0},
+			{TrainNumber: "22177", StationCode: "DR", StationName: "Dadar Central", SequenceNumber: 2, DistanceKm: 9, ScheduledArrive: "00:22", ScheduledDepart: "00:25", PlatformNumber: 4, HaltMinutes: 3},
+			{TrainNumber: "22177", StationCode: "KYN", StationName: "Kalyan Junction", SequenceNumber: 3, DistanceKm: 51, ScheduledArrive: "01:05", ScheduledDepart: "01:08", PlatformNumber: 4, HaltMinutes: 3},
+			{TrainNumber: "22177", StationCode: "NK", StationName: "Nashik Road", SequenceNumber: 4, DistanceKm: 184, ScheduledArrive: "03:45", ScheduledDepart: "03:50", PlatformNumber: 2, HaltMinutes: 5},
+			{TrainNumber: "22177", StationCode: "BSL", StationName: "Bhusaval Junction", SequenceNumber: 5, DistanceKm: 441, ScheduledArrive: "07:35", ScheduledDepart: "07:40", PlatformNumber: 1, HaltMinutes: 5},
+			{TrainNumber: "22177", StationCode: "ET", StationName: "Itarsi Junction", SequenceNumber: 6, DistanceKm: 748, ScheduledArrive: "12:15", ScheduledDepart: "12:25", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "22177", StationCode: "JBP", StationName: "Jabalpur", SequenceNumber: 7, DistanceKm: 993, ScheduledArrive: "15:45", ScheduledDepart: "15:55", PlatformNumber: 3, HaltMinutes: 10},
+			{TrainNumber: "22177", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 8, DistanceKm: 1359, ScheduledArrive: "22:30", ScheduledDepart: "22:55", PlatformNumber: 6, HaltMinutes: 25},
+			{TrainNumber: "22177", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 9, DistanceKm: 1492, ScheduledArrive: "03:20", PlatformNumber: 2, HaltMinutes: 0},
+		},
+	},
 
 	// ==========================================
 	// 3. NORTHERN / EASTERN TRUNK: Delhi <-> Kanpur <-> Prayagraj <-> Patna <-> Howrah
@@ -337,6 +431,13 @@ func getAliases(code string) []string {
 	clean := strings.ToUpper(strings.TrimSpace(code))
 	if group, exists := cityStationGroups[clean]; exists {
 		return group
+	}
+	for _, group := range cityStationGroups {
+		for _, member := range group {
+			if member == clean {
+				return group
+			}
+		}
 	}
 	return []string{clean}
 }

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"tik-tiki/services/api/internal/providers"
@@ -16,14 +18,45 @@ import (
 
 var mockAdapter = mock.NewMockAdapter()
 
-// LocationItem for station/airport autocomplete
+// In-memory alert store for fast lookup and persistence testing
+type AlertRecord struct {
+	ID                  string    `json:"id"`
+	ServiceNumber       string    `json:"service_number"`
+	Origin              string    `json:"origin"`
+	Destination         string    `json:"destination"`
+	DepartureDate       string    `json:"departure_date"`
+	ClassCode           string    `json:"class_code"`
+	DesiredState        string    `json:"desired_state"`
+	NotificationChannel string    `json:"notification_channel"`
+	Recipient           string    `json:"recipient"`
+	Status              string    `json:"status"` // ACTIVE, TRIGGERED, CANCELLED
+	CreatedAt           time.Time `json:"created_at"`
+}
+
+type CreateAlertRequest struct {
+	ServiceNumber       string `json:"service_number"`
+	Origin              string `json:"origin"`
+	Destination         string `json:"destination"`
+	DepartureDate       string `json:"departure_date"`
+	ClassCode           string `json:"class_code"`
+	DesiredState        string `json:"desired_state"`        // "AVAILABLE" or "RAC_OR_BETTER"
+	NotificationChannel string `json:"notification_channel"` // "WHATSAPP", "WEB_PUSH", "EMAIL"
+	PhoneNumber         string `json:"phone_number,omitempty"`
+	Email               string `json:"email,omitempty"`
+}
+
+var (
+	alertsMu   sync.RWMutex
+	alertsList = make(map[string]AlertRecord)
+)
+
 type LocationItem struct {
-	Code        string `json:"code"`
-	Name        string `json:"name"`
-	City        string `json:"city"`
-	Country     string `json:"country"`
-	Type        string `json:"type"` // "railway_station", "airport", "city"
-	IsMajorHub  bool   `json:"is_major_hub"`
+	Code       string `json:"code"`
+	Name       string `json:"name"`
+	City       string `json:"city"`
+	Country    string `json:"country"`
+	Type       string `json:"type"` // "railway_station", "airport", "city"
+	IsMajorHub bool   `json:"is_major_hub"`
 }
 
 var locationsCatalog = []LocationItem{
@@ -89,7 +122,6 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		// Support GET for testing
 		req.OriginCode = r.URL.Query().Get("origin")
 		req.DestCode = r.URL.Query().Get("destination")
 	}
@@ -107,7 +139,6 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Score offers with the Mathematical Journey Utility function
 	scoredOffers := scoring.CalculateScores(offers)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -203,6 +234,8 @@ func handleConnectingRoutes(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+var phoneRegex = regexp.MustCompile(`^\+?[0-9]{10,14}$`)
+
 func handleAlerts(w http.ResponseWriter, r *http.Request) {
 	enableCORS(w)
 	if r.Method == "OPTIONS" {
@@ -211,23 +244,91 @@ func handleAlerts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		var payload map[string]interface{}
-		json.NewDecoder(r.Body).Decode(&payload)
+		var req CreateAlertRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error": "Invalid request payload"}`, http.StatusBadRequest)
+			return
+		}
+
+		if req.ServiceNumber == "" || req.Origin == "" || req.Destination == "" {
+			http.Error(w, `{"error": "service_number, origin, and destination are required"}`, http.StatusBadRequest)
+			return
+		}
+
+		if req.NotificationChannel == "" {
+			req.NotificationChannel = "WHATSAPP"
+		}
+		if req.DesiredState == "" {
+			req.DesiredState = "AVAILABLE"
+		}
+		if req.ClassCode == "" {
+			req.ClassCode = "3A"
+		}
+
+		recipient := ""
+		switch req.NotificationChannel {
+		case "WHATSAPP":
+			cleanPhone := strings.ReplaceAll(req.PhoneNumber, " ", "")
+			cleanPhone = strings.ReplaceAll(cleanPhone, "-", "")
+			if !phoneRegex.MatchString(cleanPhone) {
+				http.Error(w, `{"error": "A valid 10-14 digit phone number is required for WhatsApp alerts"}`, http.StatusBadRequest)
+				return
+			}
+			recipient = cleanPhone
+		case "EMAIL":
+			if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
+				http.Error(w, `{"error": "A valid email address is required for Email alerts"}`, http.StatusBadRequest)
+				return
+			}
+			recipient = req.Email
+		case "WEB_PUSH":
+			recipient = "browser_push_active"
+		default:
+			http.Error(w, `{"error": "Invalid notification channel. Supported: WHATSAPP, WEB_PUSH, EMAIL"}`, http.StatusBadRequest)
+			return
+		}
+
+		alertID := fmt.Sprintf("alt_%d", time.Now().UnixNano())
+		record := AlertRecord{
+			ID:                  alertID,
+			ServiceNumber:       req.ServiceNumber,
+			Origin:              req.Origin,
+			Destination:         req.Destination,
+			DepartureDate:       req.DepartureDate,
+			ClassCode:           req.ClassCode,
+			DesiredState:        req.DesiredState,
+			NotificationChannel: req.NotificationChannel,
+			Recipient:           recipient,
+			Status:              "ACTIVE",
+			CreatedAt:           time.Now().UTC(),
+		}
+
+		alertsMu.Lock()
+		alertsList[alertID] = record
+		alertsMu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"alert_id":              fmt.Sprintf("alt_%d", time.Now().Unix()),
+			"alert_id":              alertID,
 			"status":                "ACTIVE",
+			"recipient":             recipient,
+			"channel":               req.NotificationChannel,
 			"poll_interval_seconds": 60,
-			"message":               "Monitoring active! You will be alerted via WhatsApp as soon as bookable seats open.",
+			"message":               fmt.Sprintf("Monitoring active! We will alert %s via %s as soon as seats open.", recipient, req.NotificationChannel),
 		})
 		return
 	}
 
+	// GET: list active alerts count
+	alertsMu.RLock()
+	count := len(alertsList)
+	alertsMu.RUnlock()
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"status": "ready",
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"active_alerts_count": count,
+		"status":              "ready",
 	})
 }
 

@@ -118,20 +118,62 @@ func TestServerEndpoints_TDD(t *testing.T) {
 		}
 	})
 
-	t.Run("POST /v1/alerts creates active subscription", func(t *testing.T) {
-		body := strings.NewReader(`{"service_number": "11059", "origin": "ET", "destination": "PRYJ"}`)
-		req := httptest.NewRequest("POST", "/v1/alerts", body)
+	t.Run("POST /v1/alerts creates active WhatsApp subscription with phone validation", func(t *testing.T) {
+		validBody := strings.NewReader(`{
+			"service_number": "11059",
+			"origin": "ET",
+			"destination": "PRYJ",
+			"departure_date": "2026-12-24",
+			"notification_channel": "WHATSAPP",
+			"phone_number": "+919876543210"
+		}`)
+		req := httptest.NewRequest("POST", "/v1/alerts", validBody)
 		w := httptest.NewRecorder()
 		handleAlerts(w, req)
 
 		if w.Code != http.StatusCreated {
-			t.Fatalf("expected 201 Created, got %d", w.Code)
+			t.Fatalf("expected 201 Created, got %d: %s", w.Code, w.Body.String())
 		}
 
 		var resp map[string]interface{}
 		json.NewDecoder(w.Body).Decode(&resp)
-		if resp["status"] != "ACTIVE" {
-			t.Errorf("expected status ACTIVE, got %v", resp["status"])
+		if resp["status"] != "ACTIVE" || resp["recipient"] != "+919876543210" {
+			t.Errorf("expected active alert for phone +919876543210, got %v", resp)
+		}
+	})
+
+	t.Run("POST /v1/alerts rejects WhatsApp request with invalid phone", func(t *testing.T) {
+		invalidBody := strings.NewReader(`{
+			"service_number": "11059",
+			"origin": "ET",
+			"destination": "PRYJ",
+			"departure_date": "2026-12-24",
+			"notification_channel": "WHATSAPP",
+			"phone_number": "not_a_phone"
+		}`)
+		req := httptest.NewRequest("POST", "/v1/alerts", invalidBody)
+		w := httptest.NewRecorder()
+		handleAlerts(w, req)
+
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("expected 400 Bad Request for bad phone, got %d", w.Code)
+		}
+	})
+
+	t.Run("POST /v1/alerts accepts Web Push alert without phone", func(t *testing.T) {
+		pushBody := strings.NewReader(`{
+			"service_number": "12955",
+			"origin": "MMCT",
+			"destination": "JP",
+			"departure_date": "2026-12-24",
+			"notification_channel": "WEB_PUSH"
+		}`)
+		req := httptest.NewRequest("POST", "/v1/alerts", pushBody)
+		w := httptest.NewRecorder()
+		handleAlerts(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Fatalf("expected 201 Created for Web Push, got %d: %s", w.Code, w.Body.String())
 		}
 	})
 }

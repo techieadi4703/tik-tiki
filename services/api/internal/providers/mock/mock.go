@@ -259,6 +259,28 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 		ArrivalPlatform:   fmt.Sprintf("Terminal 1 · %s", destAirName),
 	})
 
+	offers = append(offers, providers.NormalizedOffer{
+		ProviderID:        "duffel_flight",
+		Mode:              providers.ModeFlight,
+		OperatorName:      "Akasa Air (QP-1392)",
+		ServiceNumber:     "QP-1392",
+		OriginCode:        origAirCode,
+		DestCode:          destAirCode,
+		DepartureAt:       parseClock(depDate, "18:45", 0),
+		ArrivalAt:         parseClock(depDate, "21:05", 0),
+		DurationMinutes:   140,
+		Price:             4450.00,
+		Currency:          "INR",
+		Transfers:         0,
+		Status:            "AVAILABLE",
+		AvailableSeats:    16,
+		BookingURL:        "https://www.akasaair.com",
+		RetrievedAt:       time.Now().UTC(),
+		PunctualityRating: 95,
+		DeparturePlatform: fmt.Sprintf("Terminal 1 · %s", origAirName),
+		ArrivalPlatform:   fmt.Sprintf("Terminal 2 · %s", destAirName),
+	})
+
 	// 3. Real Premium Intercity Buses (Real Boarding Terminals & Authentic Sleeper Coaches)
 	origBusTerm := resolveBusTerminal(query.OriginCode)
 	destBusTerm := resolveBusTerminal(query.DestCode)
@@ -305,6 +327,28 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 		PunctualityRating: 93,
 		DeparturePlatform: "Boarding: Lounge Gate 1",
 		ArrivalPlatform:   "Dropping: Central Stand",
+	})
+
+	offers = append(offers, providers.NormalizedOffer{
+		ProviderID:        "redbus_partner",
+		Mode:              providers.ModeBus,
+		OperatorName:      "NueGo Electric AC Semi-Sleeper",
+		ServiceNumber:     "NG-7810",
+		OriginCode:        origBusTerm,
+		DestCode:          destBusTerm,
+		DepartureAt:       parseClock(depDate, "21:45", 0),
+		ArrivalAt:         parseClock(depDate, "15:15", 1),
+		DurationMinutes:   1050,
+		Price:             1350.00,
+		Currency:          "INR",
+		Transfers:         0,
+		Status:            "AVAILABLE",
+		AvailableSeats:    22,
+		BookingURL:        "https://www.nuego.in",
+		RetrievedAt:       time.Now().UTC(),
+		PunctualityRating: 96,
+		DeparturePlatform: "Boarding: EV Hub Gate A",
+		ArrivalPlatform:   "Dropping: City Bypass Terminal",
 	})
 
 	// Filter by requested modes if specified

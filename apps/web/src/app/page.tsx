@@ -9,6 +9,7 @@ import { SeatAlertModal } from '../components/SeatAlertModal';
 import { PassengerBookingModal } from '../components/PassengerBookingModal';
 import { CoachSeatMapModal } from '../components/CoachSeatMapModal';
 import { LiveStatusModal } from '../components/LiveStatusModal';
+import { PNRStatusModal } from '../components/PNRStatusModal';
 import { AuthGate } from '../components/AuthGate';
 import { FilterSortBar, TimeWindow, SortOption, TrainTypeFilter } from '../components/FilterSortBar';
 import { NormalizedOffer, JourneyOptimizationResult, User, AuthSession } from '../types';
@@ -41,6 +42,7 @@ export default function Home() {
   const [activeBookingOffer, setActiveBookingOffer] = useState<NormalizedOffer | null>(null);
   const [activeCoachOffer, setActiveCoachOffer] = useState<NormalizedOffer | null>(null);
   const [showLiveStatus, setShowLiveStatus] = useState(false);
+  const [showPNRStatus, setShowPNRStatus] = useState(false);
 
   // Restore authenticated session from localStorage on mount
   useEffect(() => {
@@ -181,6 +183,7 @@ export default function Home() {
         onSignOut={handleSignOut}
         onSearch={performSearch}
         onSelectMode={setMode}
+        onOpenPNRStatus={() => setShowPNRStatus(true)}
         onOpenLiveStatus={() => setShowLiveStatus(true)}
         onOpenCoachMap={() => {
           if (offers.length > 0) {
@@ -358,6 +361,12 @@ export default function Home() {
       <LiveStatusModal
         isOpen={showLiveStatus}
         onClose={() => setShowLiveStatus(false)}
+      />
+
+      {/* Live CRIS PNR Status Tracking Modal */}
+      <PNRStatusModal
+        isOpen={showPNRStatus}
+        onClose={() => setShowPNRStatus(false)}
       />
 
       {/* Seat Alert Sniping Modal */}

@@ -16,6 +16,7 @@ interface SearchHeaderProps {
   onSelectMode: (mode: string) => void;
   onOpenLiveStatus?: () => void;
   onOpenCoachMap?: () => void;
+  onOpenPNRStatus?: () => void;
   onSignOut?: () => void;
 }
 
@@ -29,6 +30,7 @@ export function SearchHeader({
   onSelectMode,
   onOpenLiveStatus,
   onOpenCoachMap,
+  onOpenPNRStatus,
   onSignOut,
 }: SearchHeaderProps) {
   const [fromCode, setFromCode] = useState(origin);
@@ -88,6 +90,14 @@ export function SearchHeader({
               className="px-3.5 py-1.5 rounded-lg bg-white text-[#1a365d] font-bold shadow-sm"
             >
               Search Trains
+            </button>
+            <button
+              type="button"
+              onClick={onOpenPNRStatus}
+              className="px-3.5 py-1.5 rounded-lg text-blue-100 hover:text-white hover:bg-blue-900/60 transition-colors flex items-center gap-1.5"
+            >
+              <Ticket className="w-3.5 h-3.5 text-orange-400" />
+              <span>PNR Status</span>
             </button>
             <button
               type="button"

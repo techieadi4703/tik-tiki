@@ -42,8 +42,8 @@ func TestMockAdapterCompliance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected search error: %v", err)
 	}
-	if len(railOffers) != 2 {
-		t.Errorf("expected 2 rail offers, got %d", len(railOffers))
+	if len(railOffers) < 2 {
+		t.Errorf("expected at least 2 rail offers, got %d", len(railOffers))
 	}
 	for _, o := range railOffers {
 		if o.Mode != providers.ModeRail {

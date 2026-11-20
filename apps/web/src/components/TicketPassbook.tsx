@@ -178,6 +178,23 @@ export function TicketPassbook({ booking }: TicketPassbookProps) {
             <span className="text-slate-900 font-black text-sm">₹{booking.total_fare.toLocaleString('en-IN')}</span>
           </div>
 
+          <div className="w-full flex items-center justify-between gap-2 pt-2 border-t border-slate-200">
+            <button
+              onClick={() => window.print()}
+              className="flex-1 py-2 px-3 rounded-xl bg-[#1a365d] hover:bg-blue-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print ERS Slip</span>
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+              title="Download Ticket PDF"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <div className="w-full flex items-center justify-center gap-2 pt-1 text-[11px] text-slate-500">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> CRIS Encrypted Verification
           </div>

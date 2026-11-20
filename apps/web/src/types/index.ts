@@ -169,3 +169,39 @@ export interface AuthSession {
   token: string;
   user: User;
 }
+
+export interface PNRPassengerStatus {
+  passenger_index: number;
+  booking_status: string;
+  current_status: string;
+  berth_preference: string;
+  allocated_coach?: string;
+  allocated_berth?: number;
+  allocated_berth_type?: string;
+  confirmation_probability: number;
+}
+
+export interface PNRStatusResponse {
+  pnr: string;
+  train_number: string;
+  train_name: string;
+  origin_code: string;
+  origin_name: string;
+  dest_code: string;
+  dest_name: string;
+  boarding_station_code: string;
+  boarding_station_name: string;
+  date_of_journey: string;
+  departure_time: string;
+  arrival_time: string;
+  class_code: string;
+  class_name: string;
+  quota: string;
+  chart_status: string;
+  platform_number: string;
+  overall_status: string;
+  confirmation_chance: string;
+  passengers: PNRPassengerStatus[];
+  coach_layout: string[];
+  last_updated: string;
+}

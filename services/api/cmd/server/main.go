@@ -780,6 +780,29 @@ func handleBookingByPNR(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(b)
 }
 
+func handlePNRStatus(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	pnr := r.URL.Query().Get("pnr")
+	if pnr == "" {
+		http.Error(w, `{"error": "pnr query parameter is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	status, err := bookingManager.GetPNRStatus(pnr)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(status)
+}
+
 func main() {
 	mux := http.NewServeMux()
 
@@ -799,6 +822,7 @@ func main() {
 	mux.HandleFunc("/v1/bookings/confirm", handleConfirmBooking)
 	mux.HandleFunc("/v1/users/me/trips", handleUserTrips)
 	mux.HandleFunc("/v1/bookings/pnr", handleBookingByPNR)
+	mux.HandleFunc("/v1/pnr/status", handlePNRStatus)
 	mux.HandleFunc("/v1/auth/register", handleRegister)
 	mux.HandleFunc("/v1/auth/login", handleLogin)
 	mux.HandleFunc("/v1/auth/me", handleMe)

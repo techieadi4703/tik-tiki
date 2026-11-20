@@ -387,3 +387,13 @@ export async function fetchBookingByPNR(pnr: string): Promise<Booking> {
   }
   return res.json();
 }
+
+export async function fetchPNRStatus(pnr: string): Promise<import('../types').PNRStatusResponse> {
+  const cleanPNR = pnr.trim();
+  const res = await fetch(`${API_BASE_URL}/pnr/status?pnr=${encodeURIComponent(cleanPNR)}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to query Indian Railways PNR status');
+  }
+  return res.json();
+}

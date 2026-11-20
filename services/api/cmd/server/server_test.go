@@ -279,4 +279,23 @@ func TestServerEndpoints_TDD(t *testing.T) {
 			t.Fatalf("expected 200 OK for logout, got %d", wLogout.Code)
 		}
 	})
+
+	t.Run("GET /v1/pnr/status returns authentic CRIS PRS response", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v1/pnr/status?pnr=284-9182741", nil)
+		w := httptest.NewRecorder()
+		handlePNRStatus(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected 200, got %d", w.Code)
+		}
+
+		var resp map[string]interface{}
+		json.NewDecoder(w.Body).Decode(&resp)
+		if resp["pnr"] != "284-9182741" {
+			t.Errorf("expected PNR 284-9182741, got %v", resp["pnr"])
+		}
+		if resp["overall_status"] != "CONFIRMED" {
+			t.Errorf("expected overall_status CONFIRMED, got %v", resp["overall_status"])
+		}
+	})
 }

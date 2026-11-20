@@ -86,4 +86,22 @@ func TestBookingManager_Flow(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected error when exceeding 6 passengers per e-ticket")
 	}
+
+	// 5. Test Live PNR Status Inquiry (Seeded and external PNRs)
+	status, err := bm.GetPNRStatus("284-9182741")
+	if err != nil {
+		t.Fatalf("unexpected error fetching seeded PNR status: %v", err)
+	}
+	if status.OverallStatus != "CONFIRMED" || len(status.Passengers) == 0 {
+		t.Errorf("expected confirmed status with passengers, got %s with %d pax", status.OverallStatus, len(status.Passengers))
+	}
+
+	// External 10-digit Indian Railways PNR
+	extStatus, err := bm.GetPNRStatus("8492194821")
+	if err != nil {
+		t.Fatalf("unexpected error querying external PNR: %v", err)
+	}
+	if extStatus.TrainNumber == "" || len(extStatus.CoachLayout) == 0 {
+		t.Errorf("expected valid synthesized CRIS PRS response for external PNR")
+	}
 }

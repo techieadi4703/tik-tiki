@@ -33,8 +33,12 @@ export function PassengerBookingModal({
   onClose,
   onBookingSuccess,
 }: PassengerBookingModalProps) {
-  const [step, setStep] = useState<'DETAILS' | 'AUTH' | 'SUCCESS'>('DETAILS');
+  const [step, setStep] = useState<'DETAILS' | 'PAYMENT' | 'AUTH' | 'SUCCESS'>('DETAILS');
   const [quota, setQuota] = useState<'GN' | 'SS' | 'LD' | 'TQ'>('GN');
+  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'NETBANKING'>('UPI');
+  const [upiId, setUpiId] = useState('aditya@okhdfcbank');
+  const [paymentStatus, setPaymentStatus] = useState<'IDLE' | 'PROCESSING' | 'SUCCESS'>('IDLE');
+  const [txnRef, setTxnRef] = useState('');
   const [irctcUsername, setIrctcUsername] = useState('');
   const [irctcPassword, setIrctcPassword] = useState('');
 
@@ -157,13 +161,27 @@ export function PassengerBookingModal({
       });
 
       setPendingBooking(initiated);
-      setStep('AUTH');
+      setStep('PAYMENT');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to initiate booking';
       setError(msg);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSimulatePayment = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaymentStatus('PROCESSING');
+    setError(null);
+
+    setTimeout(() => {
+      setTxnRef(`TXN_${Date.now().toString().slice(-8)}`);
+      setPaymentStatus('SUCCESS');
+      setTimeout(() => {
+        setStep('AUTH');
+      }, 700);
+    }, 900);
   };
 
   const handleConfirmAuth = async (e: React.FormEvent) => {
@@ -484,7 +502,7 @@ export function PassengerBookingModal({
                   </>
                 ) : (
                   <>
-                    <span>Proceed to IRCTC Verification (₹{totalFare.toLocaleString('en-IN')})</span>
+                    <span>Proceed to Payment Checkout (₹{totalFare.toLocaleString('en-IN')})</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -492,7 +510,171 @@ export function PassengerBookingModal({
             </form>
           )}
 
-          {/* STEP 2: IRCTC AUTHENTICATION */}
+          {/* STEP 2: ESCROW PAYMENT CHECKOUT GATEWAY */}
+          {step === 'PAYMENT' && pendingBooking && (
+            <form onSubmit={handleSimulatePayment} className="flex flex-col gap-4">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex flex-col gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Fare Summary & Tax Invoice
+                </span>
+                <div className="flex justify-between text-slate-700">
+                  <span>Base Ticket Fare ({passengers.length} {passengers.length === 1 ? 'Pax' : 'Pax'} · 3AC):</span>
+                  <span className="font-mono font-semibold">₹{totalFare.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-700">
+                  <span>IRCTC Convenience Fee (Statutory):</span>
+                  <span className="font-mono font-semibold">₹17.70</span>
+                </div>
+                <div className="flex justify-between text-slate-700">
+                  <span>GST (5% on AC Travel):</span>
+                  <span className="font-mono font-semibold">₹{(totalFare * 0.05).toFixed(2)}</span>
+                </div>
+                <div className="border-t border-slate-200 pt-2 flex justify-between text-slate-900 font-bold text-sm">
+                  <span>Total Payable:</span>
+                  <span className="text-[#ea580c] font-black">
+                    ₹{(totalFare + 17.70 + totalFare * 0.05).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Select Payment Method
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'UPI', label: 'UPI (GPay / PhonePe)' },
+                    { id: 'CARD', label: 'Credit / Debit Card' },
+                    { id: 'NETBANKING', label: 'Net Banking' },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.id as any)}
+                      className={`p-2.5 rounded-xl border text-center text-xs font-bold transition-all ${
+                        paymentMethod === m.id
+                          ? 'border-[#1a365d] bg-blue-50 text-[#1a365d] shadow-sm'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {paymentMethod === 'UPI' && (
+                <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 bg-white p-1 rounded-xl border border-slate-300 flex items-center justify-center shrink-0">
+                      <div className="w-full h-full bg-slate-900 rounded grid grid-cols-3 gap-0.5 p-1">
+                        <div className="bg-white rounded-xs" />
+                        <div className="bg-transparent" />
+                        <div className="bg-white rounded-xs" />
+                        <div className="bg-transparent" />
+                        <div className="bg-white rounded-xs" />
+                        <div className="bg-transparent" />
+                        <div className="bg-white rounded-xs" />
+                        <div className="bg-transparent" />
+                        <div className="bg-white rounded-xs" />
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Scan QR Code or Enter UPI ID</span>
+                      <span className="text-[11px] text-slate-600">
+                        Supports Google Pay, PhonePe, Paytm, CRED & any BHIM UPI app
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center bg-white rounded-xl px-3 py-2 border border-slate-300 text-xs">
+                    <span className="font-mono text-slate-400 mr-2">UPI:</span>
+                    <input
+                      type="text"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      placeholder="username@bank"
+                      className="w-full bg-transparent text-slate-900 font-mono focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {paymentMethod === 'CARD' && (
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-2.5 text-xs">
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Card Number</label>
+                    <input
+                      type="text"
+                      defaultValue="4242 •••• •••• 4242"
+                      disabled
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-slate-700"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Expiry</label>
+                      <input
+                        type="text"
+                        defaultValue="12/28"
+                        disabled
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-slate-700"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-slate-500 block mb-1">CVV</label>
+                      <input
+                        type="password"
+                        defaultValue="•••"
+                        disabled
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-slate-700"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {paymentMethod === 'NETBANKING' && (
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-2 gap-2 text-xs font-semibold">
+                  {['HDFC Bank', 'State Bank of India', 'ICICI Bank', 'Axis Bank'].map((bank, i) => (
+                    <div
+                      key={bank}
+                      className={`p-2.5 rounded-xl border text-center cursor-pointer transition-all ${
+                        i === 0 ? 'bg-white border-[#1a365d] text-[#1a365d]' : 'bg-white border-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {bank}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={paymentStatus !== 'IDLE'}
+                className="mt-2 w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+              >
+                {paymentStatus === 'PROCESSING' ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Processing Payment (₹{(totalFare + 17.70 + totalFare * 0.05).toFixed(2)})...</span>
+                  </>
+                ) : paymentStatus === 'SUCCESS' ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-white" />
+                    <span>Payment Verified! Redirecting to IRCTC Auth...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Pay ₹{(totalFare + 17.70 + totalFare * 0.05).toFixed(2)} & Continue</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* STEP 3: IRCTC AUTHENTICATION */}
           {step === 'AUTH' && pendingBooking && (
             <form onSubmit={handleConfirmAuth} className="flex flex-col gap-4">
               <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-xs">

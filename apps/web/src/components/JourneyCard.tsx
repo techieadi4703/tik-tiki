@@ -19,7 +19,7 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { NormalizedOffer, ClassOption } from '../types';
-import { resolveStationDisplayName } from '../lib/api';
+import { resolveStationDisplayName, formatIndianStandardTime } from '../lib/api';
 
 interface JourneyCardProps {
   offer: NormalizedOffer;
@@ -150,11 +150,7 @@ export function JourneyCard({
           {/* Departure */}
           <div className="text-left max-w-[210px]">
             <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
-              {new Date(offer.departure_at).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-              })}
+              {formatIndianStandardTime(offer.departure_at)}
             </span>
             <div className="text-sm text-slate-900 font-black uppercase mt-0.5">{offer.origin_code}</div>
             <div className="text-xs text-slate-500 font-semibold truncate" title={resolveStationDisplayName(offer.origin_code, offer.mode)}>
@@ -202,11 +198,7 @@ export function JourneyCard({
           {/* Arrival */}
           <div className="text-right max-w-[210px]">
             <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
-              {new Date(offer.arrival_at).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-              })}
+              {formatIndianStandardTime(offer.arrival_at)}
             </span>
             <div className="text-sm text-slate-900 font-black uppercase mt-0.5">{offer.dest_code}</div>
             <div className="text-xs text-slate-500 font-semibold truncate text-right" title={resolveStationDisplayName(offer.dest_code, offer.mode)}>

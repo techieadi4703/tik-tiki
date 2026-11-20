@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Train, ShieldCheck, QrCode, Copy, Check, Calendar, Clock, User, Download, Printer } from 'lucide-react';
 import { Booking } from '../types';
+import { formatIndianStandardTime } from '../lib/api';
 
 interface TicketPassbookProps {
   booking: Booking;
@@ -67,7 +68,7 @@ export function TicketPassbook({ booking }: TicketPassbookProps) {
             {/* Origin */}
             <div className="text-left">
               <span className="text-2xl font-black text-slate-900 block">
-                {depDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                {formatIndianStandardTime(booking.departure_at)}
               </span>
               <span className="text-sm font-bold text-[#1a365d] block">{booking.origin_code}</span>
               <span className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
@@ -92,7 +93,7 @@ export function TicketPassbook({ booking }: TicketPassbookProps) {
             {/* Destination */}
             <div className="text-right">
               <span className="text-2xl font-black text-slate-900 block">
-                {arrDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                {formatIndianStandardTime(booking.arrival_at)}
               </span>
               <span className="text-sm font-bold text-[#1a365d] block">{booking.dest_code}</span>
               <span className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 justify-end">

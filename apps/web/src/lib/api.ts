@@ -3,6 +3,21 @@ import { MAJOR_STATIONS_CATALOG, resolveStationDisplayName } from './stations.mj
 
 export { MAJOR_STATIONS_CATALOG, resolveStationDisplayName };
 
+export function formatIndianStandardTime(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  } catch {
+    const m = (dateStr || '').match(/T(\d{2}):(\d{2})/);
+    return m ? `${m[1]}:${m[2]}` : dateStr;
+  }
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1';
 
 export async function loginUser(identifier: string, password: string): Promise<AuthSession> {

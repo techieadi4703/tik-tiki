@@ -35,9 +35,10 @@ export function LiveStatusModal({ isOpen, onClose, initialTrain = '12168' }: Liv
 
   useEffect(() => {
     if (isOpen) {
-      performTrack(trainQuery);
+      setTrainQuery(initialTrain);
+      performTrack(initialTrain);
     }
-  }, [isOpen]);
+  }, [isOpen, initialTrain]);
 
   if (!isOpen) return null;
 

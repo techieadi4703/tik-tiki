@@ -1,0 +1,330 @@
+[
+  {
+    "train_number": "12951",
+    "train_name": "Tejas Rajdhani Express",
+    "train_type": "RAJDHANI",
+    "source_code": "MMCT",
+    "dest_code": "NDLS",
+    "base_fare_3a": 2850.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 96,
+    "departure_platform": 1,
+    "arrival_platform": 3,
+    "stops": [
+      {"train_number": "12951", "station_code": "MMCT", "station_name": "Mumbai Central", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "17:00", "platform_number": 1, "halt_minutes": 0},
+      {"train_number": "12951", "station_code": "BVI", "station_name": "Borivali", "sequence_number": 2, "distance_km": 30, "scheduled_arrive": "17:22", "scheduled_depart": "17:24", "platform_number": 6, "halt_minutes": 2},
+      {"train_number": "12951", "station_code": "ST", "station_name": "Surat", "sequence_number": 3, "distance_km": 263, "scheduled_arrive": "19:43", "scheduled_depart": "19:48", "platform_number": 1, "halt_minutes": 5},
+      {"train_number": "12951", "station_code": "BRC", "station_name": "Vadodara Junction", "sequence_number": 4, "distance_km": 393, "scheduled_arrive": "21:06", "scheduled_depart": "21:16", "platform_number": 2, "halt_minutes": 10},
+      {"train_number": "12951", "station_code": "RTM", "station_name": "Ratlam Junction", "sequence_number": 5, "distance_km": 653, "scheduled_arrive": "00:25", "scheduled_depart": "00:28", "platform_number": 5, "halt_minutes": 3},
+      {"train_number": "12951", "station_code": "KOTA", "station_name": "Kota Junction", "sequence_number": 6, "distance_km": 920, "scheduled_arrive": "03:15", "scheduled_depart": "03:20", "platform_number": 1, "halt_minutes": 5},
+      {"train_number": "12951", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 7, "distance_km": 1386, "scheduled_arrive": "08:32", "platform_number": 3, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12952",
+    "train_name": "Tejas Rajdhani Express (Return)",
+    "train_type": "RAJDHANI",
+    "source_code": "NDLS",
+    "dest_code": "MMCT",
+    "base_fare_3a": 2850.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 96,
+    "departure_platform": 1,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "12952", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "16:55", "platform_number": 1, "halt_minutes": 0},
+      {"train_number": "12952", "station_code": "KOTA", "station_name": "Kota Junction", "sequence_number": 2, "distance_km": 466, "scheduled_arrive": "21:30", "scheduled_depart": "21:40", "platform_number": 1, "halt_minutes": 10},
+      {"train_number": "12952", "station_code": "RTM", "station_name": "Ratlam Junction", "sequence_number": 3, "distance_km": 733, "scheduled_arrive": "00:55", "scheduled_depart": "01:00", "platform_number": 4, "halt_minutes": 5},
+      {"train_number": "12952", "station_code": "BRC", "station_name": "Vadodara Junction", "sequence_number": 4, "distance_km": 993, "scheduled_arrive": "04:18", "scheduled_depart": "04:28", "platform_number": 2, "halt_minutes": 10},
+      {"train_number": "12952", "station_code": "BVI", "station_name": "Borivali", "sequence_number": 5, "distance_km": 1354, "scheduled_arrive": "07:58", "scheduled_depart": "08:00", "platform_number": 7, "halt_minutes": 2},
+      {"train_number": "12952", "station_code": "MMCT", "station_name": "Mumbai Central", "sequence_number": 6, "distance_km": 1386, "scheduled_arrive": "08:35", "platform_number": 1, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "22436",
+    "train_name": "Vande Bharat Express",
+    "train_type": "VANDE_BHARAT",
+    "source_code": "NDLS",
+    "dest_code": "BSB",
+    "base_fare_3a": 1750.00,
+    "days_of_run": ["TUE", "WED", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 98,
+    "departure_platform": 16,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "22436", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "06:00", "platform_number": 16, "halt_minutes": 0},
+      {"train_number": "22436", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 2, "distance_km": 440, "scheduled_arrive": "10:08", "scheduled_depart": "10:10", "platform_number": 5, "halt_minutes": 2},
+      {"train_number": "22436", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 3, "distance_km": 635, "scheduled_arrive": "12:08", "scheduled_depart": "12:10", "platform_number": 6, "halt_minutes": 2},
+      {"train_number": "22436", "station_code": "BSB", "station_name": "Varanasi Junction", "sequence_number": 4, "distance_km": 759, "scheduled_arrive": "14:00", "platform_number": 1, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "22435",
+    "train_name": "Vande Bharat Express",
+    "train_type": "VANDE_BHARAT",
+    "source_code": "BSB",
+    "dest_code": "NDLS",
+    "base_fare_3a": 1750.00,
+    "days_of_run": ["TUE", "WED", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 98,
+    "departure_platform": 1,
+    "arrival_platform": 16,
+    "stops": [
+      {"train_number": "22435", "station_code": "BSB", "station_name": "Varanasi Junction", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "15:00", "platform_number": 1, "halt_minutes": 0},
+      {"train_number": "22435", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 2, "distance_km": 124, "scheduled_arrive": "16:30", "scheduled_depart": "16:32", "platform_number": 6, "halt_minutes": 2},
+      {"train_number": "22435", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 3, "distance_km": 319, "scheduled_arrive": "18:30", "scheduled_depart": "18:32", "platform_number": 5, "halt_minutes": 2},
+      {"train_number": "22435", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 4, "distance_km": 759, "scheduled_arrive": "23:00", "platform_number": 16, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "22415",
+    "train_name": "Vande Bharat Express (2nd)",
+    "train_type": "VANDE_BHARAT",
+    "source_code": "BSB",
+    "dest_code": "NDLS",
+    "base_fare_3a": 1750.00,
+    "days_of_run": ["MON", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 97,
+    "departure_platform": 2,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "22415", "station_code": "BSB", "station_name": "Varanasi Junction", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "06:00", "platform_number": 2, "halt_minutes": 0},
+      {"train_number": "22415", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 2, "distance_km": 124, "scheduled_arrive": "07:34", "scheduled_depart": "07:36", "platform_number": 6, "halt_minutes": 2},
+      {"train_number": "22415", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 3, "distance_km": 319, "scheduled_arrive": "09:30", "scheduled_depart": "09:32", "platform_number": 1, "halt_minutes": 2},
+      {"train_number": "22415", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 4, "distance_km": 759, "scheduled_arrive": "14:05", "platform_number": 1, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12559",
+    "train_name": "Shiv Ganga Express",
+    "train_type": "SUPERFAST",
+    "source_code": "BSBS",
+    "dest_code": "NDLS",
+    "base_fare_3a": 1390.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 94,
+    "departure_platform": 8,
+    "arrival_platform": 12,
+    "stops": [
+      {"train_number": "12559", "station_code": "BSBS", "station_name": "Banaras", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "22:15", "platform_number": 8, "halt_minutes": 0},
+      {"train_number": "12559", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 2, "distance_km": 121, "scheduled_arrive": "00:30", "scheduled_depart": "00:35", "platform_number": 5, "halt_minutes": 5},
+      {"train_number": "12559", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 3, "distance_km": 315, "scheduled_arrive": "02:45", "scheduled_depart": "02:50", "platform_number": 2, "halt_minutes": 5},
+      {"train_number": "12559", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 4, "distance_km": 755, "scheduled_arrive": "08:25", "platform_number": 12, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12560",
+    "train_name": "Shiv Ganga Express",
+    "train_type": "SUPERFAST",
+    "source_code": "NDLS",
+    "dest_code": "BSBS",
+    "base_fare_3a": 1390.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 94,
+    "departure_platform": 12,
+    "arrival_platform": 8,
+    "stops": [
+      {"train_number": "12560", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "20:05", "platform_number": 12, "halt_minutes": 0},
+      {"train_number": "12560", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 2, "distance_km": 440, "scheduled_arrive": "01:00", "scheduled_depart": "01:05", "platform_number": 2, "halt_minutes": 5},
+      {"train_number": "12560", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 3, "distance_km": 635, "scheduled_arrive": "03:45", "scheduled_depart": "03:55", "platform_number": 5, "halt_minutes": 10},
+      {"train_number": "12560", "station_code": "BSBS", "station_name": "Banaras", "sequence_number": 4, "distance_km": 755, "scheduled_arrive": "06:10", "platform_number": 8, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12581",
+    "train_name": "Banaras - New Delhi Superfast",
+    "train_type": "SUPERFAST",
+    "source_code": "BSBS",
+    "dest_code": "NDLS",
+    "base_fare_3a": 1390.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": false,
+    "punctuality_rating": 91,
+    "departure_platform": 1,
+    "arrival_platform": 4,
+    "stops": [
+      {"train_number": "12581", "station_code": "BSBS", "station_name": "Banaras", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "23:10", "platform_number": 1, "halt_minutes": 0},
+      {"train_number": "12581", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 2, "distance_km": 121, "scheduled_arrive": "01:20", "scheduled_depart": "01:25", "platform_number": 6, "halt_minutes": 5},
+      {"train_number": "12581", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 3, "distance_km": 315, "scheduled_arrive": "04:15", "scheduled_depart": "04:20", "platform_number": 1, "halt_minutes": 5},
+      {"train_number": "12581", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 4, "distance_km": 755, "scheduled_arrive": "11:30", "platform_number": 4, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12301",
+    "train_name": "Howrah Rajdhani Express (Return)",
+    "train_type": "RAJDHANI",
+    "source_code": "HWH",
+    "dest_code": "NDLS",
+    "base_fare_3a": 2980.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT"],
+    "pantry_available": true,
+    "punctuality_rating": 94,
+    "departure_platform": 9,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "12301", "station_code": "HWH", "station_name": "Howrah Junction", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "16:50", "platform_number": 9, "halt_minutes": 0},
+      {"train_number": "12301", "station_code": "ASN", "station_name": "Asansol Junction", "sequence_number": 2, "distance_km": 200, "scheduled_arrive": "18:57", "scheduled_depart": "18:59", "platform_number": 4, "halt_minutes": 2},
+      {"train_number": "12301", "station_code": "DHN", "station_name": "Dhanbad Junction", "sequence_number": 3, "distance_km": 258, "scheduled_arrive": "19:55", "scheduled_depart": "20:00", "platform_number": 3, "halt_minutes": 5},
+      {"train_number": "12301", "station_code": "GAYA", "station_name": "Gaya Junction", "sequence_number": 4, "distance_km": 459, "scheduled_arrive": "22:19", "scheduled_depart": "22:22", "platform_number": 1, "halt_minutes": 3},
+      {"train_number": "12301", "station_code": "DDU", "station_name": "Pt Deen Dayal Upadhyaya", "sequence_number": 5, "distance_km": 664, "scheduled_arrive": "00:45", "scheduled_depart": "00:55", "platform_number": 4, "halt_minutes": 10},
+      {"train_number": "12301", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 6, "distance_km": 817, "scheduled_arrive": "02:43", "scheduled_depart": "02:45", "platform_number": 1, "halt_minutes": 2},
+      {"train_number": "12301", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 7, "distance_km": 1011, "scheduled_arrive": "04:50", "scheduled_depart": "04:55", "platform_number": 1, "halt_minutes": 5},
+      {"train_number": "12301", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 8, "distance_km": 1451, "scheduled_arrive": "10:05", "platform_number": 1, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12302",
+    "train_name": "Howrah Rajdhani Express",
+    "train_type": "RAJDHANI",
+    "source_code": "NDLS",
+    "dest_code": "HWH",
+    "base_fare_3a": 2980.00,
+    "days_of_run": ["MON", "TUE", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 96,
+    "departure_platform": 12,
+    "arrival_platform": 9,
+    "stops": [
+      {"train_number": "12302", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "16:50", "platform_number": 12, "halt_minutes": 0},
+      {"train_number": "12302", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 2, "distance_km": 440, "scheduled_arrive": "21:32", "scheduled_depart": "21:37", "platform_number": 5, "halt_minutes": 5},
+      {"train_number": "12302", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 3, "distance_km": 635, "scheduled_arrive": "23:43", "scheduled_depart": "23:45", "platform_number": 4, "halt_minutes": 2},
+      {"train_number": "12302", "station_code": "DDU", "station_name": "Pt. Deen Dayal Upadhyaya Junction", "sequence_number": 4, "distance_km": 787, "scheduled_arrive": "01:42", "scheduled_depart": "01:52", "platform_number": 2, "halt_minutes": 10},
+      {"train_number": "12302", "station_code": "PNBE", "station_name": "Patna Junction", "sequence_number": 5, "distance_km": 998, "scheduled_arrive": "04:15", "scheduled_depart": "04:25", "platform_number": 1, "halt_minutes": 10},
+      {"train_number": "12302", "station_code": "HWH", "station_name": "Howrah Junction", "sequence_number": 6, "distance_km": 1451, "scheduled_arrive": "09:55", "platform_number": 9, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12167",
+    "train_name": "Banaras Superfast Express",
+    "train_type": "SUPERFAST",
+    "source_code": "LTT",
+    "dest_code": "BSBS",
+    "base_fare_3a": 1530.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 88,
+    "departure_platform": 3,
+    "arrival_platform": 2,
+    "stops": [
+      {"train_number": "12167", "station_code": "LTT", "station_name": "Lokmanya Tilak Terminus", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "22:45", "platform_number": 3, "halt_minutes": 0},
+      {"train_number": "12167", "station_code": "KYN", "station_name": "Kalyan Junction", "sequence_number": 2, "distance_km": 35, "scheduled_arrive": "23:27", "scheduled_depart": "23:30", "platform_number": 4, "halt_minutes": 3},
+      {"train_number": "12167", "station_code": "BSL", "station_name": "Bhusaval Junction", "sequence_number": 3, "distance_km": 424, "scheduled_arrive": "05:35", "scheduled_depart": "05:40", "platform_number": 1, "halt_minutes": 5},
+      {"train_number": "12167", "station_code": "KNW", "station_name": "Khandwa Junction", "sequence_number": 4, "distance_km": 548, "scheduled_arrive": "07:55", "scheduled_depart": "07:58", "platform_number": 2, "halt_minutes": 3},
+      {"train_number": "12167", "station_code": "ET", "station_name": "Itarsi Junction", "sequence_number": 5, "distance_km": 731, "scheduled_arrive": "10:15", "scheduled_depart": "10:25", "platform_number": 4, "halt_minutes": 10},
+      {"train_number": "12167", "station_code": "JBP", "station_name": "Jabalpur", "sequence_number": 6, "distance_km": 976, "scheduled_arrive": "13:40", "scheduled_depart": "13:50", "platform_number": 3, "halt_minutes": 10},
+      {"train_number": "12167", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 7, "distance_km": 1342, "scheduled_arrive": "19:15", "scheduled_depart": "19:40", "platform_number": 6, "halt_minutes": 25},
+      {"train_number": "12167", "station_code": "BSBS", "station_name": "Banaras", "sequence_number": 8, "distance_km": 1475, "scheduled_arrive": "23:20", "platform_number": 2, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12168",
+    "train_name": "Banaras - LTT Superfast Express",
+    "train_type": "SUPERFAST",
+    "source_code": "BSBS",
+    "dest_code": "LTT",
+    "base_fare_3a": 1530.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 89,
+    "departure_platform": 2,
+    "arrival_platform": 3,
+    "stops": [
+      {"train_number": "12168", "station_code": "BSBS", "station_name": "Banaras", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "10:10", "platform_number": 2, "halt_minutes": 0},
+      {"train_number": "12168", "station_code": "BSB", "station_name": "Varanasi Junction", "sequence_number": 2, "distance_km": 4, "scheduled_arrive": "10:25", "scheduled_depart": "10:35", "platform_number": 1, "halt_minutes": 10},
+      {"train_number": "12168", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 3, "distance_km": 125, "scheduled_arrive": "12:55", "scheduled_depart": "13:20", "platform_number": 7, "halt_minutes": 25},
+      {"train_number": "12168", "station_code": "JBP", "station_name": "Jabalpur", "sequence_number": 4, "distance_km": 499, "scheduled_arrive": "18:40", "scheduled_depart": "18:50", "platform_number": 2, "halt_minutes": 10},
+      {"train_number": "12168", "station_code": "ET", "station_name": "Itarsi Junction", "sequence_number": 5, "distance_km": 744, "scheduled_arrive": "22:20", "scheduled_depart": "22:30", "platform_number": 4, "halt_minutes": 10},
+      {"train_number": "12168", "station_code": "BSL", "station_name": "Bhusaval Junction", "sequence_number": 6, "distance_km": 1051, "scheduled_arrive": "02:30", "scheduled_depart": "02:35", "platform_number": 3, "halt_minutes": 5},
+      {"train_number": "12168", "station_code": "KYN", "station_name": "Kalyan Junction", "sequence_number": 7, "distance_km": 1440, "scheduled_arrive": "08:12", "scheduled_depart": "08:15", "platform_number": 5, "halt_minutes": 3},
+      {"train_number": "12168", "station_code": "LTT", "station_name": "Lokmanya Tilak Terminus", "sequence_number": 8, "distance_km": 1475, "scheduled_arrive": "09:00", "platform_number": 3, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "11059",
+    "train_name": "Godan Express",
+    "train_type": "EXPRESS",
+    "source_code": "LTT",
+    "dest_code": "BSB",
+    "base_fare_3a": 1420.00,
+    "days_of_run": ["TUE", "THU", "SAT"],
+    "pantry_available": false,
+    "punctuality_rating": 78,
+    "departure_platform": 2,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "11059", "station_code": "LTT", "station_name": "Lokmanya Tilak Terminus", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "10:55", "platform_number": 2, "halt_minutes": 0},
+      {"train_number": "11059", "station_code": "KYN", "station_name": "Kalyan Junction", "sequence_number": 2, "distance_km": 35, "scheduled_arrive": "11:38", "scheduled_depart": "11:40", "platform_number": 4, "halt_minutes": 2},
+      {"train_number": "11059", "station_code": "BSL", "station_name": "Bhusaval Junction", "sequence_number": 3, "distance_km": 424, "scheduled_arrive": "18:05", "scheduled_depart": "18:10", "platform_number": 3, "halt_minutes": 5},
+      {"train_number": "11059", "station_code": "KNW", "station_name": "Khandwa Junction", "sequence_number": 4, "distance_km": 548, "scheduled_arrive": "20:32", "scheduled_depart": "20:35", "platform_number": 2, "halt_minutes": 3},
+      {"train_number": "11059", "station_code": "ET", "station_name": "Itarsi Junction", "sequence_number": 5, "distance_km": 731, "scheduled_arrive": "23:05", "scheduled_depart": "23:15", "platform_number": 4, "halt_minutes": 10},
+      {"train_number": "11059", "station_code": "JBP", "station_name": "Jabalpur", "sequence_number": 6, "distance_km": 976, "scheduled_arrive": "02:40", "scheduled_depart": "02:50", "platform_number": 2, "halt_minutes": 10},
+      {"train_number": "11059", "station_code": "STA", "station_name": "Satna Junction", "sequence_number": 7, "distance_km": 1165, "scheduled_arrive": "05:40", "scheduled_depart": "05:45", "platform_number": 1, "halt_minutes": 5},
+      {"train_number": "11059", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 8, "distance_km": 1342, "scheduled_arrive": "11:55", "scheduled_depart": "12:15", "platform_number": 7, "halt_minutes": 20},
+      {"train_number": "11059", "station_code": "BSB", "station_name": "Varanasi Junction", "sequence_number": 9, "distance_km": 1475, "scheduled_arrive": "15:35", "platform_number": 1, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "20608",
+    "train_name": "Vande Bharat Express",
+    "train_type": "VANDE_BHARAT",
+    "source_code": "SBC",
+    "dest_code": "MAS",
+    "base_fare_3a": 1050.00,
+    "days_of_run": ["MON", "TUE", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 98,
+    "departure_platform": 7,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "20608", "station_code": "SBC", "station_name": "KSR Bengaluru", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "05:45", "platform_number": 7, "halt_minutes": 0},
+      {"train_number": "20608", "station_code": "KJM", "station_name": "Krishnarajapuram", "sequence_number": 2, "distance_km": 14, "scheduled_arrive": "05:58", "scheduled_depart": "06:00", "platform_number": 2, "halt_minutes": 2},
+      {"train_number": "20608", "station_code": "KPD", "station_name": "Katpadi Junction", "sequence_number": 3, "distance_km": 230, "scheduled_arrive": "08:18", "scheduled_depart": "08:20", "platform_number": 2, "halt_minutes": 2},
+      {"train_number": "20608", "station_code": "MAS", "station_name": "MGR Chennai Central", "sequence_number": 4, "distance_km": 360, "scheduled_arrive": "10:10", "platform_number": 1, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12008",
+    "train_name": "Shatabdi Express",
+    "train_type": "SHATABDI",
+    "source_code": "SBC",
+    "dest_code": "MAS",
+    "base_fare_3a": 980.00,
+    "days_of_run": ["MON", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 95,
+    "departure_platform": 7,
+    "arrival_platform": 2,
+    "stops": [
+      {"train_number": "12008", "station_code": "SBC", "station_name": "KSR Bengaluru", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "06:00", "platform_number": 7, "halt_minutes": 0},
+      {"train_number": "12008", "station_code": "KPD", "station_name": "Katpadi Junction", "sequence_number": 2, "distance_km": 230, "scheduled_arrive": "08:48", "scheduled_depart": "08:50", "platform_number": 2, "halt_minutes": 2},
+      {"train_number": "12008", "station_code": "MAS", "station_name": "MGR Chennai Central", "sequence_number": 3, "distance_km": 360, "scheduled_arrive": "11:00", "platform_number": 2, "halt_minutes": 0}
+    ]
+  },
+  {
+    "train_number": "12310",
+    "train_name": "Tejas Rajdhani Express (New Delhi - Patna)",
+    "train_type": "RAJDHANI",
+    "source_code": "NDLS",
+    "dest_code": "PNBE",
+    "base_fare_3a": 2480.00,
+    "days_of_run": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+    "pantry_available": true,
+    "punctuality_rating": 96,
+    "departure_platform": 12,
+    "arrival_platform": 1,
+    "stops": [
+      {"train_number": "12310", "station_code": "NDLS", "station_name": "New Delhi", "sequence_number": 1, "distance_km": 0, "scheduled_depart": "17:10", "platform_number": 12, "halt_minutes": 0},
+      {"train_number": "12310", "station_code": "CNB", "station_name": "Kanpur Central", "sequence_number": 2, "distance_km": 440, "scheduled_arrive": "21:55", "scheduled_depart": "22:00", "platform_number": 4, "halt_minutes": 5},
+      {"train_number": "12310", "station_code": "PRYJ", "station_name": "Prayagraj Junction", "sequence_number": 3, "distance_km": 635, "scheduled_arrive": "00:05", "scheduled_depart": "00:07", "platform_number": 4, "halt_minutes": 2},
+      {"train_number": "12310", "station_code": "DDU", "station_name": "Pt. Deen Dayal Upadhyaya Junction", "sequence_number": 4, "distance_km": 787, "scheduled_arrive": "02:00", "scheduled_depart": "02:10", "platform_number": 2, "halt_minutes": 10},
+      {"train_number": "12310", "station_code": "PNBE", "station_name": "Patna Junction", "sequence_number": 5, "distance_km": 998, "scheduled_arrive": "05:15", "platform_number": 1, "halt_minutes": 0}
+    ]
+  }
+]

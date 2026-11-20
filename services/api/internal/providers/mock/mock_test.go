@@ -59,4 +59,19 @@ func TestMockAdapterCompliance(t *testing.T) {
 	if status != "AVAILABLE" || seats <= 0 {
 		t.Errorf("expected AVAILABLE status with seats > 0, got %s with %d seats", status, seats)
 	}
+
+	// 4. Test Varanasi / DDU to Delhi duration sanity check (e.g. 12301 Howrah Rajdhani Return)
+	vnsDelOffers, err := adapter.Search(ctx, providers.SearchQuery{
+		OriginCode: "BSB",
+		DestCode:   "NDLS",
+		Modes:      []providers.Mode{providers.ModeRail},
+	})
+	if err != nil {
+		t.Fatalf("unexpected search error: %v", err)
+	}
+	for _, o := range vnsDelOffers {
+		if o.DurationMinutes > 24*60 {
+			t.Errorf("train %s duration %d mins exceeds 24h for a direct corridor service", o.ServiceNumber, o.DurationMinutes)
+		}
+	}
 }

@@ -26,6 +26,8 @@ func (m *MockAdapter) Category() providers.Mode {
 	return providers.ModeMultimodal
 }
 
+var istLocation = time.FixedZone("IST", 5*3600+30*60)
+
 func parseClock(depDate time.Time, timeStr string, addDays int) time.Time {
 	parts := strings.Split(timeStr, ":")
 	if len(parts) != 2 {
@@ -33,7 +35,7 @@ func parseClock(depDate time.Time, timeStr string, addDays int) time.Time {
 	}
 	hour, _ := strconv.Atoi(parts[0])
 	min, _ := strconv.Atoi(parts[1])
-	return time.Date(depDate.Year(), depDate.Month(), depDate.Day()+addDays, hour, min, 0, 0, time.UTC)
+	return time.Date(depDate.Year(), depDate.Month(), depDate.Day()+addDays, hour, min, 0, 0, istLocation)
 }
 
 func resolveAirport(code string) (airportCode string, airportName string) {
@@ -114,17 +116,26 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 		}
 
 		if originStop != nil && destStop != nil && originStop.SequenceNumber < destStop.SequenceNumber {
-			// Calculate real departure and arrival times
+			// Calculate real departure and arrival times in Indian Standard Time (IST)
 			tDepart := parseClock(depDate, originStop.ScheduledDepart, 0)
-			dayOffset := 0
-			if destStop.DistanceKm-originStop.DistanceKm > 600 {
-				dayOffset = 1
-			}
-			tArrive := parseClock(depDate, destStop.ScheduledArrive, dayOffset)
-			if tArrive.Before(tDepart) {
+			
+			// Arrival is initially parsed on the same day
+			tArrive := parseClock(depDate, destStop.ScheduledArrive, 0)
+			
+			// If arrival clock is earlier than departure clock, the train journey crosses midnight
+			for tArrive.Before(tDepart) {
 				tArrive = tArrive.Add(24 * time.Hour)
 			}
+			
 			durationMins := int(tArrive.Sub(tDepart).Minutes())
+			
+			// Sanity check: if implied average speed would exceed 120 km/h for a multi-day journey,
+			// it crossed an additional midnight boundary
+			distKm := destStop.DistanceKm - originStop.DistanceKm
+			if distKm > 0 && durationMins < (distKm*60/120) {
+				tArrive = tArrive.Add(24 * time.Hour)
+				durationMins = int(tArrive.Sub(tDepart).Minutes())
+			}
 			if durationMins <= 0 {
 				durationMins = (destStop.DistanceKm - originStop.DistanceKm) * 60 / 75 // approx speed
 				if durationMins <= 0 {

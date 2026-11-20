@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"tik-tiki/services/api/internal/timetable"
 )
 
 // RouteHaltStatus represents intermediate station live progress
@@ -39,15 +41,12 @@ type LiveTrainStatusResponse struct {
 // GetLiveTrainStatus computes real-time NTES running position for any train number
 func GetLiveTrainStatus(query string) *LiveTrainStatusResponse {
 	clean := strings.TrimSpace(query)
+	store := timetable.GetGlobalStore()
 
-	// 1. Search in MasterCorridors
-	for _, train := range MasterCorridors {
-		if strings.EqualFold(train.TrainNumber, clean) || strings.Contains(strings.ToLower(train.TrainName), strings.ToLower(clean)) {
-			totalStops := len(train.Stops)
-			if totalStops == 0 {
-				break
-			}
-
+	// 1. Search in Timetable Database Store
+	if train, err := store.GetTrainByNumberOrName(clean); err == nil && train != nil {
+		totalStops := len(train.Stops)
+		if totalStops > 0 {
 			// Deterministic live position (roughly 60% through the journey)
 			currentIdx := totalStops * 3 / 5
 			if currentIdx >= totalStops-1 {
@@ -58,7 +57,12 @@ func GetLiveTrainStatus(query string) *LiveTrainStatusResponse {
 			}
 
 			currStop := train.Stops[currentIdx]
-			nextStop := train.Stops[currentIdx+1]
+			var nextStop timetable.TrainStop
+			if currentIdx+1 < totalStops {
+				nextStop = train.Stops[currentIdx+1]
+			} else {
+				nextStop = currStop
+			}
 
 			var halts []RouteHaltStatus
 			for i, s := range train.Stops {
@@ -113,7 +117,7 @@ func GetLiveTrainStatus(query string) *LiveTrainStatusResponse {
 		}
 	}
 
-	// 2. Fallback for any other valid 5-digit Indian Railways train number
+	// 2. Fallback for any other valid Indian Railways train number
 	var sum int
 	for _, c := range clean {
 		sum += int(c)

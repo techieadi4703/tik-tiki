@@ -6,19 +6,6 @@ import (
 	"time"
 )
 
-// TrainStop represents an ordered station along a train route
-type TrainStop struct {
-	TrainNumber     string `json:"train_number"`
-	StationCode     string `json:"station_code"`
-	StationName     string `json:"station_name"`
-	SequenceNumber  int    `json:"sequence_number"` // 1, 2, 3...
-	DistanceKm      int    `json:"distance_km"`
-	ScheduledArrive string `json:"scheduled_arrive"` // "18:00"
-	ScheduledDepart string `json:"scheduled_depart"` // "18:15"
-	PlatformNumber  int    `json:"platform_number,omitempty"`
-	HaltMinutes     int    `json:"halt_minutes,omitempty"`
-}
-
 // Strategy 1: Upstream Booking Recommendation
 type UpstreamBookingOption struct {
 	Type                  string  `json:"type"` // "UPSTREAM_BOOKING"

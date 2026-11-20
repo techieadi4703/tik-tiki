@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    name: Backend TDD Unit & Integration Tests
+  backend-test:
+    name: Backend Go TDD & Race Detector
     runs-on: ubuntu-latest
 
     steps:
@@ -21,12 +21,30 @@ jobs:
           go-version: '1.24'
           cache-dependency-path: services/api/go.sum
 
-      - name: Run Tests with Coverage and Race Detector
+      - name: Run Backend Tests
         run: |
           cd services/api
           go test -v -race -coverprofile=coverage.out ./...
 
-      - name: Verify Minimum Coverage Threshold
+      - name: Verify Coverage
         run: |
           cd services/api
           go tool cover -func=coverage.out
+
+  frontend-test:
+    name: Frontend Client TDD Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Frontend Tests
+        run: |
+          cd apps/web
+          node --test src/**/*.test.mjs

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Train, Clock, MapPin, CheckCircle2, ShieldCheck, Activity } from 'lucide-react';
+import { X, Train, Clock, MapPin, CheckCircle2, ShieldCheck, Activity, Search } from 'lucide-react';
 
 interface LiveStatusModalProps {
   isOpen: boolean;
@@ -42,105 +42,99 @@ export function LiveStatusModal({ isOpen, onClose }: LiveStatusModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden flex flex-col">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-            <Activity className="w-5 h-5" />
+          <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#1a365d] shrink-0">
+            <Activity className="w-5 h-5 text-[#1a365d]" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-white leading-tight">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 font-bold">
+                NTES Live Feed
+              </span>
+              <span className="text-xs text-slate-500 font-medium">GPS Triangulation</span>
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
               Live Train Running Status
             </h3>
-            <span className="text-xs text-zinc-400 font-mono">
-              GPS Satellite + CRIS RTIS Integration
-            </span>
           </div>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex items-center gap-2 mb-5">
-          <input
-            type="text"
-            value={trainQuery}
-            onChange={(e) => setTrainQuery(e.target.value)}
-            placeholder="Enter Train Number (e.g. 12951, 12167)"
-            className="flex-1 bg-zinc-900 border border-zinc-800 text-xs text-white rounded-xl px-3.5 py-2.5 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
+        {/* Train Search Input */}
+        <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+          <div className="flex-1 flex items-center bg-slate-50 rounded-xl px-3 py-2 border border-slate-300 focus-within:border-[#1a365d] focus-within:bg-white transition-all">
+            <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+            <input
+              type="text"
+              value={trainQuery}
+              onChange={(e) => setTrainQuery(e.target.value)}
+              placeholder="Enter Train Number (e.g. 12951, 12167)"
+              className="w-full bg-transparent text-slate-900 text-xs sm:text-sm font-medium focus:outline-none placeholder-slate-400"
+            />
+          </div>
           <button
             type="submit"
-            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95 shrink-0"
+            className="px-4 py-2 bg-[#1a365d] hover:bg-[#152a4a] text-white font-bold text-xs rounded-xl transition-all shadow-sm shrink-0"
           >
-            Track Status
+            Track Train
           </button>
         </form>
 
         {/* Live Status Card */}
-        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-4">
-          <div className="flex items-start justify-between border-b border-zinc-850 pb-3">
+        <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 flex flex-col gap-3">
+          <div className="flex items-start justify-between border-b border-slate-200 pb-3">
             <div>
-              <div className="text-xs font-bold text-white">{trainName}</div>
-              <div className="text-[11px] text-zinc-400 font-mono mt-0.5">Runs Daily · Real-time RTIS feed</div>
+              <span className="text-xs text-slate-500 font-mono">Current Service</span>
+              <h4 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">{trainName}</h4>
             </div>
             <div className="text-right">
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
-                delayMins <= 5 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+              <span className="text-[10px] uppercase font-bold text-slate-500 block">Punctuality</span>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full inline-block mt-0.5 ${
+                delayMins <= 5 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
               }`}>
                 {delayMins <= 5 ? 'Right Time' : `Delayed ~${delayMins}m`}
               </span>
             </div>
           </div>
 
-          {/* Current Speed & Position */}
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-850">
-              <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Current Speed</div>
-              <div className="text-lg font-black text-white font-mono mt-0.5">{speed} <span className="text-xs font-normal text-zinc-400">km/h</span></div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <span className="text-slate-500 text-[10px] uppercase block font-semibold">Current Speed</span>
+              <span className="text-slate-900 font-mono font-bold text-sm">{speed} km/h</span>
             </div>
-            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-850">
-              <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Historical P95</div>
-              <div className="text-lg font-black text-emerald-400 font-mono mt-0.5">96% <span className="text-xs font-normal text-zinc-400">punctual</span></div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <span className="text-slate-500 text-[10px] uppercase block font-semibold">Signal Status</span>
+              <span className="text-emerald-700 font-mono font-bold text-sm">Clear Green</span>
             </div>
           </div>
 
-          {/* Station Timeline */}
-          <div className="flex flex-col gap-2.5 text-xs text-zinc-300">
-            <div className="flex items-start gap-2.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0 shadow-sm shadow-emerald-500" />
-              <div>
-                <span className="font-bold text-white block">{currentStation}</span>
-                <span className="text-[11px] text-emerald-400">Speed recorded via Loco GPS</span>
-              </div>
+          <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-200 text-xs flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5 font-bold text-[#1a365d]">
+              <MapPin className="w-3.5 h-3.5 text-[#ea580c]" />
+              <span>{currentStation}</span>
             </div>
-            <div className="flex items-start gap-2.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-zinc-600 mt-1 shrink-0" />
-              <div>
-                <span className="font-medium text-zinc-400 block">{nextStation}</span>
-                <span className="text-[11px] text-zinc-500 font-mono">Estimated Arrival: On Schedule</span>
-              </div>
-            </div>
+            <span className="text-slate-600 text-[11px] pl-5">{nextStation}</span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-4 pt-3 border-t border-zinc-850 flex items-center justify-between text-xs text-zinc-500">
-          <span className="flex items-center gap-1 font-mono text-[11px]">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> RTIS Synchronized
-          </span>
+        <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <span>Synced with CRIS Central Servers</span>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white font-semibold transition-colors"
+            className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition-colors"
           >
-            Close Tracker
+            Close
           </button>
         </div>
       </div>

@@ -148,3 +148,18 @@ export interface Booking {
   qr_code_data?: string;
   created_at: string;
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  irctc_username: string;
+  role: string;
+  phone?: string;
+  created_at: string;
+}
+
+export interface AuthSession {
+  token: string;
+  user: User;
+}

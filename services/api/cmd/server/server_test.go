@@ -221,4 +221,62 @@ func TestServerEndpoints_TDD(t *testing.T) {
 			t.Fatalf("expected 200 OK for PNR lookup, got %d", wPNR.Code)
 		}
 	})
+
+	t.Run("Auth Flow: Register, Login, Me with Bearer token, and Logout", func(t *testing.T) {
+		// 1. Register
+		regBody := strings.NewReader(`{
+			"name": "Rohan Mehra",
+			"email": "rohan@example.com",
+			"password": "rohanPassword123",
+			"irctc_username": "ROHAN_CRIS",
+			"phone": "+919876543210"
+		}`)
+		reqReg := httptest.NewRequest("POST", "/v1/auth/register", regBody)
+		wReg := httptest.NewRecorder()
+		handleRegister(wReg, reqReg)
+
+		if wReg.Code != http.StatusCreated {
+			t.Fatalf("expected 201 Created for register, got %d: %s", wReg.Code, wReg.Body.String())
+		}
+
+		var regResp map[string]interface{}
+		json.NewDecoder(wReg.Body).Decode(&regResp)
+		token, ok := regResp["token"].(string)
+		if !ok || token == "" {
+			t.Fatalf("expected token in register response")
+		}
+
+		// 2. Access /v1/auth/me with Bearer token
+		reqMe := httptest.NewRequest("GET", "/v1/auth/me", nil)
+		reqMe.Header.Set("Authorization", "Bearer "+token)
+		wMe := httptest.NewRecorder()
+		handleMe(wMe, reqMe)
+
+		if wMe.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for /v1/auth/me, got %d", wMe.Code)
+		}
+
+		// 3. Login with credentials
+		loginBody := strings.NewReader(`{
+			"identifier": "rohan@example.com",
+			"password": "rohanPassword123"
+		}`)
+		reqLogin := httptest.NewRequest("POST", "/v1/auth/login", loginBody)
+		wLogin := httptest.NewRecorder()
+		handleLogin(wLogin, reqLogin)
+
+		if wLogin.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for login, got %d", wLogin.Code)
+		}
+
+		// 4. Logout
+		reqLogout := httptest.NewRequest("POST", "/v1/auth/logout", nil)
+		reqLogout.Header.Set("Authorization", "Bearer "+token)
+		wLogout := httptest.NewRecorder()
+		handleLogout(wLogout, reqLogout)
+
+		if wLogout.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for logout, got %d", wLogout.Code)
+		}
+	})
 }

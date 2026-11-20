@@ -35,7 +35,7 @@ export function FilterSortBar({
   ];
 
   return (
-    <div className="w-full bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-3 sm:p-4 flex flex-col gap-3 shadow-sm backdrop-blur-sm">
+    <div className="w-full bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm text-slate-800">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Time Windows */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
@@ -43,28 +43,30 @@ export function FilterSortBar({
             <button
               key={tw.id}
               onClick={() => onSelectTimeWindow(tw.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
                 selectedTimeWindow === tw.id
-                  ? 'bg-zinc-800 text-white border-zinc-700 shadow-sm'
-                  : 'bg-zinc-950/40 text-zinc-400 hover:text-zinc-200 border-zinc-850 hover:border-zinc-700'
+                  ? 'bg-[#1a365d] text-white border-[#1a365d] shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'
               }`}
             >
               {tw.icon}
               <span>{tw.label}</span>
-              <span className="text-[10px] text-zinc-500 font-mono">({tw.range})</span>
+              <span className={`text-[10px] font-mono ${selectedTimeWindow === tw.id ? 'text-blue-200' : 'text-slate-400'}`}>
+                ({tw.range})
+              </span>
             </button>
           ))}
         </div>
 
         {/* Sort Controls */}
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <span className="text-xs text-zinc-400 flex items-center gap-1 font-medium">
-            <ArrowUpDown className="w-3.5 h-3.5" /> Sort:
+          <span className="text-xs text-slate-500 flex items-center gap-1 font-bold">
+            <ArrowUpDown className="w-3.5 h-3.5 text-orange-600" /> Sort By:
           </span>
           <select
             value={selectedSort}
             onChange={(e) => onSelectSort(e.target.value as SortOption)}
-            className="bg-zinc-850 border border-zinc-750 text-xs text-white rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="bg-slate-50 border border-slate-300 text-xs text-slate-900 rounded-xl px-3 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-blue-100"
           >
             <option value="SCORE">Recommended (Value Index)</option>
             <option value="FASTEST">Fastest Duration</option>
@@ -75,9 +77,9 @@ export function FilterSortBar({
       </div>
 
       {/* Train Type Filter Tabs */}
-      <div className="flex items-center justify-between border-t border-zinc-800/60 pt-2.5 text-xs">
+      <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
         <div className="flex items-center gap-2">
-          <span className="text-zinc-500 text-[11px] font-semibold uppercase tracking-wider">Service:</span>
+          <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Service Type:</span>
           {(
             [
               { id: 'ALL', label: 'All Services' },
@@ -89,10 +91,10 @@ export function FilterSortBar({
             <button
               key={t.id}
               onClick={() => onSelectTrainType(t.id)}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+              className={`px-3 py-1 rounded-lg font-bold transition-colors ${
                 selectedTrainType === t.id
-                  ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 font-bold'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-blue-100 text-blue-900 border border-blue-300 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               {t.label}
@@ -100,8 +102,8 @@ export function FilterSortBar({
           ))}
         </div>
 
-        <span className="text-zinc-500 text-xs font-mono">
-          {resultsCount} options found
+        <span className="text-slate-500 text-xs font-mono font-bold">
+          {resultsCount} options verified
         </span>
       </div>
     </div>

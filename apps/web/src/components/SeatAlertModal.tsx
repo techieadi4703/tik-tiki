@@ -57,27 +57,27 @@ export function SeatAlertModal({ offer, onClose }: SeatAlertModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {success ? (
           <div className="text-center py-6 flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-white">Alert Activated!</h3>
-            <p className="text-xs text-slate-300 max-w-xs leading-relaxed">
-              We are now monitoring <strong className="text-white">{offer.service_number}</strong>. As soon as a bookable berth frees up, we will ping you on {channel === 'WHATSAPP' ? 'WhatsApp' : 'browser push'} with a direct 1-click booking link.
+            <h3 className="text-xl font-bold text-slate-900">Seat Alert Activated!</h3>
+            <p className="text-xs text-slate-600 max-w-xs leading-relaxed">
+              We are now monitoring <strong className="text-slate-900">{offer.service_number}</strong>. As soon as a bookable berth opens via cancellations or quota release, we will ping you on {channel === 'WHATSAPP' ? 'WhatsApp' : 'browser push'}.
             </p>
             <button
               onClick={onClose}
-              className="mt-4 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition-transform active:scale-95 shadow"
+              className="mt-4 px-6 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs rounded-xl transition-transform active:scale-95 shadow-md"
             >
               Done
             </button>
@@ -85,27 +85,27 @@ export function SeatAlertModal({ offer, onClose }: SeatAlertModalProps) {
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <div className="p-2.5 rounded-xl bg-orange-100 text-[#ea580c] border border-orange-200">
                 <Bell className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-base">Seat Availability Sniping</h3>
-                <span className="text-xs text-slate-400">Never refresh IRCTC manually again</span>
+                <h3 className="text-slate-900 font-bold text-base">Seat Availability Sniping</h3>
+                <span className="text-xs text-slate-500">Auto-monitors cancellation releases 24x7</span>
               </div>
             </div>
 
-            <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50 flex flex-col gap-1 text-xs">
-              <div className="flex justify-between text-slate-300">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col gap-1.5 text-xs">
+              <div className="flex justify-between text-slate-600">
                 <span>Train:</span>
-                <strong className="text-white">{offer.service_number}</strong>
+                <strong className="text-slate-900">{offer.service_number}</strong>
               </div>
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-slate-600">
                 <span>Route:</span>
-                <strong className="text-white">{offer.origin_code} → {offer.dest_code}</strong>
+                <strong className="text-slate-900">{offer.origin_code} → {offer.dest_code}</strong>
               </div>
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-slate-600">
                 <span>Date:</span>
-                <strong className="text-white">{offer.departure_at.split('T')[0]}</strong>
+                <strong className="text-slate-900">{offer.departure_at.split('T')[0]}</strong>
               </div>
             </div>
 
@@ -116,46 +116,46 @@ export function SeatAlertModal({ offer, onClose }: SeatAlertModalProps) {
                 onClick={() => setChannel('WHATSAPP')}
                 className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-colors ${
                   channel === 'WHATSAPP'
-                    ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300'
-                    : 'bg-slate-800/80 border-slate-700/60 text-slate-400 hover:text-white'
+                    ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-sm'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <MessageSquare className="w-4 h-4 text-emerald-400" /> WhatsApp
+                <MessageSquare className="w-4 h-4 text-emerald-600" /> WhatsApp
               </button>
               <button
                 type="button"
                 onClick={() => setChannel('WEB_PUSH')}
                 className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-colors ${
                   channel === 'WEB_PUSH'
-                    ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300'
-                    : 'bg-slate-800/80 border-slate-700/60 text-slate-400 hover:text-white'
+                    ? 'bg-blue-50 border-blue-400 text-[#1a365d] shadow-sm'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Bell className="w-4 h-4 text-sky-400" /> Web Push
+                <Bell className="w-4 h-4 text-blue-600" /> Web Push
               </button>
             </div>
 
             {channel === 'WHATSAPP' && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-300">
+                <label className="text-xs font-semibold text-slate-700">
                   Your WhatsApp Mobile Number
                 </label>
-                <div className="flex items-center bg-slate-800/90 rounded-xl px-3 py-2.5 border border-slate-700/60 focus-within:border-emerald-500">
-                  <span className="text-xs font-bold text-slate-400 mr-2">+91</span>
+                <div className="flex items-center bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-300 focus-within:border-[#1a365d] focus-within:bg-white transition-all">
+                  <span className="text-xs font-bold text-slate-500 mr-2">+91</span>
                   <input
                     type="tel"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="98765 43210"
-                    className="w-full bg-transparent text-white text-sm font-medium focus:outline-none placeholder-slate-500"
+                    className="w-full bg-transparent text-slate-900 text-sm font-medium focus:outline-none placeholder-slate-400"
                   />
                 </div>
               </div>
             )}
 
             {error && (
-              <div className="text-xs font-medium text-rose-400 bg-rose-950/50 border border-rose-800/50 p-2.5 rounded-xl">
+              <div className="text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 p-2.5 rounded-xl">
                 {error}
               </div>
             )}
@@ -163,7 +163,7 @@ export function SeatAlertModal({ offer, onClose }: SeatAlertModalProps) {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700 text-slate-950 font-bold text-sm rounded-xl transition-transform active:scale-95 shadow flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#ea580c] hover:bg-[#c2410c] disabled:bg-slate-300 text-white font-bold text-sm rounded-xl transition-transform active:scale-95 shadow-md flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>

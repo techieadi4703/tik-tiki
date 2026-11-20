@@ -1,9 +1,68 @@
-import { JourneyOptimizationResult, LocationItem, NormalizedOffer, Booking, Passenger } from '../types';
+import { JourneyOptimizationResult, LocationItem, NormalizedOffer, Booking, Passenger, User, AuthSession } from '../types';
 import { MAJOR_STATIONS_CATALOG, resolveStationDisplayName } from './stations.mjs';
 
 export { MAJOR_STATIONS_CATALOG, resolveStationDisplayName };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1';
+
+export async function loginUser(identifier: string, password: string): Promise<AuthSession> {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier, password }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Authentication failed. Please verify your credentials.');
+  }
+  return res.json();
+}
+
+export async function registerUser(payload: {
+  name: string;
+  email: string;
+  password: string;
+  irctc_username?: string;
+  phone?: string;
+}): Promise<AuthSession> {
+  const res = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Registration failed');
+  }
+  return res.json();
+}
+
+export async function fetchCurrentUser(token: string): Promise<User> {
+  const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Unauthorized');
+  const data = await res.json();
+  return data.user;
+}
+
+export async function logoutUser(token: string): Promise<void> {
+  await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  }).catch(() => {});
+}
+
+export async function listAllUsers(): Promise<User[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/users`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.users || [];
+  } catch {
+    return [];
+  }
+}
 
 export async function searchLocations(query: string): Promise<LocationItem[]> {
   const cleanQuery = query.trim().toLowerCase();
@@ -240,6 +299,7 @@ function getFallbackJourneys(origin: string, destination: string, date: string):
 }
 
 export async function initiateBooking(payload: {
+  user_id?: string;
   train_number: string;
   train_name: string;
   origin_code: string;

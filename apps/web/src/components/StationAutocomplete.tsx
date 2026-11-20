@@ -116,12 +116,12 @@ export function StationAutocomplete({
   return (
     <div ref={wrapperRef} className="relative w-full">
       <div
-        className={`flex items-center bg-slate-900/90 rounded-xl px-3 py-2 border transition-all ${
-          isOpen ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-700/50 hover:border-slate-600'
+        className={`flex items-center bg-slate-50 rounded-xl px-3 py-2 border transition-all ${
+          isOpen ? 'border-blue-600 ring-2 ring-blue-100 bg-white' : 'border-slate-300 hover:border-slate-400'
         }`}
       >
-        <span className="text-xs font-bold text-slate-400 uppercase w-12 tracking-wider flex items-center gap-1">
-          <Train className="w-3 h-3 text-emerald-400" />
+        <span className="text-xs font-bold text-slate-500 uppercase w-12 tracking-wider flex items-center gap-1">
+          <Train className="w-3 h-3 text-orange-600" />
           {label}
         </span>
         <input
@@ -132,13 +132,13 @@ export function StationAutocomplete({
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full bg-transparent text-white font-medium focus:outline-none text-sm placeholder-slate-500 truncate"
+          className="w-full bg-transparent text-slate-900 font-semibold focus:outline-none text-sm placeholder-slate-400 truncate"
         />
         {inputValue && (
           <button
             type="button"
             onClick={handleClear}
-            className="p-1 rounded-full text-slate-500 hover:text-white hover:bg-slate-800 transition-colors ml-1"
+            className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors ml-1"
             title="Clear"
           >
             <X className="w-3.5 h-3.5" />
@@ -148,13 +148,13 @@ export function StationAutocomplete({
 
       {/* Autocomplete Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-2 bg-slate-900 border border-slate-700/90 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md max-h-80 flex flex-col">
-          <div className="p-2 border-b border-slate-800/80 bg-slate-950/40 text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+        <div className="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-80 flex flex-col">
+          <div className="p-2 border-b border-slate-100 bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
             <span>{inputValue ? 'Matching Stations' : 'Popular Railway Hubs'}</span>
-            <span className="text-slate-500 font-mono text-[10px]">Type code or city name</span>
+            <span className="text-slate-400 font-mono text-[10px]">Type code or city name</span>
           </div>
 
-          <div className="overflow-y-auto divide-y divide-slate-800/40">
+          <div className="overflow-y-auto divide-y divide-slate-100">
             {suggestions.length > 0 ? (
               suggestions.map((item, idx) => {
                 const isSelected = item.code.toUpperCase() === value.toUpperCase();
@@ -166,32 +166,32 @@ export function StationAutocomplete({
                     onMouseEnter={() => setSelectedIndex(idx)}
                     className={`px-3 py-2.5 cursor-pointer flex items-center justify-between transition-colors ${
                       isHighlighted
-                        ? 'bg-emerald-950/40 text-emerald-200'
+                        ? 'bg-blue-50 text-blue-900'
                         : isSelected
-                        ? 'bg-slate-800/60 text-white'
-                        : 'hover:bg-slate-800/40 text-slate-200'
+                        ? 'bg-blue-100/60 text-blue-950 font-bold'
+                        : 'hover:bg-slate-50 text-slate-800'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="h-7 w-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700/50">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                      <div className="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 text-orange-600">
+                        <MapPin className="w-3.5 h-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold truncate flex items-center gap-1.5">
+                        <div className="text-sm font-semibold truncate flex items-center gap-1.5 text-slate-900">
                           {item.name}
-                          {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
                         </div>
-                        <div className="text-xs text-slate-400 truncate">
+                        <div className="text-xs text-slate-500 truncate">
                           {item.city}, {item.country === 'IN' ? 'India' : item.country}
                           {item.is_major_hub && (
-                            <span className="ml-1.5 text-[10px] text-emerald-400 font-medium">· Major Hub</span>
+                            <span className="ml-1.5 text-[10px] text-blue-700 font-bold">· Major Hub</span>
                           )}
                         </div>
                       </div>
                     </div>
 
                     <div className="shrink-0 ml-2">
-                      <span className="text-xs font-mono font-bold bg-slate-800 text-emerald-400 border border-emerald-900/60 px-2 py-0.5 rounded-md shadow-sm">
+                      <span className="text-xs font-mono font-bold bg-slate-100 text-[#1a365d] border border-slate-200 px-2 py-0.5 rounded-md shadow-sm">
                         {item.code}
                       </span>
                     </div>
@@ -200,7 +200,7 @@ export function StationAutocomplete({
               })
             ) : (
               <div className="p-4 text-center">
-                <p className="text-sm text-slate-300 font-medium">No station found for &quot;{inputValue}&quot;</p>
+                <p className="text-sm text-slate-700 font-medium">No station found for &quot;{inputValue}&quot;</p>
                 <p className="text-xs text-slate-500 mt-1">Try searching by city (e.g. Mumbai, Delhi) or code (e.g. NDLS, ET)</p>
                 <div className="mt-3 flex flex-wrap gap-1.5 justify-center">
                   {MAJOR_STATIONS_CATALOG.slice(0, 4).map((fallback) => (
@@ -208,7 +208,7 @@ export function StationAutocomplete({
                       key={fallback.code}
                       type="button"
                       onMouseDown={() => handleSelect(fallback)}
-                      className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-md border border-slate-700 transition-colors"
+                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-md border border-slate-300 transition-colors"
                     >
                       {fallback.city} ({fallback.code})
                     </button>

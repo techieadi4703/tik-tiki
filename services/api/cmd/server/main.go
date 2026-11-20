@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"tik-tiki/services/api/internal/auth"
 	"tik-tiki/services/api/internal/bookings"
 	"tik-tiki/services/api/internal/providers"
 	"tik-tiki/services/api/internal/providers/mock"
@@ -19,6 +20,7 @@ import (
 
 var mockAdapter = mock.NewMockAdapter()
 var bookingManager = bookings.NewBookingManager()
+var authManager = auth.NewAuthManager()
 
 type AlertRecord struct {
 	ID                  string    `json:"id"`
@@ -482,6 +484,145 @@ func handleAlerts(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type RegisterRequest struct {
+	Name          string `json:"name"`
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	IRCTCUsername string `json:"irctc_username,omitempty"`
+	Phone         string `json:"phone,omitempty"`
+}
+
+type LoginRequest struct {
+	Identifier string `json:"identifier"`
+	Password   string `json:"password"`
+}
+
+func extractUserFromHeader(r *http.Request) *auth.User {
+	authHeader := r.Header.Get("Authorization")
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		u, err := authManager.ValidateToken(token)
+		if err == nil {
+			return u
+		}
+	}
+	return nil
+}
+
+func handleRegister(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != "POST" {
+		http.Error(w, `{"error": "Method not allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
+		return
+	}
+
+	u, token, err := authManager.Register(req.Name, req.Email, req.Password, req.IRCTCUsername, req.Phone)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user":  u,
+		"token": token,
+	})
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != "POST" {
+		http.Error(w, `{"error": "Method not allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
+		return
+	}
+
+	u, token, err := authManager.Login(req.Identifier, req.Password)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusUnauthorized)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user":  u,
+		"token": token,
+	})
+}
+
+func handleMe(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	u := extractUserFromHeader(r)
+	if u == nil {
+		http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user": u,
+	})
+}
+
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		authManager.Logout(token)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Logged out successfully",
+	})
+}
+
+func handleUsersList(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	users := authManager.ListUsers()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"count": len(users),
+		"users": users,
+	})
+}
+
 func handleInitiateBooking(w http.ResponseWriter, r *http.Request) {
 	enableCORS(w)
 	if r.Method == "OPTIONS" {
@@ -497,6 +638,13 @@ func handleInitiateBooking(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
 		return
+	}
+
+	if u := extractUserFromHeader(r); u != nil {
+		req.UserID = u.ID
+		if req.IRCTCUsername == "" {
+			req.IRCTCUsername = u.IRCTCUsername
+		}
 	}
 
 	b, err := bookingManager.InitiateBooking(req)
@@ -545,8 +693,11 @@ func handleUserTrips(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.URL.Query().Get("user_id")
+	if u := extractUserFromHeader(r); u != nil {
+		userID = u.ID
+	}
 	if userID == "" {
-		userID = "usr_demo"
+		userID = "usr_aditya"
 	}
 
 	trips := bookingManager.ListUserBookings(userID)
@@ -600,6 +751,11 @@ func main() {
 	mux.HandleFunc("/v1/bookings/confirm", handleConfirmBooking)
 	mux.HandleFunc("/v1/users/me/trips", handleUserTrips)
 	mux.HandleFunc("/v1/bookings/pnr", handleBookingByPNR)
+	mux.HandleFunc("/v1/auth/register", handleRegister)
+	mux.HandleFunc("/v1/auth/login", handleLogin)
+	mux.HandleFunc("/v1/auth/me", handleMe)
+	mux.HandleFunc("/v1/auth/logout", handleLogout)
+	mux.HandleFunc("/v1/auth/users", handleUsersList)
 
 	port := "8080"
 	log.Printf("🚀 Tiktiki API Server running at http://localhost:%s", port)

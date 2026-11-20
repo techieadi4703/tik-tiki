@@ -43,6 +43,7 @@ type Booking struct {
 
 // InitiateBookingRequest payload for starting the reservation process
 type InitiateBookingRequest struct {
+	UserID        string      `json:"user_id,omitempty"`
 	TrainNumber   string      `json:"train_number"`
 	TrainName     string      `json:"train_name"`
 	OriginCode    string      `json:"origin_code"`
@@ -136,9 +137,14 @@ func (bm *BookingManager) InitiateBooking(req InitiateBookingRequest) (*Booking,
 	}
 
 	bookingID := fmt.Sprintf("bk_%d", time.Now().UnixNano())
+	targetUserID := req.UserID
+	if targetUserID == "" {
+		targetUserID = "usr_demo"
+	}
+
 	b := &Booking{
 		ID:            bookingID,
-		UserID:        "usr_demo",
+		UserID:        targetUserID,
 		PNR:           "",
 		TrainNumber:   req.TrainNumber,
 		TrainName:     req.TrainName,

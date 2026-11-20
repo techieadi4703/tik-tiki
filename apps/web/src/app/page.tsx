@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SearchHeader } from '../components/SearchHeader';
 import { OptimizerSection } from '../components/OptimizerSection';
@@ -9,13 +9,20 @@ import { SeatAlertModal } from '../components/SeatAlertModal';
 import { PassengerBookingModal } from '../components/PassengerBookingModal';
 import { CoachSeatMapModal } from '../components/CoachSeatMapModal';
 import { LiveStatusModal } from '../components/LiveStatusModal';
+import { AuthGate } from '../components/AuthGate';
 import { FilterSortBar, TimeWindow, SortOption, TrainTypeFilter } from '../components/FilterSortBar';
-import { NormalizedOffer, JourneyOptimizationResult } from '../types';
+import { NormalizedOffer, JourneyOptimizationResult, User, AuthSession } from '../types';
 import { searchJourneys, fetchOptimizedJourneyStrategies } from '../lib/api';
-import { Compass, Train, Zap, ShieldCheck } from 'lucide-react';
+import { Compass, Train, Zap, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
+
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authChecking, setAuthChecking] = useState(true);
+
+  // Search Parameters - Zero Defaults on First Load
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState('');
@@ -34,6 +41,40 @@ export default function Home() {
   const [activeBookingOffer, setActiveBookingOffer] = useState<NormalizedOffer | null>(null);
   const [activeCoachOffer, setActiveCoachOffer] = useState<NormalizedOffer | null>(null);
   const [showLiveStatus, setShowLiveStatus] = useState(false);
+
+  // Restore authenticated session from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('tiktiki_user');
+      if (storedUser) {
+        setCurrentUser(JSON.parse(storedUser));
+      }
+    } catch (e) {
+      console.warn('Failed to parse cached session:', e);
+    } finally {
+      setAuthChecking(false);
+    }
+  }, []);
+
+  const handleAuthenticated = (session: AuthSession) => {
+    setCurrentUser(session.user);
+    try {
+      localStorage.setItem('tiktiki_user', JSON.stringify(session.user));
+      localStorage.setItem('tiktiki_token', session.token);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('tiktiki_user');
+      localStorage.removeItem('tiktiki_token');
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const performSearch = async (from: string, to: string, travelDate: string) => {
     if (!from || !to) return;
@@ -111,13 +152,33 @@ export default function Home() {
       return b.score - a.score;
     });
 
+  // If session is still verifying, show clean loader
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-[#1a365d] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-semibold text-slate-600">Verifying CRIS Passenger Credentials...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // MANDATORY AUTHENTICATION GATE: User must be signed in to access the platform
+  if (!currentUser) {
+    return <AuthGate onAuthenticated={handleAuthenticated} />;
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-zinc-950">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-[#ea580c] selection:text-white">
+      {/* IRCTC-Themed Top Header with Authenticated User Context */}
       <SearchHeader
         origin={origin}
         destination={destination}
         travelDate={date}
         selectedMode={mode}
+        currentUser={currentUser}
+        onSignOut={handleSignOut}
         onSearch={performSearch}
         onSelectMode={setMode}
         onOpenLiveStatus={() => setShowLiveStatus(true)}
@@ -125,7 +186,6 @@ export default function Home() {
           if (offers.length > 0) {
             setActiveCoachOffer(offers[0]);
           } else {
-            // Default demo offer for coach visualizer
             setActiveCoachOffer({
               provider_id: 'irctc_cris',
               mode: 'RAIL',
@@ -149,73 +209,81 @@ export default function Home() {
         }}
       />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 flex flex-col gap-6">
+      {/* Wide Fluid Responsive Main Content (Eliminates excessive side padding) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
         {!hasSearched ? (
-          /* Empty Initial State - Zero Defaults */
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 text-emerald-400 shadow-sm">
-              <Compass className="w-8 h-8" />
-            </div>
-
-            <h1 className="text-2xl sm:text-4xl font-black text-white max-w-xl tracking-tight leading-tight">
-              Smarter Transit Discovery. Transparent Journey Choices.
-            </h1>
-            <p className="text-sm text-zinc-400 max-w-lg mt-2.5 leading-relaxed">
-              Compare direct trains, uncover smart upstream quotas, and verify safe delay-aware transfers across India with zero booking markups.
-            </p>
-
-            {/* Quick Explore Corridors */}
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
-                Explore Popular Corridors
-              </span>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {[
-                  { label: 'Mumbai ⇄ New Delhi', from: 'MMCT', to: 'NDLS' },
-                  { label: 'Mumbai ⇄ Prayagraj', from: 'BOM', to: 'PRYJ' },
-                  { label: 'New Delhi ⇄ Patna', from: 'NDLS', to: 'PNBE' },
-                  { label: 'Bengaluru ⇄ Chennai', from: 'BLR', to: 'MAS' },
-                  { label: 'Delhi ⇄ Howrah (Kolkata)', from: 'NDLS', to: 'HWH' },
-                ].map((corridor) => (
-                  <button
-                    key={corridor.label}
-                    onClick={() => handleQuickCorridor(corridor.from, corridor.to)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-colors shadow-sm"
-                  >
-                    <Train className="w-3.5 h-3.5 text-emerald-400" />
-                    {corridor.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Transit Value Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 w-full max-w-3xl text-left">
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl">
-                <div className="text-emerald-400 font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5" /> Quota Optimization
-                </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Identify vacant berths from nearby originating halts with official boarding point adjustments.
-                </p>
+          /* Empty Initial State - Zero Pre-selected Defaults */
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            {/* Elevated Clean Indian Railways Hero Card */}
+            <div className="w-full max-w-4xl bg-white rounded-3xl border border-slate-200/90 shadow-sm p-8 sm:p-12 flex flex-col items-center">
+              <div className="h-16 w-16 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center mb-5 text-[#1a365d] shadow-sm">
+                <Compass className="w-8 h-8 text-[#1a365d]" />
               </div>
 
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl">
-                <div className="text-sky-400 font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Delay-Aware Transfers
-                </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Connecting suggestions incorporate P95 punctuality delays and station platform walking times.
-                </p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-xs font-bold text-[#ea580c] mb-3">
+                <Sparkles className="w-3.5 h-3.5" /> Direct IRCTC Integration · No Redirection
               </div>
 
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl">
-                <div className="text-amber-400 font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5" /> Multi-Modal Comparison
+              <h1 className="text-2xl sm:text-4xl font-black text-slate-900 max-w-2xl tracking-tight leading-tight">
+                Authentic Indian Railways Discovery & Direct In-App Booking
+              </h1>
+              <p className="text-sm sm:text-base text-slate-600 max-w-xl mt-3 leading-relaxed">
+                Search all trains, explore verified seat availability, unlock upstream quotas, and complete tickets directly through your IRCTC passenger account.
+              </p>
+
+              {/* Quick Explore Corridors */}
+              <div className="mt-8 flex flex-col items-center gap-3 w-full">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Popular High-Demand Travel Corridors
+                </span>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {[
+                    { label: 'Mumbai ⇄ New Delhi', from: 'MMCT', to: 'NDLS' },
+                    { label: 'Mumbai ⇄ Prayagraj', from: 'BOM', to: 'PRYJ' },
+                    { label: 'New Delhi ⇄ Patna', from: 'NDLS', to: 'PNBE' },
+                    { label: 'Bengaluru ⇄ Chennai', from: 'BLR', to: 'MAS' },
+                    { label: 'Delhi ⇄ Howrah (Kolkata)', from: 'NDLS', to: 'HWH' },
+                  ].map((corridor) => (
+                    <button
+                      key={corridor.label}
+                      onClick={() => handleQuickCorridor(corridor.from, corridor.to)}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-xs font-semibold text-slate-700 hover:text-[#1a365d] border border-slate-200 hover:border-blue-300 transition-colors shadow-sm"
+                    >
+                      <Train className="w-3.5 h-3.5 text-[#1a365d]" />
+                      {corridor.label}
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Compare rail, intercity sleeper buses, and nonstop flights objectively using the Travel Value Index.
-                </p>
+              </div>
+
+              {/* Authentic Feature Pillars */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 w-full text-left">
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                  <div className="text-emerald-700 font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-emerald-600" /> Upstream Quota Bypass
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Automatically discovers vacant seats originating 1-2 halts prior with legal boarding point switches.
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                  <div className="text-[#1a365d] font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#1a365d]" /> In-App Direct Booking
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Book tickets without broken IRCTC redirects. View all booked tickets in your personalized Passbook.
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                  <div className="text-amber-700 font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" /> Multi-Modal Transit
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Compare trains, intercity sleeper buses, and nonstop flights objectively with transparent fares.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -244,7 +312,7 @@ export default function Home() {
             {loading ? (
               <div className="flex flex-col gap-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-44 w-full bg-zinc-900/60 rounded-2xl animate-pulse border border-zinc-800/50" />
+                  <div key={i} className="h-44 w-full bg-white rounded-2xl animate-pulse border border-slate-200" />
                 ))}
               </div>
             ) : filteredOffers.length > 0 ? (
@@ -260,9 +328,9 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 bg-zinc-900/40 rounded-2xl border border-zinc-800/60">
-                <p className="text-zinc-400 text-sm">No routes found matching current filters.</p>
-                <p className="text-xs text-zinc-500 mt-1">Try resetting the time window or service filter to view all options.</p>
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <p className="text-slate-700 font-medium text-sm">No routes found matching current filters.</p>
+                <p className="text-xs text-slate-500 mt-1">Try resetting the departure time window or service filter to view all available transit options.</p>
               </div>
             )}
           </>
@@ -272,6 +340,7 @@ export default function Home() {
       {/* In-App Railway Passenger Booking Modal */}
       <PassengerBookingModal
         offer={activeBookingOffer}
+        currentUser={currentUser}
         onClose={() => setActiveBookingOffer(null)}
         onBookingSuccess={() => {
           setActiveBookingOffer(null);
@@ -297,8 +366,8 @@ export default function Home() {
         onClose={() => setActiveAlertOffer(null)}
       />
 
-      <footer className="w-full border-t border-zinc-800/80 py-6 text-center text-xs text-zinc-500 font-mono">
-        Tiktiki · Modern Travel Intelligence & Segment Quota Engine · Zero Captive Booking Fees
+      <footer className="w-full border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 font-medium">
+        Tiktiki (JourneyOS) · Official CRIS & IRCTC Partner Engine · Zero Hidden Booking Fees
       </footer>
     </div>
   );

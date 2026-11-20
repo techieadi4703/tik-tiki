@@ -16,8 +16,7 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
 
   if (!offer) return null;
 
-  // LHB 3AC 72-berth layout sample (Compartments 1-9)
-  // Each compartment: Lower (1), Middle (2), Upper (3) | Lower (4), Middle (5), Upper (6) || Side Lower (7), Side Upper (8)
+  // LHB 3AC 72-berth layout sample (Compartments 1-8)
   const compartments = Array.from({ length: 8 }, (_, compIdx) => {
     const base = compIdx * 8;
     return {
@@ -38,36 +37,36 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
-      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl p-5 sm:p-7 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-            <Train className="w-5 h-5" />
+          <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#1a365d] shrink-0">
+            <Train className="w-5 h-5 text-[#1a365d]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase font-mono tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">
+              <span className="text-xs uppercase font-mono tracking-wider text-[#1a365d] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-bold">
                 LHB Coach Layout · Coach B2
               </span>
-              <span className="text-xs text-zinc-400">72 Berths</span>
+              <span className="text-xs text-slate-500 font-medium">72 Berths</span>
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-white mt-0.5">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
               {offer.service_number}
             </h3>
           </div>
         </div>
 
         {/* Coach Class Tabs */}
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
           <div className="flex items-center gap-1.5">
             {(['3A', '2A', 'SL'] as const).map((cls) => (
               <button
@@ -75,8 +74,8 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
                 onClick={() => setCoachClass(cls)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                   coachClass === cls
-                    ? 'bg-zinc-800 text-white border border-zinc-700'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-[#1a365d] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 {cls === '3A' ? 'AC 3 Tier (3A)' : cls === '2A' ? 'AC 2 Tier (2A)' : 'Sleeper (SL)'}
@@ -84,15 +83,15 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
             ))}
           </div>
 
-          <div className="hidden sm:flex items-center gap-3 text-[11px] text-zinc-400">
+          <div className="hidden sm:flex items-center gap-3 text-[11px] text-slate-500 font-medium">
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded bg-emerald-500/40 border border-emerald-500/80" /> Selected
+              <span className="w-2.5 h-2.5 rounded bg-emerald-600 border border-emerald-700" /> Selected
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded bg-zinc-800 border border-zinc-700" /> Available
+              <span className="w-2.5 h-2.5 rounded bg-slate-100 border border-slate-300" /> Available
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded bg-zinc-900 border border-zinc-800 opacity-50" /> Occupied
+              <span className="w-2.5 h-2.5 rounded bg-slate-200 border border-slate-300 opacity-60" /> Occupied
             </span>
           </div>
         </div>
@@ -100,9 +99,9 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
         {/* Interactive Coach Map Scroll Area */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-4">
           {/* Coach Entry & Restroom Header */}
-          <div className="flex items-center justify-between p-2.5 bg-zinc-900/80 rounded-xl border border-zinc-800 text-xs text-zinc-400">
+          <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 font-medium">
             <span className="font-mono">🚪 Entry Door / Vestibule</span>
-            <span className="font-mono text-zinc-500">🚽 Bio-Toilets & Wash Basin</span>
+            <span className="font-mono text-slate-500">🚽 Bio-Toilets & Wash Basin</span>
           </div>
 
           {/* Coach Compartments Grid */}
@@ -110,11 +109,11 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
             {compartments.map((comp) => (
               <div
                 key={comp.compNumber}
-                className="p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800/80 flex flex-col gap-2"
+                className="p-3 bg-slate-50/70 rounded-2xl border border-slate-200 flex flex-col gap-2"
               >
-                <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 flex items-center justify-between">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold flex items-center justify-between">
                   <span>Bay {comp.compNumber}</span>
-                  <span className="text-zinc-600">Cabin {comp.compNumber}</span>
+                  <span className="text-slate-400">Cabin {comp.compNumber}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
@@ -131,12 +130,12 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
                           }}
                           className={`p-2 rounded-xl text-center border transition-all ${
                             isSelected
-                              ? 'bg-emerald-500 text-zinc-950 border-emerald-400 font-black shadow-lg shadow-emerald-500/20'
-                              : 'bg-zinc-800/80 hover:bg-zinc-750 text-zinc-200 border-zinc-700/60 hover:border-zinc-500'
+                              ? 'bg-emerald-600 text-white border-emerald-700 font-black shadow-md'
+                              : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-200 hover:border-slate-400 shadow-sm'
                           }`}
                         >
                           <div className="text-xs font-mono font-bold">{b.num}</div>
-                          <div className={`text-[9px] uppercase font-medium ${isSelected ? 'text-zinc-950 font-bold' : 'text-zinc-400'}`}>
+                          <div className={`text-[9px] uppercase font-medium ${isSelected ? 'text-emerald-100 font-bold' : 'text-slate-500'}`}>
                             {b.code}
                           </div>
                         </button>
@@ -145,7 +144,7 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
                   </div>
 
                   {/* Aisle Gangway */}
-                  <div className="w-5 flex flex-col items-center justify-center text-[10px] font-mono text-zinc-600 rotate-90 select-none">
+                  <div className="w-5 flex flex-col items-center justify-center text-[10px] font-mono text-slate-400 rotate-90 select-none font-bold">
                     ···
                   </div>
 
@@ -162,12 +161,12 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
                           }}
                           className={`p-2 rounded-xl text-center border transition-all ${
                             isSelected
-                              ? 'bg-emerald-500 text-zinc-950 border-emerald-400 font-black shadow-lg shadow-emerald-500/20'
-                              : 'bg-zinc-800/80 hover:bg-zinc-750 text-zinc-200 border-zinc-700/60 hover:border-zinc-500'
+                              ? 'bg-emerald-600 text-white border-emerald-700 font-black shadow-md'
+                              : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-200 hover:border-slate-400 shadow-sm'
                           }`}
                         >
                           <div className="text-xs font-mono font-bold">{b.num}</div>
-                          <div className={`text-[9px] uppercase font-medium ${isSelected ? 'text-zinc-950 font-bold' : 'text-zinc-400'}`}>
+                          <div className={`text-[9px] uppercase font-medium ${isSelected ? 'text-emerald-100 font-bold' : 'text-slate-500'}`}>
                             {b.code}
                           </div>
                         </button>
@@ -180,25 +179,25 @@ export function CoachSeatMapModal({ offer, onClose, onSelectBerth }: CoachSeatMa
           </div>
 
           {/* Coach End Restroom Footer */}
-          <div className="flex items-center justify-between p-2.5 bg-zinc-900/80 rounded-xl border border-zinc-800 text-xs text-zinc-400">
-            <span className="font-mono text-zinc-500">🚽 Bio-Toilets & Wash Basin</span>
+          <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 font-medium">
+            <span className="font-mono text-slate-500">🚽 Bio-Toilets & Wash Basin</span>
             <span className="font-mono">🚪 Rear Vestibule Door</span>
           </div>
         </div>
 
         {/* Selection Confirmation Bar */}
-        <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between">
+        <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
           <div>
-            <div className="text-[11px] text-zinc-400">Selected Allocation</div>
-            <div className="text-sm font-bold text-white flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="text-[11px] text-slate-500">Selected Allocation</div>
+            <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
               Coach B2 · Berth #{selectedSeat}
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+            className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
           >
             Confirm Berth Selection
           </button>

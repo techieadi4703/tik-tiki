@@ -75,6 +75,9 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 			durationMins := int(tArrive.Sub(tDepart).Minutes())
 			if durationMins <= 0 {
 				durationMins = (destStop.DistanceKm - originStop.DistanceKm) * 60 / 75 // approx speed
+				if durationMins <= 0 {
+					durationMins = 360
+				}
 			}
 
 			// Alternate status for testing
@@ -85,23 +88,60 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 				availSeats = 0
 			}
 
+			var stopInfos []providers.RouteStopInfo
+			for _, s := range train.Stops {
+				stopInfos = append(stopInfos, providers.RouteStopInfo{
+					StationCode:     s.StationCode,
+					StationName:     s.StationName,
+					ScheduledArrive: s.ScheduledArrive,
+					ScheduledDepart: s.ScheduledDepart,
+					DistanceKm:      s.DistanceKm,
+					HaltMinutes:     s.HaltMinutes,
+					PlatformNumber:  s.PlatformNumber,
+				})
+			}
+
+			depPlat := fmt.Sprintf("Platform %d", train.DeparturePlatform)
+			if originStop.PlatformNumber > 0 {
+				depPlat = fmt.Sprintf("Platform %d", originStop.PlatformNumber)
+			}
+			arrPlat := fmt.Sprintf("Platform %d", train.ArrivalPlatform)
+			if destStop.PlatformNumber > 0 {
+				arrPlat = fmt.Sprintf("Platform %d", destStop.PlatformNumber)
+			}
+
+			days := train.DaysOfRun
+			if len(days) == 0 {
+				days = []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"}
+			}
+			punct := train.PunctualityRating
+			if punct == 0 {
+				punct = 88
+			}
+
 			offer := providers.NormalizedOffer{
-				ProviderID:      "irctc_cris",
-				Mode:            providers.ModeRail,
-				OperatorName:    "Indian Railways",
-				ServiceNumber:   fmt.Sprintf("%s (%s)", train.TrainNumber, train.TrainName),
-				OriginCode:      query.OriginCode,
-				DestCode:        query.DestCode,
-				DepartureAt:     tDepart,
-				ArrivalAt:       tArrive,
-				DurationMinutes: durationMins,
-				Price:           train.BaseFare3A,
-				Currency:        "INR",
-				Transfers:       0,
-				Status:          status,
-				AvailableSeats:  availSeats,
-				BookingURL:      fmt.Sprintf("https://www.irctc.co.in/nget/train-search?train=%s", train.TrainNumber),
-				RetrievedAt:     time.Now().UTC(),
+				ProviderID:        "irctc_cris",
+				Mode:              providers.ModeRail,
+				OperatorName:      "Indian Railways",
+				ServiceNumber:     fmt.Sprintf("%s (%s)", train.TrainNumber, train.TrainName),
+				OriginCode:        originStop.StationCode,
+				DestCode:          destStop.StationCode,
+				DepartureAt:       tDepart,
+				ArrivalAt:         tArrive,
+				DurationMinutes:   durationMins,
+				Price:             train.BaseFare3A,
+				Currency:          "INR",
+				Transfers:         0,
+				Status:            status,
+				AvailableSeats:    availSeats,
+				BookingURL:        fmt.Sprintf("https://www.irctc.co.in/nget/train-search?train=%s", train.TrainNumber),
+				RetrievedAt:       time.Now().UTC(),
+				DaysOfRun:         days,
+				PantryAvailable:   train.PantryAvailable,
+				PunctualityRating: punct,
+				DeparturePlatform: depPlat,
+				ArrivalPlatform:   arrPlat,
+				Stops:             stopInfos,
 			}
 			offers = append(offers, offer)
 		}

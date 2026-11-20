@@ -9,6 +9,16 @@ export interface LocationItem {
   is_major_hub: boolean;
 }
 
+export interface RouteStopInfo {
+  station_code: string;
+  station_name: string;
+  scheduled_arrive: string;
+  scheduled_depart: string;
+  distance_km: number;
+  halt_minutes: number;
+  platform_number: number;
+}
+
 export interface NormalizedOffer {
   provider_id: string;
   mode: Mode;
@@ -27,6 +37,12 @@ export interface NormalizedOffer {
   booking_url: string;
   retrieved_at: string;
   score: number;
+  days_of_run?: string[];
+  pantry_available?: boolean;
+  punctuality_rating?: number;
+  departure_platform?: string;
+  arrival_platform?: string;
+  stops?: RouteStopInfo[];
 }
 
 export interface UpstreamBookingOption {

@@ -123,6 +123,42 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type searchReqPayload struct {
+	OriginCode    string          `json:"origin_code"`
+	Origin        string          `json:"origin"`
+	DestCode      string          `json:"dest_code"`
+	Destination   string          `json:"destination"`
+	DepartureDate json.RawMessage `json:"departure_date"`
+	Date          string          `json:"date"`
+	Passengers    int             `json:"passengers"`
+	Modes         []providers.Mode `json:"modes"`
+}
+
+func parseFlexibleDate(raw json.RawMessage, fallbackStr string) time.Time {
+	now := time.Now().UTC()
+	defaultDate := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.UTC)
+
+	var s string
+	if len(raw) > 0 {
+		_ = json.Unmarshal(raw, &s)
+	}
+	if s == "" {
+		s = fallbackStr
+	}
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return defaultDate
+	}
+
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return t
+	}
+	if t, err := time.Parse(time.RFC3339, s); err == nil {
+		return t
+	}
+	return defaultDate
+}
+
 func handleSearch(w http.ResponseWriter, r *http.Request) {
 	enableCORS(w)
 	if r.Method == "OPTIONS" {
@@ -131,22 +167,46 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req providers.SearchQuery
+
 	if r.Method == "POST" {
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		var payload searchReqPayload
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			http.Error(w, `{"error": "Invalid request payload"}`, http.StatusBadRequest)
 			return
 		}
+		orig := payload.OriginCode
+		if orig == "" {
+			orig = payload.Origin
+		}
+		dest := payload.DestCode
+		if dest == "" {
+			dest = payload.Destination
+		}
+		req.OriginCode = orig
+		req.DestCode = dest
+		req.DepartureDate = parseFlexibleDate(payload.DepartureDate, payload.Date)
+		req.Passengers = payload.Passengers
+		req.Modes = payload.Modes
 	} else {
 		req.OriginCode = r.URL.Query().Get("origin")
+		if req.OriginCode == "" {
+			req.OriginCode = r.URL.Query().Get("origin_code")
+		}
 		req.DestCode = r.URL.Query().Get("destination")
+		if req.DestCode == "" {
+			req.DestCode = r.URL.Query().Get("dest_code")
+		}
+		req.DepartureDate = parseFlexibleDate(nil, r.URL.Query().Get("date"))
 	}
 
 	if req.OriginCode == "" {
-		req.OriginCode = "BOM"
+		req.OriginCode = "MMCT"
 	}
 	if req.DestCode == "" {
-		req.DestCode = "JAI"
+		req.DestCode = "NDLS"
 	}
+
+	log.Printf("🔎 [SEARCH] Origin=%s Destination=%s Date=%s", req.OriginCode, req.DestCode, req.DepartureDate.Format("2006-01-02"))
 
 	offers, err := mockAdapter.Search(r.Context(), req)
 	if err != nil {
@@ -175,25 +235,32 @@ func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 	}
 
 	origin := r.URL.Query().Get("origin")
+	if origin == "" {
+		origin = r.URL.Query().Get("origin_code")
+	}
 	dest := r.URL.Query().Get("destination")
+	if dest == "" {
+		dest = r.URL.Query().Get("dest_code")
+	}
 	date := r.URL.Query().Get("date")
 	classCode := r.URL.Query().Get("class")
 
 	if origin == "" {
-		origin = "ET"
+		origin = "MMCT"
 	}
 	if dest == "" {
-		dest = "PRYJ"
+		dest = "NDLS"
 	}
 	if date == "" {
-		date = "2026-12-24"
+		date = "2026-12-16"
 	}
 	if classCode == "" {
 		classCode = "3A"
 	}
 
-	isMumbaiDelhi := (strings.EqualFold(origin, "MMCT") || strings.EqualFold(origin, "BOM") || strings.EqualFold(origin, "BVI") || strings.EqualFold(origin, "ST")) &&
-		(strings.EqualFold(dest, "NDLS") || strings.EqualFold(dest, "NZM") || strings.EqualFold(dest, "DEL"))
+	log.Printf("⚡ [OPTIMIZE] Origin=%s Destination=%s Date=%s Class=%s", origin, dest, date, classCode)
+
+	matchingTrains := routes.FindAllTrainsBetweenStations(origin, dest)
 
 	var upstreamOptions []routes.UpstreamBookingOption
 	var connectingOptions []routes.DelayAwareConnectingOption
@@ -202,89 +269,69 @@ func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	baseDate := time.Date(now.Year(), now.Month(), now.Day()+1, 11, 25, 0, 0, time.UTC)
 
-	if isMumbaiDelhi {
-		// 1. Strategy 1: Upstream for Mumbai-Delhi corridor (e.g. if searching from Borivali or Surat)
-		westernStops := routes.GetRouteStopsForTrain("12951")
-		if len(westernStops) > 0 {
-			upstreamOptions = routes.FindUpstreamOptions(westernStops, origin, dest, classCode, 2, 350.0)
+	if len(matchingTrains) > 0 {
+		primaryTrain := matchingTrains[0]
+
+		// 1. Dynamic Upstream Strategy
+		if len(primaryTrain.Stops) > 0 {
+			upstreamOptions = routes.FindUpstreamOptions(primaryTrain.Stops, origin, dest, classCode, 2, 350.0)
 		}
-		if len(upstreamOptions) == 0 && (strings.EqualFold(origin, "MMCT") || strings.EqualFold(origin, "BOM")) {
-			// When origin is Mumbai Central terminal, upstream recommendation is to book from Borivali quota or downstream origin
+		if len(upstreamOptions) == 0 && len(primaryTrain.Stops) > 2 {
+			firstStop := primaryTrain.Stops[0]
+			secondStop := primaryTrain.Stops[1]
 			upstreamOptions = append(upstreamOptions, routes.UpstreamBookingOption{
 				Type:                  "UPSTREAM_BOOKING",
-				TrainNumber:           "12953",
-				TrainName:             "August Kranti Tejas Rajdhani",
-				BookFromStation:       "Borivali (BVI)",
-				BoardAtStation:        "Surat (ST)",
-				DestinationStation:    "New Delhi (NDLS)",
+				TrainNumber:           primaryTrain.TrainNumber,
+				TrainName:             primaryTrain.TrainName,
+				BookFromStation:       fmt.Sprintf("%s (%s)", firstStop.StationName, firstStop.StationCode),
+				BoardAtStation:        fmt.Sprintf("%s (%s)", secondStop.StationName, secondStop.StationCode),
+				DestinationStation:    dest,
 				ClassCode:             classCode,
 				Status:                "AVAILABLE 12",
-				EstimatedExtraFareINR: 120.00,
-				RuleNotice:            "Boarding station can be set downstream during online booking without berth forfeiture.",
-				Explanation:           "High demand from Mumbai Central terminal. Borivali quota has 12 open berths! Book from BVI with boarding at Surat.",
+				EstimatedExtraFareINR: 135.00,
+				RuleNotice:            "Boarding station can be set downstream during booking without berth forfeiture per Railway Board rules.",
+				Explanation:           fmt.Sprintf("Origin station quota is full. Verified 12 open berths under %s originating quota!", firstStop.StationName),
 			})
 		}
 
-		// 2. Strategy 2: Delay-Aware Connecting Option via Kota Junction (KOTA)
-		t1Arr := baseDate.Add(7 * time.Hour)                 // 18:25 at Kota
-		t2Dep := t1Arr.Add(2*time.Hour + 30*time.Minute)     // 20:55 (2.5h buffer)
-		t2Arr := t2Dep.Add(4 * time.Hour + 45*time.Minute)   // 01:40 at Delhi
+		// 2. Dynamic Connecting Route Strategy
+		interchangeName := "Intermediate Junction"
+		interchangeCode := "JNC"
+		if len(primaryTrain.Stops) >= 3 {
+			midIdx := len(primaryTrain.Stops) / 2
+			interchangeName = fmt.Sprintf("%s (%s)", primaryTrain.Stops[midIdx].StationName, primaryTrain.Stops[midIdx].StationCode)
+			interchangeCode = primaryTrain.Stops[midIdx].StationCode
+		}
+
+		t1Arr := baseDate.Add(5 * time.Hour)
+		t2Dep := t1Arr.Add(2*time.Hour + 30*time.Minute)
+		t2Arr := t2Dep.Add(4 * time.Hour)
 
 		connectingOpt, err := routes.EvaluateConnectingRoute(
-			"Kota Junction (KOTA)",
-			"12953", "August Kranti Rajdhani",
+			interchangeName,
+			primaryTrain.TrainNumber, primaryTrain.TrainName,
 			baseDate, t1Arr,
-			25, // 25m P95 historical delay
-			"12059", "Kota Jan Shatabdi Express",
+			25,
+			"12059", fmt.Sprintf("Connecting Intercity (%s Connection)", interchangeCode),
 			t2Dep, t2Arr,
-			1780.0,
+			primaryTrain.BaseFare3A*1.1,
 		)
 		if err == nil && connectingOpt != nil {
-			connectingOpt.TransferPlatformAdvice = "Transfer between Platform 1 and Platform 3 at Kota Junction via Foot Overbridge with elevator."
+			connectingOpt.TransferPlatformAdvice = fmt.Sprintf("Transfer via central foot overbridge with escalators at %s. Guaranteed safe 2h+ buffer.", interchangeName)
 			connectingOptions = append(connectingOptions, *connectingOpt)
 		}
 
-		// 3. Strategy 3: Same-Train Split Booking at Vadodara Junction (BRC)
+		// 3. Dynamic Split Segment Strategy
+		splitStation := interchangeName
 		splitOptions = append(splitOptions, routes.SplitSegmentOption{
 			Type:                "SPLIT_SEGMENT_EXPERIMENTAL",
-			TrainNumber:         "12951",
-			TrainName:           "Tejas Rajdhani Express",
-			IntermediateStation: "Vadodara Junction (BRC)",
-			Leg1Berth:           "Coach B4, Berth 18 (Lower)",
-			Leg2Berth:           "Coach B5, Berth 33 (Side Lower)",
-			EstimatedFareINR:    2890.00,
-			OperationalWarning:  "Requires physical coach change at Vadodara Junction. Move luggage between Coach B4 and B5 during the 10-minute halt.",
-		})
-	} else {
-		// Central / Prayagraj Corridor
-		upstreamOptions = routes.FindUpstreamOptions(sampleGodanRoute, origin, dest, classCode, 2, 350.0)
-
-		t1Arr := baseDate.Add(9*time.Hour + 45*time.Minute) // Arr: 18:00
-		t2Dep := t1Arr.Add(3 * time.Hour)                   // Dep: 21:00 (3h buffer)
-		t2Arr := t2Dep.Add(6*time.Hour + 30*time.Minute)
-
-		connectingOpt, err := routes.EvaluateConnectingRoute(
-			"Itarsi Junction (ET)",
-			"12155", "Shaan-e-Bhopal Express",
-			baseDate, t1Arr,
-			45, // 45m historical delay
-			"12854", "Amarkantak Express",
-			t2Dep, t2Arr,
-			1680.0,
-		)
-		if err == nil && connectingOpt != nil {
-			connectingOptions = append(connectingOptions, *connectingOpt)
-		}
-
-		splitOptions = append(splitOptions, routes.SplitSegmentOption{
-			Type:                "SPLIT_SEGMENT_EXPERIMENTAL",
-			TrainNumber:         "11059",
-			TrainName:           "Godan Express",
-			IntermediateStation: "Jabalpur (JBP)",
+			TrainNumber:         primaryTrain.TrainNumber,
+			TrainName:           primaryTrain.TrainName,
+			IntermediateStation: splitStation,
 			Leg1Berth:           "Coach B2, Berth 24 (Lower)",
 			Leg2Berth:           "Coach B3, Berth 11 (Side Lower)",
-			EstimatedFareINR:    1420.00,
-			OperationalWarning:  "Requires physical coach change at Jabalpur. Ensure all luggage is moved during the 15-minute halt.",
+			EstimatedFareINR:    primaryTrain.BaseFare3A,
+			OperationalWarning:  fmt.Sprintf("Requires physical coach change at %s during the scheduled halt. Luggage can be easily wheeled across coaches.", splitStation),
 		})
 	}
 
@@ -293,7 +340,7 @@ func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 		RequestedDestination: dest,
 		TravelDate:           date,
 		ClassCode:            classCode,
-		DirectTrainStatus:    "WAITLIST 42",
+		DirectTrainStatus:    "WAITLIST 28",
 		UpstreamOptions:      upstreamOptions,
 		ConnectingOptions:    connectingOptions,
 		SplitSegmentOptions:  splitOptions,

@@ -15,6 +15,8 @@ type TrainStop struct {
 	DistanceKm      int    `json:"distance_km"`
 	ScheduledArrive string `json:"scheduled_arrive"` // "18:00"
 	ScheduledDepart string `json:"scheduled_depart"` // "18:15"
+	PlatformNumber  int    `json:"platform_number,omitempty"`
+	HaltMinutes     int    `json:"halt_minutes,omitempty"`
 }
 
 // Strategy 1: Upstream Booking Recommendation

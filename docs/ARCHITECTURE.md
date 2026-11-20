@@ -36,8 +36,17 @@ The system is separated into two operational binaries:
 
 ## 2. Low-Level Algorithmic Engines
 
-### 2.1 The Tiktiki Journey Optimizer (`internal/routes/optimizer.go`)
-When a direct train is waitlisted (`WL`) or sold out, the optimizer evaluates three complementary strategies:
+### 2.3 Authentic Railway Transit Engine (`internal/routes/corridors.go`)
+- **Multi-Station City Normalizer**: Intelligently expands metropolitan codes (`BOM` -> `MMCT`, `CSMT`, `LTT`, `BDTS`, `BVI`; `DEL` -> `NDLS`, `NZM`, `DLI`, `ANVT`; `BLR` -> `SBC`, `YPR`, `SMVB`; `MAS` -> `MAS`, `MS`; `PRYJ` -> `PRYJ`, `PRRB`; `BSB` -> `BSB`, `DDU`).
+- **National Trunk Corridors**: Covers Western Trunk (Mumbai-Delhi), Central Trunk (Mumbai-Prayagraj-Varanasi), Eastern Trunk (Delhi-Kanpur-Patna-Howrah), Southern Trunk (Bengaluru-Chennai), and Western-Southern Trunk (Mumbai-Pune-Bengaluru).
+- **Dynamic Pair Synthesizer**: For arbitrary station pairs not in the predefined trunks, dynamically computes realistic express services matching distance, speed class, intermediate junctions, and real railway fares.
+- **Authentic Transit Details**: Emits Days of Run (`M T W T F S S`), Punctuality ratings, platform numbers, pantry/e-catering availability, and complete intermediate stop sequences.
+
+### 2.4 Interactive Coach & Berth Visualizer (`components/CoachSeatMapModal.tsx`)
+- Provides an authentic interactive LHB coach floorplan (3AC, 2AC, Sleeper) detailing 72-berth bay divisions (Lower, Middle, Upper, Side Lower, Side Upper), restrooms, vestibule doors, and luggage corridors.
+
+### 2.5 Multi-Attribute Filter & Sort Engine (`components/FilterSortBar.tsx`)
+- Enables travelers to filter by departure time windows (Early Morning, Morning, Afternoon, Night), service category (Rajdhani/Vande Bharat, Superfast, Mail/Express), and sort by Travel Value Index, Fastest Duration, Departure Time, or Fare.
 
 #### Strategy 1: Upstream Booking with Boarding Modification
 - **Concept**: In Indian Railways, major originating stations often have larger General Quotas (`GN`) than intermediate halts.

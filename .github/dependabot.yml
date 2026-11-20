@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for Go backend
+  - package-ecosystem: "gomod"
+    directory: "/services/api"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for Frontend (Next.js)
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"

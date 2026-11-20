@@ -1,0 +1,12 @@
+# Global Code Owners
+* @techieadi4703
+
+# Backend & Core Algorithms
+/services/api/ @techieadi4703
+
+# Frontend Web Application
+/apps/web/ @techieadi4703
+
+# Infrastructure & Workflows
+/infrastructure/ @techieadi4703
+/.github/ @techieadi4703

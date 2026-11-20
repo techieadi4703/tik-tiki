@@ -134,7 +134,7 @@ export function JourneyCard({ offer, onOpenAlertModal }: JourneyCardProps) {
           <a
             href={offer.booking_url}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener"
             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-200 text-slate-950 font-bold text-xs rounded-xl transition-colors shadow-sm"
           >
             Book Now <ExternalLink className="w-3.5 h-3.5" />

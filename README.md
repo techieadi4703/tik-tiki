@@ -24,7 +24,7 @@ tik-tiki/
 │       │   └── worker/     # Sniping Background Worker daemon
 │       ├── internal/
 │       │   ├── providers/  # Multi-modal provider abstraction & mock adapter
-│       │   ├── routes/     # Tiktiki Journey Optimizer (3 Unified Strategies)
+│       │   ├── routes/     # Real corridor timetable graph (corridors.go) & 3 optimization strategies
 │       │   ├── scoring/    # Journey Utility Scoring Engine (0.4C + 0.3T + 0.2R + 0.1K)
 │       │   └── worker/     # Adaptive poller, state diffing & multi-channel dispatcher
 │       ├── Makefile        # Build, test, and run automation

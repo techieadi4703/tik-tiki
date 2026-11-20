@@ -69,9 +69,9 @@ export function OptimizerSection({ optimization }: OptimizerSectionProps) {
                   </div>
                 </div>
                 <a
-                  href="https://www.irctc.co.in"
+                  href={`https://www.irctc.co.in/nget/train-search?train=${optimization.upstream_options[0].train_number}`}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener"
                   className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center gap-1.5"
                 >
                   Book on IRCTC <ExternalLink className="w-3.5 h-3.5" />

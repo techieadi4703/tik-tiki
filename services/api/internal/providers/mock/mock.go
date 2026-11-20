@@ -2,13 +2,16 @@ package mock
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
 	"tik-tiki/services/api/internal/providers"
+	"tik-tiki/services/api/internal/routes"
 )
 
-// MockAdapter implements providers.ProviderAdapter for testing and initial demonstration
+// MockAdapter implements providers.ProviderAdapter with real corridor timetable awareness
 type MockAdapter struct{}
 
 func NewMockAdapter() *MockAdapter {
@@ -23,90 +26,125 @@ func (m *MockAdapter) Category() providers.Mode {
 	return providers.ModeMultimodal
 }
 
+func parseClock(depDate time.Time, timeStr string, addDays int) time.Time {
+	parts := strings.Split(timeStr, ":")
+	if len(parts) != 2 {
+		return depDate.Add(time.Duration(addDays) * 24 * time.Hour)
+	}
+	hour, _ := strconv.Atoi(parts[0])
+	min, _ := strconv.Atoi(parts[1])
+	return time.Date(depDate.Year(), depDate.Month(), depDate.Day()+addDays, hour, min, 0, 0, time.UTC)
+}
+
 func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) ([]providers.NormalizedOffer, error) {
 	depDate := query.DepartureDate
 	if depDate.IsZero() {
 		depDate = time.Now().Add(24 * time.Hour)
 	}
 
-	offers := []providers.NormalizedOffer{
-		// 1. Direct Train
-		{
-			ProviderID:      "irctc_cris",
-			Mode:            providers.ModeRail,
-			OperatorName:    "Indian Railways",
-			ServiceNumber:   "12955 (Mumbai-Jaipur Superfast)",
-			OriginCode:      query.OriginCode,
-			DestCode:        query.DestCode,
-			DepartureAt:     time.Date(depDate.Year(), depDate.Month(), depDate.Day(), 19, 5, 0, 0, time.UTC),
-			ArrivalAt:       time.Date(depDate.Year(), depDate.Month(), depDate.Day()+1, 12, 45, 0, 0, time.UTC),
-			DurationMinutes: 1060,
-			Price:           1640.00,
-			Currency:        "INR",
-			Transfers:       0,
-			Status:          "WAITLIST",
-			AvailableSeats:  0,
-			BookingURL:      "https://www.irctc.co.in",
-			RetrievedAt:     time.Now().UTC(),
-		},
-		// 2. High-speed Express Train
-		{
-			ProviderID:      "irctc_cris",
-			Mode:            providers.ModeRail,
-			OperatorName:    "Indian Railways",
-			ServiceNumber:   "12951 (Tejas Rajdhani Express)",
-			OriginCode:      query.OriginCode,
-			DestCode:        query.DestCode,
-			DepartureAt:     time.Date(depDate.Year(), depDate.Month(), depDate.Day(), 17, 0, 0, 0, time.UTC),
-			ArrivalAt:       time.Date(depDate.Year(), depDate.Month(), depDate.Day()+1, 8, 30, 0, 0, time.UTC),
-			DurationMinutes: 930,
-			Price:           2850.00,
-			Currency:        "INR",
-			Transfers:       0,
-			Status:          "AVAILABLE",
-			AvailableSeats:  8,
-			BookingURL:      "https://www.irctc.co.in",
-			RetrievedAt:     time.Now().UTC(),
-		},
-		// 3. Premium Intercity Bus
-		{
-			ProviderID:      "redbus_affiliate",
-			Mode:            providers.ModeBus,
-			OperatorName:    "Zingbus Plus Electric AC Sleeper",
-			ServiceNumber:   "ZB-9921",
-			OriginCode:      query.OriginCode,
-			DestCode:        query.DestCode,
-			DepartureAt:     time.Date(depDate.Year(), depDate.Month(), depDate.Day(), 20, 30, 0, 0, time.UTC),
-			ArrivalAt:       time.Date(depDate.Year(), depDate.Month(), depDate.Day()+1, 14, 0, 0, 0, time.UTC),
-			DurationMinutes: 1050,
-			Price:           1420.00,
-			Currency:        "INR",
-			Transfers:       0,
-			Status:          "AVAILABLE",
-			AvailableSeats:  14,
-			BookingURL:      "https://www.redbus.in?ref=tiktiki",
-			RetrievedAt:     time.Now().UTC(),
-		},
-		// 4. Nonstop Flight
-		{
-			ProviderID:      "duffel_flight",
-			Mode:            providers.ModeFlight,
-			OperatorName:    "IndiGo (6E-6512)",
-			ServiceNumber:   "6E-6512",
-			OriginCode:      query.OriginCode,
-			DestCode:        query.DestCode,
-			DepartureAt:     time.Date(depDate.Year(), depDate.Month(), depDate.Day(), 9, 30, 0, 0, time.UTC),
-			ArrivalAt:       time.Date(depDate.Year(), depDate.Month(), depDate.Day(), 11, 25, 0, 0, time.UTC),
-			DurationMinutes: 115,
-			Price:           4890.00,
-			Currency:        "INR",
-			Transfers:       0,
-			Status:          "AVAILABLE",
-			AvailableSeats:  9,
-			BookingURL:      "https://www.goindigo.in?ref=tiktiki",
-			RetrievedAt:     time.Now().UTC(),
-		},
+	var offers []providers.NormalizedOffer
+
+	// 1. Query real corridor trains between the requested origin and destination
+	matchingTrains := routes.FindAllTrainsBetweenStations(query.OriginCode, query.DestCode)
+
+	for idx, train := range matchingTrains {
+		var originStop, destStop *routes.TrainStop
+		for i := range train.Stops {
+			stopCode := strings.ToUpper(train.Stops[i].StationCode)
+			if stopCode == strings.ToUpper(query.OriginCode) || (query.OriginCode == "BOM" && (stopCode == "MMCT" || stopCode == "LTT")) {
+				if originStop == nil {
+					originStop = &train.Stops[i]
+				}
+			}
+			if stopCode == strings.ToUpper(query.DestCode) || (query.DestCode == "BOM" && (stopCode == "MMCT" || stopCode == "LTT")) {
+				destStop = &train.Stops[i]
+			}
+		}
+
+		if originStop != nil && destStop != nil && originStop.SequenceNumber < destStop.SequenceNumber {
+			// Calculate real departure and arrival times
+			tDepart := parseClock(depDate, originStop.ScheduledDepart, 0)
+			dayOffset := 0
+			if destStop.DistanceKm-originStop.DistanceKm > 600 {
+				dayOffset = 1
+			}
+			tArrive := parseClock(depDate, destStop.ScheduledArrive, dayOffset)
+			if tArrive.Before(tDepart) {
+				tArrive = tArrive.Add(24 * time.Hour)
+			}
+			durationMins := int(tArrive.Sub(tDepart).Minutes())
+			if durationMins <= 0 {
+				durationMins = (destStop.DistanceKm - originStop.DistanceKm) * 60 / 75 // approx speed
+			}
+
+			// Alternate status for testing
+			status := "AVAILABLE"
+			availSeats := 8 + (idx * 3)
+			if idx%2 == 1 {
+				status = "WAITLIST"
+				availSeats = 0
+			}
+
+			offer := providers.NormalizedOffer{
+				ProviderID:      "irctc_cris",
+				Mode:            providers.ModeRail,
+				OperatorName:    "Indian Railways",
+				ServiceNumber:   fmt.Sprintf("%s (%s)", train.TrainNumber, train.TrainName),
+				OriginCode:      query.OriginCode,
+				DestCode:        query.DestCode,
+				DepartureAt:     tDepart,
+				ArrivalAt:       tArrive,
+				DurationMinutes: durationMins,
+				Price:           train.BaseFare3A,
+				Currency:        "INR",
+				Transfers:       0,
+				Status:          status,
+				AvailableSeats:  availSeats,
+				BookingURL:      fmt.Sprintf("https://www.irctc.co.in/nget/train-search?train=%s", train.TrainNumber),
+				RetrievedAt:     time.Now().UTC(),
+			}
+			offers = append(offers, offer)
+		}
 	}
+
+	// 2. Add Multi-modal options (Flights / Buses) for multi-modal comparison
+	offers = append(offers, providers.NormalizedOffer{
+		ProviderID:      "duffel_flight",
+		Mode:            providers.ModeFlight,
+		OperatorName:    "IndiGo (6E-2054)",
+		ServiceNumber:   "6E-2054",
+		OriginCode:      query.OriginCode,
+		DestCode:        query.DestCode,
+		DepartureAt:     parseClock(depDate, "09:30", 0),
+		ArrivalAt:       parseClock(depDate, "11:45", 0),
+		DurationMinutes: 135,
+		Price:           4890.00,
+		Currency:        "INR",
+		Transfers:       0,
+		Status:          "AVAILABLE",
+		AvailableSeats:  12,
+		BookingURL:      "https://www.goindigo.in",
+		RetrievedAt:     time.Now().UTC(),
+	})
+
+	offers = append(offers, providers.NormalizedOffer{
+		ProviderID:      "redbus_partner",
+		Mode:            providers.ModeBus,
+		OperatorName:    "Zingbus Plus Electric AC Sleeper",
+		ServiceNumber:   "ZB-9921",
+		OriginCode:      query.OriginCode,
+		DestCode:        query.DestCode,
+		DepartureAt:     parseClock(depDate, "20:30", 0),
+		ArrivalAt:       parseClock(depDate, "14:00", 1),
+		DurationMinutes: 1050,
+		Price:           1420.00,
+		Currency:        "INR",
+		Transfers:       0,
+		Status:          "AVAILABLE",
+		AvailableSeats:  18,
+		BookingURL:      "https://www.redbus.in",
+		RetrievedAt:     time.Now().UTC(),
+	})
 
 	// Filter by requested modes if specified
 	if len(query.Modes) > 0 {

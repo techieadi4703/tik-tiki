@@ -190,34 +190,91 @@ func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 		classCode = "3A"
 	}
 
-	// 1. Strategy 1: Upstream Options
-	upstreamOptions := routes.FindUpstreamOptions(sampleGodanRoute, origin, dest, classCode, 2, 350.0)
+	isMumbaiDelhi := (strings.EqualFold(origin, "MMCT") || strings.EqualFold(origin, "BOM") || strings.EqualFold(origin, "BVI") || strings.EqualFold(origin, "ST")) &&
+		(strings.EqualFold(dest, "NDLS") || strings.EqualFold(dest, "NZM") || strings.EqualFold(dest, "DEL"))
 
-	// 2. Strategy 2: Delay-Aware Connecting Option
-	now := time.Now()
-	baseDate := time.Date(now.Year(), now.Month(), now.Day()+1, 8, 15, 0, 0, time.UTC)
-	t1Arr := baseDate.Add(9*time.Hour + 45*time.Minute) // Arr: 18:00
-	t2Dep := t1Arr.Add(3 * time.Hour)                   // Dep: 21:00 (3h buffer)
-	t2Arr := t2Dep.Add(6*time.Hour + 30*time.Minute)
-
-	connectingOpt, err := routes.EvaluateConnectingRoute(
-		"Itarsi Junction (ET)",
-		"12155", "Shaan-e-Bhopal Express",
-		baseDate, t1Arr,
-		45, // 45m historical delay
-		"12854", "Amarkantak Express",
-		t2Dep, t2Arr,
-		1680.0,
-	)
-
+	var upstreamOptions []routes.UpstreamBookingOption
 	var connectingOptions []routes.DelayAwareConnectingOption
-	if err == nil && connectingOpt != nil {
-		connectingOptions = append(connectingOptions, *connectingOpt)
-	}
+	var splitOptions []routes.SplitSegmentOption
 
-	// 3. Strategy 3: Split Segment (Experimental)
-	splitOptions := []routes.SplitSegmentOption{
-		{
+	now := time.Now()
+	baseDate := time.Date(now.Year(), now.Month(), now.Day()+1, 11, 25, 0, 0, time.UTC)
+
+	if isMumbaiDelhi {
+		// 1. Strategy 1: Upstream for Mumbai-Delhi corridor (e.g. if searching from Borivali or Surat)
+		westernStops := routes.GetRouteStopsForTrain("12951")
+		if len(westernStops) > 0 {
+			upstreamOptions = routes.FindUpstreamOptions(westernStops, origin, dest, classCode, 2, 350.0)
+		}
+		if len(upstreamOptions) == 0 && (strings.EqualFold(origin, "MMCT") || strings.EqualFold(origin, "BOM")) {
+			// When origin is Mumbai Central terminal, upstream recommendation is to book from Borivali quota or downstream origin
+			upstreamOptions = append(upstreamOptions, routes.UpstreamBookingOption{
+				Type:                  "UPSTREAM_BOOKING",
+				TrainNumber:           "12953",
+				TrainName:             "August Kranti Tejas Rajdhani",
+				BookFromStation:       "Borivali (BVI)",
+				BoardAtStation:        "Surat (ST)",
+				DestinationStation:    "New Delhi (NDLS)",
+				ClassCode:             classCode,
+				Status:                "AVAILABLE 12",
+				EstimatedExtraFareINR: 120.00,
+				RuleNotice:            "Boarding station can be set downstream during online booking without berth forfeiture.",
+				Explanation:           "High demand from Mumbai Central terminal. Borivali quota has 12 open berths! Book from BVI with boarding at Surat.",
+			})
+		}
+
+		// 2. Strategy 2: Delay-Aware Connecting Option via Kota Junction (KOTA)
+		t1Arr := baseDate.Add(7 * time.Hour)                 // 18:25 at Kota
+		t2Dep := t1Arr.Add(2*time.Hour + 30*time.Minute)     // 20:55 (2.5h buffer)
+		t2Arr := t2Dep.Add(4 * time.Hour + 45*time.Minute)   // 01:40 at Delhi
+
+		connectingOpt, err := routes.EvaluateConnectingRoute(
+			"Kota Junction (KOTA)",
+			"12953", "August Kranti Rajdhani",
+			baseDate, t1Arr,
+			25, // 25m P95 historical delay
+			"12059", "Kota Jan Shatabdi Express",
+			t2Dep, t2Arr,
+			1780.0,
+		)
+		if err == nil && connectingOpt != nil {
+			connectingOpt.TransferPlatformAdvice = "Transfer between Platform 1 and Platform 3 at Kota Junction via Foot Overbridge with elevator."
+			connectingOptions = append(connectingOptions, *connectingOpt)
+		}
+
+		// 3. Strategy 3: Same-Train Split Booking at Vadodara Junction (BRC)
+		splitOptions = append(splitOptions, routes.SplitSegmentOption{
+			Type:                "SPLIT_SEGMENT_EXPERIMENTAL",
+			TrainNumber:         "12951",
+			TrainName:           "Tejas Rajdhani Express",
+			IntermediateStation: "Vadodara Junction (BRC)",
+			Leg1Berth:           "Coach B4, Berth 18 (Lower)",
+			Leg2Berth:           "Coach B5, Berth 33 (Side Lower)",
+			EstimatedFareINR:    2890.00,
+			OperationalWarning:  "Requires physical coach change at Vadodara Junction. Move luggage between Coach B4 and B5 during the 10-minute halt.",
+		})
+	} else {
+		// Central / Prayagraj Corridor
+		upstreamOptions = routes.FindUpstreamOptions(sampleGodanRoute, origin, dest, classCode, 2, 350.0)
+
+		t1Arr := baseDate.Add(9*time.Hour + 45*time.Minute) // Arr: 18:00
+		t2Dep := t1Arr.Add(3 * time.Hour)                   // Dep: 21:00 (3h buffer)
+		t2Arr := t2Dep.Add(6*time.Hour + 30*time.Minute)
+
+		connectingOpt, err := routes.EvaluateConnectingRoute(
+			"Itarsi Junction (ET)",
+			"12155", "Shaan-e-Bhopal Express",
+			baseDate, t1Arr,
+			45, // 45m historical delay
+			"12854", "Amarkantak Express",
+			t2Dep, t2Arr,
+			1680.0,
+		)
+		if err == nil && connectingOpt != nil {
+			connectingOptions = append(connectingOptions, *connectingOpt)
+		}
+
+		splitOptions = append(splitOptions, routes.SplitSegmentOption{
 			Type:                "SPLIT_SEGMENT_EXPERIMENTAL",
 			TrainNumber:         "11059",
 			TrainName:           "Godan Express",
@@ -226,7 +283,7 @@ func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 			Leg2Berth:           "Coach B3, Berth 11 (Side Lower)",
 			EstimatedFareINR:    1420.00,
 			OperationalWarning:  "Requires physical coach change at Jabalpur. Ensure all luggage is moved during the 15-minute halt.",
-		},
+		})
 	}
 
 	resp := routes.JourneyOptimizationResult{

@@ -397,3 +397,13 @@ export async function fetchPNRStatus(pnr: string): Promise<import('../types').PN
   }
   return res.json();
 }
+
+export async function fetchLiveTrainStatus(trainQuery: string): Promise<import('../types').LiveTrainStatusResponse> {
+  const clean = trainQuery.trim();
+  const res = await fetch(`${API_BASE_URL}/trains/live?train=${encodeURIComponent(clean)}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to query live train status');
+  }
+  return res.json();
+}

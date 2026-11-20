@@ -803,6 +803,27 @@ func handlePNRStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(status)
 }
 
+func handleLiveTrainStatus(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	train := r.URL.Query().Get("train")
+	if train == "" {
+		train = r.URL.Query().Get("train_number")
+	}
+	if train == "" {
+		http.Error(w, `{"error": "train query parameter is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	status := routes.GetLiveTrainStatus(train)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(status)
+}
+
 func main() {
 	mux := http.NewServeMux()
 
@@ -823,6 +844,7 @@ func main() {
 	mux.HandleFunc("/v1/users/me/trips", handleUserTrips)
 	mux.HandleFunc("/v1/bookings/pnr", handleBookingByPNR)
 	mux.HandleFunc("/v1/pnr/status", handlePNRStatus)
+	mux.HandleFunc("/v1/trains/live", handleLiveTrainStatus)
 	mux.HandleFunc("/v1/auth/register", handleRegister)
 	mux.HandleFunc("/v1/auth/login", handleLogin)
 	mux.HandleFunc("/v1/auth/me", handleMe)

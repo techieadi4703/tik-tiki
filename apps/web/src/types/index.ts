@@ -205,3 +205,31 @@ export interface PNRStatusResponse {
   coach_layout: string[];
   last_updated: string;
 }
+
+export interface RouteHaltStatus {
+  station_code: string;
+  station_name: string;
+  scheduled_arrive?: string;
+  scheduled_depart?: string;
+  platform_number: number;
+  halt_minutes: number;
+  distance_km: number;
+  status: 'PASSED' | 'CURRENT' | 'UPCOMING';
+  delay_minutes: number;
+}
+
+export interface LiveTrainStatusResponse {
+  train_number: string;
+  train_name: string;
+  train_type: string;
+  source_code: string;
+  dest_code: string;
+  current_speed: number;
+  signal_status: string;
+  delay_minutes: number;
+  punctuality_text: string;
+  current_station: string;
+  next_station: string;
+  halts: RouteHaltStatus[];
+  last_updated: string;
+}

@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Train, Bus, Plane, Bell, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Train, Bus, Plane, Bell, Ticket, ShieldCheck } from 'lucide-react';
 import { NormalizedOffer } from '../types';
 
 interface JourneyCardProps {
   offer: NormalizedOffer;
   onOpenAlertModal: (offer: NormalizedOffer) => void;
+  onOpenBookingModal?: (offer: NormalizedOffer) => void;
 }
 
-export function JourneyCard({ offer, onOpenAlertModal }: JourneyCardProps) {
+export function JourneyCard({ offer, onOpenAlertModal, onOpenBookingModal }: JourneyCardProps) {
   const getModeIcon = () => {
     switch (offer.mode) {
       case 'RAIL':
@@ -131,14 +132,13 @@ export function JourneyCard({ offer, onOpenAlertModal }: JourneyCardProps) {
             </button>
           )}
 
-          <a
-            href={offer.booking_url}
-            target="_blank"
-            rel="noopener"
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-200 text-slate-950 font-bold text-xs rounded-xl transition-colors shadow-sm"
+          <button
+            type="button"
+            onClick={() => onOpenBookingModal?.(offer)}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
           >
-            Book Now <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+            Book Ticket <Ticket className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </div>

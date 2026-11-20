@@ -17,7 +17,8 @@ The system is separated into two operational binaries:
    ├── /v1/locations/search
    ├── /v1/journeys/search  ──> [ Scoring Engine: 0.40C + 0.30T + 0.20R + 0.10K ]
    ├── /v1/journeys/optimize ──> [ Journey Optimizer (3 Strategies) ]
-   └── /v1/alerts           ──> [ Watch Store (PostgreSQL / Redis) ]
+   ├── /v1/alerts           ──> [ Watch Store (PostgreSQL / Redis) ]
+   └── /v1/bookings/*       ──> [ Booking Manager: In-App IRCTC Auth & Passbook ]
                                             |
                                             v
 [ Sniping Background Worker: cmd/worker (Go 1.24 Daemon) ]

@@ -1,14 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Zap, Clock, AlertTriangle, ArrowRight, CheckCircle2, ShieldCheck, ExternalLink } from 'lucide-react';
-import { JourneyOptimizationResult } from '../types';
+import { Zap, Clock, AlertTriangle, ArrowRight, CheckCircle2, ShieldCheck, Ticket } from 'lucide-react';
+import { JourneyOptimizationResult, NormalizedOffer } from '../types';
 
 interface OptimizerSectionProps {
   optimization: JourneyOptimizationResult | null;
+  destination?: string;
+  onOpenBookingModal?: (offer: NormalizedOffer) => void;
 }
 
-export function OptimizerSection({ optimization }: OptimizerSectionProps) {
+export function OptimizerSection({ optimization, destination, onOpenBookingModal }: OptimizerSectionProps) {
   if (!optimization) return null;
 
   const hasUpstream = optimization.upstream_options && optimization.upstream_options.length > 0;
@@ -68,14 +70,35 @@ export function OptimizerSection({ optimization }: OptimizerSectionProps) {
                     +₹{optimization.upstream_options[0].estimated_extra_fare_inr.toFixed(0)}
                   </div>
                 </div>
-                <a
-                  href={`https://www.irctc.co.in/nget/train-search?train=${optimization.upstream_options[0].train_number}`}
-                  target="_blank"
-                  rel="noopener"
+                <button
+                  type="button"
+                  onClick={() => {
+                    const opt = optimization.upstream_options[0];
+                    const upstreamOffer: NormalizedOffer = {
+                      provider_id: `irctc-mock-${opt.train_number}`,
+                      mode: 'RAIL',
+                      operator_name: `Indian Railways (${opt.train_name})`,
+                      service_number: opt.train_number,
+                      origin_code: opt.book_from_station,
+                      dest_code: destination || 'NDLS',
+                      departure_at: new Date().toISOString(),
+                      arrival_at: new Date(Date.now() + 16 * 3600 * 1000).toISOString(),
+                      duration_minutes: 960,
+                      price: 1850 + Math.round(opt.estimated_extra_fare_inr),
+                      currency: 'INR',
+                      transfers: 0,
+                      status: 'AVAILABLE',
+                      available_seats: 12,
+                      booking_url: '',
+                      retrieved_at: new Date().toISOString(),
+                      score: 96,
+                    };
+                    onOpenBookingModal?.(upstreamOffer);
+                  }}
                   className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center gap-1.5"
                 >
-                  Book on IRCTC <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                  Book Confirmed Ticket <Ticket className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>

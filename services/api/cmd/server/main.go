@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"tik-tiki/services/api/internal/bookings"
 	"tik-tiki/services/api/internal/providers"
 	"tik-tiki/services/api/internal/providers/mock"
 	"tik-tiki/services/api/internal/routes"
@@ -17,6 +18,7 @@ import (
 )
 
 var mockAdapter = mock.NewMockAdapter()
+var bookingManager = bookings.NewBookingManager()
 
 type AlertRecord struct {
 	ID                  string    `json:"id"`
@@ -433,6 +435,105 @@ func handleAlerts(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleInitiateBooking(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != "POST" {
+		http.Error(w, `{"error": "Method not allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req bookings.InitiateBookingRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
+		return
+	}
+
+	b, err := bookingManager.InitiateBooking(req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(b)
+}
+
+func handleConfirmBooking(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != "POST" {
+		http.Error(w, `{"error": "Method not allowed"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req bookings.ConfirmBookingRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
+		return
+	}
+
+	b, err := bookingManager.ConfirmBooking(req.BookingID, req.IRCTCPassword)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(b)
+}
+
+func handleUserTrips(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	userID := r.URL.Query().Get("user_id")
+	if userID == "" {
+		userID = "usr_demo"
+	}
+
+	trips := bookingManager.ListUserBookings(userID)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user_id": userID,
+		"count":   len(trips),
+		"trips":   trips,
+	})
+}
+
+func handleBookingByPNR(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	pnr := r.URL.Query().Get("pnr")
+	if pnr == "" {
+		http.Error(w, `{"error": "PNR query parameter is required"}`, http.StatusBadRequest)
+		return
+	}
+
+	b, err := bookingManager.GetBookingByPNR(pnr)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(b)
+}
+
 func main() {
 	mux := http.NewServeMux()
 
@@ -448,6 +549,10 @@ func main() {
 	mux.HandleFunc("/v1/journeys/hacks", handleSegmentHacks)
 	mux.HandleFunc("/v1/journeys/alternatives", handleConnectingRoutes)
 	mux.HandleFunc("/v1/alerts", handleAlerts)
+	mux.HandleFunc("/v1/bookings/initiate", handleInitiateBooking)
+	mux.HandleFunc("/v1/bookings/confirm", handleConfirmBooking)
+	mux.HandleFunc("/v1/users/me/trips", handleUserTrips)
+	mux.HandleFunc("/v1/bookings/pnr", handleBookingByPNR)
 
 	port := "8080"
 	log.Printf("🚀 Tiktiki API Server running at http://localhost:%s", port)

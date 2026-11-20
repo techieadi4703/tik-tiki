@@ -139,4 +139,86 @@ func TestServerEndpoints_TDD(t *testing.T) {
 			t.Errorf("expected active alert for phone +919876543210, got %v", resp)
 		}
 	})
+
+	t.Run("Booking Flow: Initiate, Confirm with IRCTC auth, and List Trips", func(t *testing.T) {
+		// 1. Initiate booking
+		initBody := strings.NewReader(`{
+			"train_number": "12951",
+			"train_name": "Tejas Rajdhani Express",
+			"origin_code": "MMCT",
+			"dest_code": "NDLS",
+			"departure_at": "2026-12-16T17:00:00Z",
+			"arrival_at": "2026-12-17T08:32:00Z",
+			"class_code": "3A",
+			"total_fare": 2850.00,
+			"irctc_username": "aditya_srivastava",
+			"passengers": [
+				{"full_name": "Aditya Srivastava", "age": 26, "gender": "MALE", "berth_preference": "LOWER"}
+			]
+		}`)
+		req := httptest.NewRequest("POST", "/v1/bookings/initiate", initBody)
+		w := httptest.NewRecorder()
+		handleInitiateBooking(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Fatalf("expected 201 Created, got %d: %s", w.Code, w.Body.String())
+		}
+
+		var initResp map[string]interface{}
+		json.NewDecoder(w.Body).Decode(&initResp)
+		bookingID, ok := initResp["id"].(string)
+		if !ok || bookingID == "" {
+			t.Fatalf("expected booking ID in response, got %v", initResp)
+		}
+
+		// 2. Confirm booking with IRCTC password
+		confirmBody := strings.NewReader(`{
+			"booking_id": "` + bookingID + `",
+			"irctc_username": "aditya_srivastava",
+			"irctc_password": "secure_irctc_password",
+			"auth_method": "PASSWORD"
+		}`)
+		reqConfirm := httptest.NewRequest("POST", "/v1/bookings/confirm", confirmBody)
+		wConfirm := httptest.NewRecorder()
+		handleConfirmBooking(wConfirm, reqConfirm)
+
+		if wConfirm.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for confirm, got %d: %s", wConfirm.Code, wConfirm.Body.String())
+		}
+
+		var confirmResp map[string]interface{}
+		json.NewDecoder(wConfirm.Body).Decode(&confirmResp)
+		pnr, ok := confirmResp["pnr"].(string)
+		if !ok || pnr == "" {
+			t.Fatalf("expected PNR in confirmed booking, got %v", confirmResp)
+		}
+		if confirmResp["status"] != "CONFIRMED" {
+			t.Errorf("expected status CONFIRMED, got %v", confirmResp["status"])
+		}
+
+		// 3. List trips
+		reqTrips := httptest.NewRequest("GET", "/v1/users/me/trips?user_id=usr_demo", nil)
+		wTrips := httptest.NewRecorder()
+		handleUserTrips(wTrips, reqTrips)
+
+		if wTrips.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for trips, got %d", wTrips.Code)
+		}
+
+		var tripsResp map[string]interface{}
+		json.NewDecoder(wTrips.Body).Decode(&tripsResp)
+		tripsList, ok := tripsResp["trips"].([]interface{})
+		if !ok || len(tripsList) == 0 {
+			t.Fatalf("expected at least 1 trip, got %v", tripsResp)
+		}
+
+		// 4. Lookup by PNR
+		reqPNR := httptest.NewRequest("GET", "/v1/bookings/pnr?pnr="+pnr, nil)
+		wPNR := httptest.NewRecorder()
+		handleBookingByPNR(wPNR, reqPNR)
+
+		if wPNR.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for PNR lookup, got %d", wPNR.Code)
+		}
+	})
 }

@@ -209,7 +209,114 @@ Lists all registered watch alerts and their current operational status.
 
 ---
 
-## 6. System Health
+## 6. In-App Booking & User Trips (Sub-PSP Integration)
+
+Direct in-app booking architecture modeled on B2C Sub-PSP integrations (MakeMyTrip, redBus, ConfirmTkt) eliminating external redirect issues and Akamai WAF Edge errors.
+
+### `POST /v1/bookings/initiate`
+Initiates a new railway booking session and records passenger manifest.
+
+#### Request Body
+```json
+{
+  "train_number": "12951",
+  "train_name": "Tejas Rajdhani Express",
+  "origin_code": "MMCT",
+  "dest_code": "NDLS",
+  "departure_at": "2026-12-16T17:00:00Z",
+  "arrival_at": "2026-12-17T08:32:00Z",
+  "class_code": "3A",
+  "total_fare": 2450.00,
+  "irctc_username": "traveler47",
+  "passengers": [
+    {
+      "full_name": "Aditya Srivastava",
+      "age": 26,
+      "gender": "MALE",
+      "berth_preference": "LOWER"
+    }
+  ]
+}
+```
+
+#### Response (201 Created)
+```json
+{
+  "id": "bkg_1763630248000_12951",
+  "user_id": "usr_default",
+  "pnr": "PENDING",
+  "train_number": "12951",
+  "train_name": "Tejas Rajdhani Express",
+  "origin_code": "MMCT",
+  "dest_code": "NDLS",
+  "class_code": "3A",
+  "status": "PENDING_AUTH",
+  "total_fare": 2450.00,
+  "irctc_username": "traveler47",
+  "passengers": [
+    {
+      "full_name": "Aditya Srivastava",
+      "age": 26,
+      "gender": "MALE",
+      "berth_preference": "LOWER"
+    }
+  ],
+  "created_at": "2026-11-20T14:30:00Z"
+}
+```
+
+### `POST /v1/bookings/confirm`
+Completes IRCTC sandboxed authentication / authorization and allocates official 10-digit PNR, coach number, and berth.
+
+#### Request Body
+```json
+{
+  "booking_id": "bkg_1763630248000_12951",
+  "irctc_username": "traveler47",
+  "irctc_password": "irctc_password_or_otp",
+  "auth_method": "PASSWORD"
+}
+```
+
+#### Response (200 OK)
+```json
+{
+  "id": "bkg_1763630248000_12951",
+  "user_id": "usr_default",
+  "pnr": "8421904721",
+  "train_number": "12951",
+  "train_name": "Tejas Rajdhani Express",
+  "origin_code": "MMCT",
+  "dest_code": "NDLS",
+  "class_code": "3A",
+  "status": "CONFIRMED",
+  "total_fare": 2450.00,
+  "irctc_username": "traveler47",
+  "coach_number": "B3",
+  "berth_number": 28,
+  "berth_type": "LOWER",
+  "qr_code_data": "IRCTC-PNR:8421904721|TRN:12951|COACH:B3|BERTH:28|CLASS:3A|MMCT-NDLS",
+  "passengers": [
+    {
+      "full_name": "Aditya Srivastava",
+      "age": 26,
+      "gender": "MALE",
+      "berth_preference": "LOWER"
+    }
+  ],
+  "created_at": "2026-11-20T14:30:00Z"
+}
+```
+
+### `GET /v1/users/me/trips`
+Retrieves all active and past bookings for the authenticated user to render in the `/trips` digital passbook.
+
+### `GET /v1/bookings/pnr?pnr=8421904721`
+Retrieves a specific booking by its 10-digit PNR.
+
+---
+
+## 7. System Health
 
 ### `GET /v1/health`
 Checks API server liveliness and subsystem connectivity.

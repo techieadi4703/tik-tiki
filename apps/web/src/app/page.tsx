@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { SearchHeader } from '../components/SearchHeader';
 import { OptimizerSection } from '../components/OptimizerSection';
 import { JourneyCard } from '../components/JourneyCard';
 import { SeatAlertModal } from '../components/SeatAlertModal';
+import { PassengerBookingModal } from '../components/PassengerBookingModal';
 import { NormalizedOffer, JourneyOptimizationResult } from '../types';
 import { searchJourneys, fetchOptimizedJourneyStrategies } from '../lib/api';
 import { Compass, Train, Zap, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
+  const router = useRouter();
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState('');
@@ -20,6 +23,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeAlertOffer, setActiveAlertOffer] = useState<NormalizedOffer | null>(null);
+  const [activeBookingOffer, setActiveBookingOffer] = useState<NormalizedOffer | null>(null);
 
   const performSearch = async (from: string, to: string, travelDate: string) => {
     if (!from || !to) return;
@@ -142,7 +146,11 @@ export default function Home() {
           /* Search Results View */
           <>
             {/* Tiktiki Journey Optimizer: 3 Smart Strategies */}
-            <OptimizerSection optimization={optimization} />
+            <OptimizerSection
+              optimization={optimization}
+              destination={destination}
+              onOpenBookingModal={setActiveBookingOffer}
+            />
 
             {/* Results Header */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -173,6 +181,7 @@ export default function Home() {
                     key={`${offer.service_number}-${idx}`}
                     offer={offer}
                     onOpenAlertModal={setActiveAlertOffer}
+                    onOpenBookingModal={setActiveBookingOffer}
                   />
                 ))}
               </div>
@@ -185,6 +194,16 @@ export default function Home() {
           </>
         )}
       </main>
+
+      {/* In-App Railway Passenger Booking Modal */}
+      <PassengerBookingModal
+        offer={activeBookingOffer}
+        onClose={() => setActiveBookingOffer(null)}
+        onBookingSuccess={() => {
+          setActiveBookingOffer(null);
+          router.push('/trips');
+        }}
+      />
 
       {/* Seat Alert Sniping Modal */}
       <SeatAlertModal

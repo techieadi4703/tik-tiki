@@ -84,3 +84,42 @@ export interface JourneyOptimizationResult {
   connecting_options: DelayAwareConnectingOption[];
   split_segment_options: SplitSegmentOption[];
 }
+
+export interface Passenger {
+  full_name: string;
+  age: number;
+  gender: string; // 'MALE' | 'FEMALE' | 'TRANSGENDER'
+  berth_preference: string; // 'LOWER' | 'MIDDLE' | 'UPPER' | 'SIDE_LOWER' | 'SIDE_UPPER'
+}
+
+export interface SegmentHack {
+  train_number: string;
+  class_code: string;
+  book_from: string;
+  board_at: string;
+  destination: string;
+  extra_fare_inr: number;
+  explanation: string;
+}
+
+export interface Booking {
+  id: string;
+  user_id: string;
+  pnr: string;
+  train_number: string;
+  train_name: string;
+  origin_code: string;
+  dest_code: string;
+  departure_at: string;
+  arrival_at: string;
+  class_code: string;
+  status: 'PENDING_AUTH' | 'CONFIRMED' | 'CANCELLED';
+  total_fare: number;
+  irctc_username: string;
+  coach_number?: string;
+  berth_number?: number;
+  berth_type?: string;
+  passengers: Passenger[];
+  qr_code_data?: string;
+  created_at: string;
+}

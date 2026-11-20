@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowLeftRight, Search, Train, Bus, Plane, LayoutGrid, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeftRight, Search, Train, Bus, Plane, LayoutGrid, AlertCircle, Ticket } from 'lucide-react';
 import { StationAutocomplete } from './StationAutocomplete';
 
 interface SearchHeaderProps {
@@ -62,7 +63,16 @@ export function SearchHeader({
               Travel Intelligence
             </span>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Zero-Ad Modern Travel</span>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-block text-xs text-slate-400 font-medium">Zero-Ad Modern Travel</span>
+            <Link
+              href="/trips"
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+            >
+              <Ticket className="w-3.5 h-3.5 text-emerald-400" />
+              <span>My Trips</span>
+            </Link>
+          </div>
         </div>
 
         {/* Search Bar Form */}

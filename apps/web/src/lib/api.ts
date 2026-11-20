@@ -1,4 +1,4 @@
-import { JourneyOptimizationResult, LocationItem, NormalizedOffer } from '../types';
+import { JourneyOptimizationResult, LocationItem, NormalizedOffer, Booking, Passenger } from '../types';
 import { MAJOR_STATIONS_CATALOG, resolveStationDisplayName } from './stations.mjs';
 
 export { MAJOR_STATIONS_CATALOG, resolveStationDisplayName };
@@ -361,4 +361,90 @@ function getFallbackJourneys(origin: string, destination: string, date: string):
       score: 84,
     },
   ];
+}
+
+export async function initiateBooking(payload: {
+  train_number: string;
+  train_name: string;
+  origin_code: string;
+  dest_code: string;
+  departure_at: string;
+  arrival_at: string;
+  class_code: string;
+  total_fare: number;
+  irctc_username: string;
+  passengers: Passenger[];
+}): Promise<Booking> {
+  const res = await fetch(`${API_BASE_URL}/bookings/initiate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to initiate booking');
+  }
+  return res.json();
+}
+
+export async function confirmBooking(payload: {
+  booking_id: string;
+  irctc_username: string;
+  irctc_password: string;
+  auth_method: string;
+}): Promise<Booking> {
+  const res = await fetch(`${API_BASE_URL}/bookings/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'IRCTC Authentication failed');
+  }
+  return res.json();
+}
+
+export async function fetchUserTrips(userId = 'usr_demo'): Promise<Booking[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/me/trips?user_id=${userId}`);
+    if (!res.ok) throw new Error('Failed to fetch trips');
+    const data = await res.json();
+    return data.trips || [];
+  } catch (err) {
+    console.warn('Backend trips fetch failed, returning client store:', err);
+    return [
+      {
+        id: 'bk_sample_01',
+        user_id: 'usr_demo',
+        pnr: '284-9182741',
+        train_number: '12951',
+        train_name: 'Tejas Rajdhani Express',
+        origin_code: 'MMCT',
+        dest_code: 'NDLS',
+        departure_at: new Date(Date.now() + 86400000 * 2).toISOString(),
+        arrival_at: new Date(Date.now() + 86400000 * 2 + 56000000).toISOString(),
+        class_code: '3A',
+        status: 'CONFIRMED',
+        total_fare: 2850.0,
+        irctc_username: 'aditya_srivastava',
+        coach_number: 'B2',
+        berth_number: 24,
+        berth_type: 'LOWER',
+        passengers: [
+          { full_name: 'Aditya Srivastava', age: 26, gender: 'MALE', berth_preference: 'LOWER' },
+        ],
+        qr_code_data: 'IRCTC:PNR:284-9182741:TRN:12951:COACH:B2:BERTH:24',
+        created_at: new Date().toISOString(),
+      },
+    ];
+  }
+}
+
+export async function fetchBookingByPNR(pnr: string): Promise<Booking> {
+  const res = await fetch(`${API_BASE_URL}/bookings/pnr?pnr=${encodeURIComponent(pnr.trim())}`);
+  if (!res.ok) {
+    throw new Error('PNR lookup failed');
+  }
+  return res.json();
 }

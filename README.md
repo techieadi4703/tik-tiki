@@ -34,9 +34,14 @@ tik-tiki/
         └── src/
             ├── components/
             │   ├── SearchHeader.tsx       # Origin/Destination swap, date & modes
+            │   ├── StationAutocomplete.tsx# Smart fuzzy station search with code & name
             │   ├── OptimizerSection.tsx   # 3 Journey Optimization Strategy cards
             │   ├── JourneyCard.tsx        # Utility score badge & results
             │   └── SeatAlertModal.tsx     # 1-click WhatsApp seat alert opt-in
+            ├── lib/
+            │   ├── api.ts                 # API client & fallback handlers
+            │   ├── stations.mjs           # Major Indian railway stations catalog
+            │   └── scoring.mjs            # Client-side utility scorer
             └── app/                       # Next.js App Router
 ```
 

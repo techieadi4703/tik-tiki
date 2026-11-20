@@ -1,6 +1,35 @@
-import { JourneyOptimizationResult } from '../types';
+import { JourneyOptimizationResult, LocationItem } from '../types';
+import { MAJOR_STATIONS_CATALOG, resolveStationDisplayName } from './stations.mjs';
+
+export { MAJOR_STATIONS_CATALOG, resolveStationDisplayName };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/v1';
+
+export async function searchLocations(query: string): Promise<LocationItem[]> {
+  const cleanQuery = query.trim().toLowerCase();
+  if (!cleanQuery) {
+    return (MAJOR_STATIONS_CATALOG as LocationItem[]).filter((s) => s.is_major_hub).slice(0, 8);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/locations/search?q=${encodeURIComponent(cleanQuery)}`);
+    if (!res.ok) throw new Error('Search locations failed');
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      return data.results;
+    }
+  } catch (err) {
+    console.warn('Backend locations lookup fallback to local catalog:', err);
+  }
+
+  // Resilient client-side filtering matching code, name, or city
+  return (MAJOR_STATIONS_CATALOG as LocationItem[]).filter(
+    (loc) =>
+      loc.code.toLowerCase().includes(cleanQuery) ||
+      loc.name.toLowerCase().includes(cleanQuery) ||
+      loc.city.toLowerCase().includes(cleanQuery)
+  );
+}
 
 export async function searchJourneys(origin = 'BOM', destination = 'JAI', date = '2026-12-24') {
   try {

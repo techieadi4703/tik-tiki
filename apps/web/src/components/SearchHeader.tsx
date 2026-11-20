@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowLeftRight, Search, Train, Bus, Plane, LayoutGrid } from 'lucide-react';
+import { ArrowLeftRight, Search, Train, Bus, Plane, LayoutGrid, AlertCircle } from 'lucide-react';
+import { StationAutocomplete } from './StationAutocomplete';
 
 interface SearchHeaderProps {
   origin: string;
@@ -20,19 +21,30 @@ export function SearchHeader({
   onSearch,
   onSelectMode,
 }: SearchHeaderProps) {
-  const [from, setFrom] = useState(origin);
-  const [to, setTo] = useState(destination);
+  const [fromCode, setFromCode] = useState(origin);
+  const [toCode, setToCode] = useState(destination);
   const [date, setDate] = useState(travelDate);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSwap = () => {
-    const temp = from;
-    setFrom(to);
-    setTo(temp);
+    const temp = fromCode;
+    setFromCode(toCode);
+    setToCode(temp);
+    setValidationError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(from, to, date);
+    if (!fromCode.trim() || !toCode.trim()) {
+      setValidationError('Please select both Origin and Destination stations.');
+      return;
+    }
+    if (fromCode.trim().toUpperCase() === toCode.trim().toUpperCase()) {
+      setValidationError('Origin and destination cannot be the same station.');
+      return;
+    }
+    setValidationError(null);
+    onSearch(fromCode.trim().toUpperCase(), toCode.trim().toUpperCase(), date);
   };
 
   return (
@@ -53,58 +65,76 @@ export function SearchHeader({
           <span className="text-xs text-slate-400 font-medium">Zero-Ad Modern Travel</span>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-2 bg-slate-800/80 p-2 rounded-2xl border border-slate-700/80 shadow-lg">
-          <div className="md:col-span-4 flex items-center bg-slate-900/90 rounded-xl px-3 py-2 border border-slate-700/50">
-            <span className="text-xs font-bold text-slate-400 uppercase w-12">From</span>
-            <input
-              type="text"
-              value={from}
-              onChange={(e) => setFrom(e.target.value.toUpperCase())}
-              placeholder="Origin (e.g. BOM)"
-              className="w-full bg-transparent text-white font-medium focus:outline-none text-sm placeholder-slate-500"
-            />
+        {/* Search Bar Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-2 bg-slate-800/80 p-2 rounded-2xl border border-slate-700/80 shadow-lg">
+            {/* Origin Autocomplete */}
+            <div className="md:col-span-4 relative z-30">
+              <StationAutocomplete
+                label="From"
+                value={fromCode}
+                onChange={(code) => {
+                  setFromCode(code);
+                  setValidationError(null);
+                }}
+                placeholder="Origin station, city, or code"
+              />
+            </div>
+
+            {/* Station Swap Button */}
+            <div className="hidden md:flex md:col-span-1 items-center justify-center">
+              <button
+                type="button"
+                onClick={handleSwap}
+                className="p-2 rounded-full hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                title="Swap stations"
+              >
+                <ArrowLeftRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Destination Autocomplete */}
+            <div className="md:col-span-4 relative z-20">
+              <StationAutocomplete
+                label="To"
+                value={toCode}
+                onChange={(code) => {
+                  setToCode(code);
+                  setValidationError(null);
+                }}
+                placeholder="Destination station, city, or code"
+              />
+            </div>
+
+            {/* Date Picker */}
+            <div className="md:col-span-2 flex items-center bg-slate-900/90 rounded-xl px-3 py-2 border border-slate-700/50">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-transparent text-white font-medium focus:outline-none text-sm [color-scheme:dark]"
+              />
+            </div>
+
+            {/* Search Submit Button */}
+            <div className="md:col-span-1 flex">
+              <button
+                type="submit"
+                className="w-full h-full min-h-[42px] bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl flex items-center justify-center transition-transform active:scale-95 shadow-md"
+                title="Search Journeys"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="hidden md:flex md:col-span-1 items-center justify-center">
-            <button
-              type="button"
-              onClick={handleSwap}
-              className="p-2 rounded-full hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-              title="Swap stations"
-            >
-              <ArrowLeftRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="md:col-span-4 flex items-center bg-slate-900/90 rounded-xl px-3 py-2 border border-slate-700/50">
-            <span className="text-xs font-bold text-slate-400 uppercase w-12">To</span>
-            <input
-              type="text"
-              value={to}
-              onChange={(e) => setTo(e.target.value.toUpperCase())}
-              placeholder="Destination (e.g. JAI)"
-              className="w-full bg-transparent text-white font-medium focus:outline-none text-sm placeholder-slate-500"
-            />
-          </div>
-
-          <div className="md:col-span-2 flex items-center bg-slate-900/90 rounded-xl px-3 py-2 border border-slate-700/50">
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-transparent text-white font-medium focus:outline-none text-sm [color-scheme:dark]"
-            />
-          </div>
-
-          <div className="md:col-span-1 flex">
-            <button
-              type="submit"
-              className="w-full h-full min-h-[42px] bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl flex items-center justify-center transition-transform active:scale-95 shadow-md"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-          </div>
+          {/* Validation Alert Message */}
+          {validationError && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs font-medium">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{validationError}</span>
+            </div>
+          )}
         </form>
 
         {/* Filter Pills */}

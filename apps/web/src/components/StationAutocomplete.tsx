@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Train, X, Check } from 'lucide-react';
+import { Search, MapPin, Train, X, Check, Building2, Plane, Bus, Compass } from 'lucide-react';
 import { LocationItem } from '../types';
 import { searchLocations, MAJOR_STATIONS_CATALOG } from '../lib/api';
 
@@ -16,7 +16,7 @@ export function StationAutocomplete({
   label,
   value,
   onChange,
-  placeholder = 'Search station or city...',
+  placeholder = 'Search city, railway code, or airport...',
 }: StationAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -27,7 +27,7 @@ export function StationAutocomplete({
 
   // Sync display text when value changes externally
   useEffect(() => {
-    const matched = MAJOR_STATIONS_CATALOG.find(
+    const matched = (MAJOR_STATIONS_CATALOG as LocationItem[]).find(
       (s) => s.code.toUpperCase() === value.toUpperCase()
     );
     if (matched) {
@@ -57,7 +57,6 @@ export function StationAutocomplete({
 
   const handleFocus = () => {
     setIsOpen(true);
-    // If the input already contains the full formatted name "Name (CODE)", search with empty to show top hubs
     if (inputValue.includes('(') && inputValue.includes(')')) {
       loadSuggestions('');
     } else {
@@ -113,6 +112,48 @@ export function StationAutocomplete({
     }
   };
 
+  const renderTypeIcon = (type: string) => {
+    switch (type) {
+      case 'city_hub':
+        return <Building2 className="w-4 h-4 text-purple-600" />;
+      case 'airport':
+        return <Plane className="w-4 h-4 text-sky-600" />;
+      case 'bus_terminal':
+        return <Bus className="w-4 h-4 text-amber-600" />;
+      default:
+        return <Train className="w-4 h-4 text-[#1a365d]" />;
+    }
+  };
+
+  const renderTypeBadge = (type: string) => {
+    switch (type) {
+      case 'city_hub':
+        return (
+          <span className="text-[10px] font-black uppercase text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded">
+            City Area Hub
+          </span>
+        );
+      case 'airport':
+        return (
+          <span className="text-[10px] font-black uppercase text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">
+            Airport
+          </span>
+        );
+      case 'bus_terminal':
+        return (
+          <span className="text-[10px] font-black uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+            Bus Stand
+          </span>
+        );
+      default:
+        return (
+          <span className="text-[10px] font-black uppercase text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+            Rail Station
+          </span>
+        );
+    }
+  };
+
   return (
     <div ref={wrapperRef} className="relative w-full">
       <div
@@ -148,10 +189,10 @@ export function StationAutocomplete({
 
       {/* Autocomplete Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-80 flex flex-col">
-          <div className="p-2 border-b border-slate-100 bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-            <span>{inputValue ? 'Matching Stations' : 'Popular Railway Hubs'}</span>
-            <span className="text-slate-400 font-mono text-[10px]">Type code or city name</span>
+        <div className="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden max-h-96 flex flex-col">
+          <div className="p-2.5 border-b border-slate-100 bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider flex items-center justify-between">
+            <span>{inputValue ? 'Matching Transit Hubs' : 'Major Metropolitan Hubs & Stations'}</span>
+            <span className="text-slate-400 font-mono text-[10px]">Type City, Station, or Airport</span>
           </div>
 
           <div className="overflow-y-auto divide-y divide-slate-100">
@@ -164,7 +205,7 @@ export function StationAutocomplete({
                     key={`${item.code}-${idx}`}
                     onMouseDown={() => handleSelect(item)}
                     onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`px-3 py-2.5 cursor-pointer flex items-center justify-between transition-colors ${
+                    className={`px-3 py-3 cursor-pointer flex items-center justify-between transition-colors ${
                       isHighlighted
                         ? 'bg-blue-50 text-blue-900'
                         : isSelected
@@ -172,26 +213,33 @@ export function StationAutocomplete({
                         : 'hover:bg-slate-50 text-slate-800'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 text-orange-600">
-                        <MapPin className="w-3.5 h-3.5" />
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 mt-0.5">
+                        {renderTypeIcon(item.type)}
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold truncate flex items-center gap-1.5 text-slate-900">
-                          {item.name}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-slate-900 truncate">
+                            {item.name}
+                          </span>
+                          {renderTypeBadge(item.type)}
                           {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
                         </div>
-                        <div className="text-xs text-slate-500 truncate">
-                          {item.city}, {item.country === 'IN' ? 'India' : item.country}
-                          {item.is_major_hub && (
-                            <span className="ml-1.5 text-[10px] text-blue-700 font-bold">· Major Hub</span>
-                          )}
-                        </div>
+
+                        {item.subtitle ? (
+                          <div className="text-xs text-slate-500 mt-0.5 truncate font-medium">
+                            {item.subtitle}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-slate-500 mt-0.5 truncate">
+                            {item.city}, {item.country === 'IN' ? 'India' : item.country}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="shrink-0 ml-2">
-                      <span className="text-xs font-mono font-bold bg-slate-100 text-[#1a365d] border border-slate-200 px-2 py-0.5 rounded-md shadow-sm">
+                    <div className="shrink-0 ml-3 text-right">
+                      <span className="text-xs font-mono font-black bg-slate-100 text-[#1a365d] border border-slate-300 px-2 py-0.5 rounded-md shadow-sm block">
                         {item.code}
                       </span>
                     </div>
@@ -200,15 +248,15 @@ export function StationAutocomplete({
               })
             ) : (
               <div className="p-4 text-center">
-                <p className="text-sm text-slate-700 font-medium">No station found for &quot;{inputValue}&quot;</p>
-                <p className="text-xs text-slate-500 mt-1">Try searching by city (e.g. Mumbai, Delhi) or code (e.g. NDLS, ET)</p>
+                <p className="text-sm text-slate-700 font-medium">No transit location found for &quot;{inputValue}&quot;</p>
+                <p className="text-xs text-slate-500 mt-1">Try searching by city (e.g. Mumbai, Delhi, Varanasi) or code (e.g. CSMT, BOM, PRYJ)</p>
                 <div className="mt-3 flex flex-wrap gap-1.5 justify-center">
-                  {MAJOR_STATIONS_CATALOG.slice(0, 4).map((fallback) => (
+                  {(MAJOR_STATIONS_CATALOG as LocationItem[]).slice(0, 5).map((fallback) => (
                     <button
                       key={fallback.code}
                       type="button"
                       onMouseDown={() => handleSelect(fallback)}
-                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-md border border-slate-300 transition-colors"
+                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md border border-slate-300 transition-colors font-medium"
                     >
                       {fallback.city} ({fallback.code})
                     </button>

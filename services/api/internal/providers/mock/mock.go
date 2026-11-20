@@ -39,23 +39,23 @@ func parseClock(depDate time.Time, timeStr string, addDays int) time.Time {
 func resolveAirport(code string) (airportCode string, airportName string) {
 	clean := strings.ToUpper(strings.TrimSpace(code))
 	switch clean {
-	case "BOM", "MMCT", "CSMT", "LTT", "BDTS", "BVI", "KYN":
+	case "BOM", "MMCT", "CSMT", "LTT", "BDTS", "BVI", "KYN", "MUMBAI", "PNVL", "DR":
 		return "BOM", "CSMIA (Mumbai)"
-	case "DEL", "NDLS", "NZM", "DLI", "ANVT":
+	case "DEL", "NDLS", "NZM", "DLI", "ANVT", "DELHI":
 		return "DEL", "IGI Airport (Delhi)"
-	case "BSB", "BSBS", "DDU":
+	case "BSB", "BSBS", "DDU", "VARANASI", "VNS":
 		return "VNS", "LBS Airport (Varanasi)"
-	case "PRYJ", "PRRB", "NYN":
+	case "PRYJ", "PRRB", "NYN", "PRAYAGRAJ", "ALLAHABAD", "IXD":
 		return "IXD", "Bamrauli (Prayagraj)"
-	case "BLR", "SBC", "YPR", "SMVB", "BNC", "KJM":
+	case "BLR", "SBC", "YPR", "SMVB", "BNC", "KJM", "BENGALURU", "BANGALORE":
 		return "BLR", "Kempegowda Intl (BLR)"
-	case "MAS", "MS", "TBM", "AJJ":
+	case "MAS", "MS", "TBM", "AJJ", "CHENNAI", "MAA":
 		return "MAA", "Chennai Intl (MAA)"
-	case "HWH", "SDAH", "KOAA", "SHM":
+	case "HWH", "SDAH", "KOAA", "SHM", "KOLKATA", "CCU":
 		return "CCU", "NSCB Intl (Kolkata)"
-	case "PNBE", "DNR", "RJPB":
+	case "PNBE", "DNR", "RJPB", "PATNA", "PAT":
 		return "PAT", "Jay Prakash Intl (Patna)"
-	case "JP", "JAI":
+	case "JP", "JAI", "JAIPUR":
 		return "JAI", "Jaipur Intl Airport"
 	default:
 		return clean, clean + " Airport"
@@ -65,24 +65,24 @@ func resolveAirport(code string) (airportCode string, airportName string) {
 func resolveBusTerminal(code string) string {
 	clean := strings.ToUpper(strings.TrimSpace(code))
 	switch clean {
-	case "BOM", "MMCT", "CSMT", "LTT", "BDTS", "BVI", "KYN":
-		return "Borivali / Sion (Mumbai)"
-	case "DEL", "NDLS", "NZM", "DLI", "ANVT":
-		return "ISBT Kashmiri Gate (Delhi)"
-	case "BSB", "BSBS", "DDU":
-		return "Cantt Roadways (Varanasi)"
-	case "PRYJ", "PRRB", "NYN":
-		return "Civil Lines Bus Stand (Prayagraj)"
-	case "BLR", "SBC", "YPR", "SMVB", "BNC", "KJM":
-		return "Majestic / Shantinagar (Bengaluru)"
-	case "MAS", "MS", "TBM", "AJJ":
-		return "CMBT Koyambedu (Chennai)"
-	case "HWH", "SDAH", "KOAA", "SHM":
-		return "Esplanade Bus Terminus (Kolkata)"
-	case "PNBE", "DNR", "RJPB":
-		return "Bairiya ISBT (Patna)"
-	case "JP", "JAI":
-		return "Sindhi Camp (Jaipur)"
+	case "BOM", "MMCT", "CSMT", "LTT", "BDTS", "BVI", "KYN", "MUMBAI", "PNVL", "DR":
+		return "Mumbai (Borivali / Sion)"
+	case "DEL", "NDLS", "NZM", "DLI", "ANVT", "DELHI":
+		return "Delhi (ISBT Kashmiri Gate)"
+	case "BSB", "BSBS", "DDU", "VARANASI", "VNS":
+		return "Varanasi (Cantt Stand)"
+	case "PRYJ", "PRRB", "NYN", "PRAYAGRAJ", "ALLAHABAD", "IXD":
+		return "Prayagraj (Civil Lines)"
+	case "BLR", "SBC", "YPR", "SMVB", "BNC", "KJM", "BENGALURU", "BANGALORE":
+		return "Bengaluru (Majestic / Shantinagar)"
+	case "MAS", "MS", "TBM", "AJJ", "CHENNAI", "MAA":
+		return "Chennai (CMBT Koyambedu)"
+	case "HWH", "SDAH", "KOAA", "SHM", "KOLKATA", "CCU":
+		return "Kolkata (Esplanade Stand)"
+	case "PNBE", "DNR", "RJPB", "PATNA", "PAT":
+		return "Patna (Bairiya ISBT)"
+	case "JP", "JAI", "JAIPUR":
+		return "Jaipur (Sindhi Camp)"
 	default:
 		return clean + " Bus Station"
 	}

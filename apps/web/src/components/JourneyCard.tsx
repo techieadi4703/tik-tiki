@@ -19,6 +19,7 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { NormalizedOffer, ClassOption } from '../types';
+import { resolveStationDisplayName } from '../lib/api';
 
 interface JourneyCardProps {
   offer: NormalizedOffer;
@@ -147,7 +148,7 @@ export function JourneyCard({
         {/* Origin -> Duration -> Destination */}
         <div className="sm:col-span-8 flex items-center justify-between gap-3">
           {/* Departure */}
-          <div className="text-left">
+          <div className="text-left max-w-[210px]">
             <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
               {new Date(offer.departure_at).toLocaleTimeString([], {
                 hour: '2-digit',
@@ -155,9 +156,12 @@ export function JourneyCard({
                 hour12: false,
               })}
             </span>
-            <div className="text-sm text-slate-800 font-black uppercase mt-0.5">{offer.origin_code}</div>
+            <div className="text-sm text-slate-900 font-black uppercase mt-0.5">{offer.origin_code}</div>
+            <div className="text-xs text-slate-500 font-semibold truncate" title={resolveStationDisplayName(offer.origin_code, offer.mode)}>
+              {resolveStationDisplayName(offer.origin_code, offer.mode)}
+            </div>
             {offer.departure_platform && (
-              <span className="text-xs text-slate-500 font-bold block mt-0.5">
+              <span className="text-[11px] text-[#1a365d] font-bold block mt-0.5">
                 {offer.departure_platform}
               </span>
             )}
@@ -196,7 +200,7 @@ export function JourneyCard({
           </div>
 
           {/* Arrival */}
-          <div className="text-right">
+          <div className="text-right max-w-[210px]">
             <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
               {new Date(offer.arrival_at).toLocaleTimeString([], {
                 hour: '2-digit',
@@ -204,9 +208,12 @@ export function JourneyCard({
                 hour12: false,
               })}
             </span>
-            <div className="text-sm text-slate-800 font-black uppercase mt-0.5">{offer.dest_code}</div>
+            <div className="text-sm text-slate-900 font-black uppercase mt-0.5">{offer.dest_code}</div>
+            <div className="text-xs text-slate-500 font-semibold truncate text-right" title={resolveStationDisplayName(offer.dest_code, offer.mode)}>
+              {resolveStationDisplayName(offer.dest_code, offer.mode)}
+            </div>
             {offer.arrival_platform && (
-              <span className="text-xs text-slate-500 font-bold block mt-0.5">
+              <span className="text-[11px] text-[#1a365d] font-bold block mt-0.5">
                 {offer.arrival_platform}
               </span>
             )}

@@ -54,29 +54,68 @@ var (
 )
 
 type LocationItem struct {
-	Code       string `json:"code"`
-	Name       string `json:"name"`
-	City       string `json:"city"`
-	Country    string `json:"country"`
-	Type       string `json:"type"`
-	IsMajorHub bool   `json:"is_major_hub"`
+	Code             string   `json:"code"`
+	Name             string   `json:"name"`
+	City             string   `json:"city"`
+	Country          string   `json:"country"`
+	Type             string   `json:"type"`
+	IsMajorHub       bool     `json:"is_major_hub"`
+	Subtitle         string   `json:"subtitle,omitempty"`
+	StationsIncluded []string `json:"stations_included,omitempty"`
 }
 
 var locationsCatalog = []LocationItem{
-	{Code: "BOM", Name: "Chhatrapati Shivaji Maharaj Terminus", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "MMCT", Name: "Mumbai Central", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "NDLS", Name: "New Delhi Railway Station", City: "New Delhi", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "JAI", Name: "Jaipur Junction", City: "Jaipur", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "JP", Name: "Jaipur Junction", City: "Jaipur", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "ET", Name: "Itarsi Junction", City: "Itarsi", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "PRYJ", Name: "Prayagraj Junction", City: "Prayagraj", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "BSL", Name: "Bhusaval Junction", City: "Bhusaval", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "KNW", Name: "Khandwa Junction", City: "Khandwa", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "BPL", Name: "Bhopal Junction", City: "Bhopal", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "CNB", Name: "Kanpur Central", City: "Kanpur", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "BLR", Name: "KSR Bengaluru", City: "Bengaluru", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "MAS", Name: "Chennai Central", City: "Chennai", Country: "IN", Type: "railway_station", IsMajorHub: true},
-	{Code: "DEL", Name: "Indira Gandhi International Airport", City: "New Delhi", Country: "IN", Type: "airport", IsMajorHub: true},
+	// City Hubs
+	{Code: "MUMBAI", Name: "Mumbai (All Stations & Airports)", City: "Mumbai", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes CSMT, LTT, Bandra (BDTS), Panvel, Central & BOM Airport", StationsIncluded: []string{"CSMT", "LTT", "BDTS", "MMCT", "PNVL", "DR", "BOM"}},
+	{Code: "DELHI", Name: "Delhi NCR (All Stations & Airports)", City: "New Delhi", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes NDLS, Nizamuddin, Old Delhi, Anand Vihar & DEL Airport", StationsIncluded: []string{"NDLS", "NZM", "DLI", "ANVT", "DEL"}},
+	{Code: "VARANASI", Name: "Varanasi Area (All Stations & Airports)", City: "Varanasi", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes BSB, Banaras (BSBS), Pt. Deen Dayal (DDU) & VNS Airport", StationsIncluded: []string{"BSB", "BSBS", "DDU", "VNS"}},
+	{Code: "PRAYAGRAJ", Name: "Prayagraj Area (All Stations & Airports)", City: "Prayagraj", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes Prayagraj Jn (PRYJ), Rambag, Naini & Bamrauli Airport", StationsIncluded: []string{"PRYJ", "PRRB", "NYN", "IXD"}},
+	{Code: "BENGALURU", Name: "Bengaluru (All Stations & Airports)", City: "Bengaluru", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes KSR Bengaluru, Yesvantpur, SMVT & BLR Airport", StationsIncluded: []string{"SBC", "YPR", "SMVB", "BLR"}},
+	{Code: "KOLKATA", Name: "Kolkata (All Stations & Airports)", City: "Kolkata", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes Howrah, Sealdah, Kolkata Terminus & CCU Airport", StationsIncluded: []string{"HWH", "SDAH", "KOAA", "CCU"}},
+	{Code: "CHENNAI", Name: "Chennai (All Stations & Airports)", City: "Chennai", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes MGR Chennai Central, Egmore & MAA Airport", StationsIncluded: []string{"MAS", "MS", "MAA"}},
+	{Code: "PATNA", Name: "Patna (All Stations & Airports)", City: "Patna", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes Patna Jn, Danapur & PAT Airport", StationsIncluded: []string{"PNBE", "DNR", "PAT"}},
+	{Code: "JAIPUR", Name: "Jaipur (All Stations & Airports)", City: "Jaipur", Country: "IN", Type: "city_hub", IsMajorHub: true, Subtitle: "Includes Jaipur Jn, Gandhinagar Jaipur & JAI Airport", StationsIncluded: []string{"JP", "JAI"}},
+
+	// Rail Stations
+	{Code: "CSMT", Name: "Chhatrapati Shivaji Maharaj Terminus", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Central Railway Trunk Terminal"},
+	{Code: "LTT", Name: "Lokmanya Tilak Terminus", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Kurla East · North/Eastbound Expresses"},
+	{Code: "BDTS", Name: "Bandra Terminus", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Western Railway Express Terminal"},
+	{Code: "MMCT", Name: "Mumbai Central", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Western Railway Premier Line"},
+	{Code: "PNVL", Name: "Panvel Junction", City: "Mumbai", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Navi Mumbai Gateway"},
+	{Code: "NDLS", Name: "New Delhi Railway Station", City: "New Delhi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Paharganj / Ajmeri Gate Premier Terminal"},
+	{Code: "NZM", Name: "Hazrat Nizamuddin", City: "New Delhi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "South/Central Rajdhani Terminal"},
+	{Code: "DLI", Name: "Old Delhi Railway Station", City: "New Delhi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Chandni Chowk Historic Terminal"},
+	{Code: "ANVT", Name: "Anand Vihar Terminus", City: "New Delhi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "East Delhi Terminal"},
+	{Code: "PRYJ", Name: "Prayagraj Junction", City: "Prayagraj", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Civil Lines · Major NCR Hub"},
+	{Code: "PRRB", Name: "Prayagraj Rambag", City: "Prayagraj", Country: "IN", Type: "railway_station", IsMajorHub: false, Subtitle: "NER Varanasi Line Station"},
+	{Code: "BSB", Name: "Varanasi Junction", City: "Varanasi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Cantonment Main Station"},
+	{Code: "BSBS", Name: "Banaras Railway Station", City: "Varanasi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Manduadih Modern Terminal"},
+	{Code: "DDU", Name: "Pt. Deen Dayal Upadhyaya Junction", City: "Varanasi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Mughalsarai Grand Trunk Hub"},
+	{Code: "ET", Name: "Itarsi Junction", City: "Itarsi", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "National Quad Junction"},
+	{Code: "BPL", Name: "Bhopal Junction", City: "Bhopal", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Madhya Pradesh Capital Hub"},
+	{Code: "JBP", Name: "Jabalpur", City: "Jabalpur", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "West Central Railway HQ"},
+	{Code: "KTE", Name: "Katni Junction", City: "Katni", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Central Mineral Junction"},
+	{Code: "STA", Name: "Satna Junction", City: "Satna", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Rewa & Chitrakoot Gateway"},
+	{Code: "BSL", Name: "Bhusaval Junction", City: "Bhusaval", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Maharashtra-MP Hub"},
+	{Code: "KNW", Name: "Khandwa Junction", City: "Khandwa", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Omkareshwar Gateway"},
+	{Code: "CNB", Name: "Kanpur Central", City: "Kanpur", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Grand Chord Central Hub"},
+	{Code: "LKO", Name: "Lucknow Charbagh", City: "Lucknow", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Awadh Capital Junction"},
+	{Code: "HWH", Name: "Howrah Junction", City: "Kolkata", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Historic 23-platform Megaterminal"},
+	{Code: "SBC", Name: "KSR Bengaluru", City: "Bengaluru", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Majestic City Central Station"},
+	{Code: "MAS", Name: "Chennai Central", City: "Chennai", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Southern Railway HQ"},
+	{Code: "PNBE", Name: "Patna Junction", City: "Patna", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Bihar Capital Hub"},
+	{Code: "JAI", Name: "Jaipur Junction", City: "Jaipur", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "Pink City Central Station"},
+	{Code: "JP", Name: "Jaipur Junction", City: "Jaipur", Country: "IN", Type: "railway_station", IsMajorHub: true, Subtitle: "North Western Railway HQ"},
+
+	// Airports (IATA)
+	{Code: "BOM", Name: "Chhatrapati Shivaji Maharaj International Airport", City: "Mumbai", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "CSMIA · Terminal 1 & 2"},
+	{Code: "DEL", Name: "Indira Gandhi International Airport", City: "New Delhi", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "IGI Airport · Terminal 1, 2, 3"},
+	{Code: "VNS", Name: "Lal Bahadur Shastri International Airport", City: "Varanasi", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "Babatpur Airport (Varanasi)"},
+	{Code: "IXD", Name: "Prayagraj Bamrauli Airport", City: "Prayagraj", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "Bamrauli Civil Enclave"},
+	{Code: "BLR", Name: "Kempegowda International Airport", City: "Bengaluru", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "Bengaluru Airport"},
+	{Code: "CCU", Name: "Netaji Subhash Chandra Bose Intl Airport", City: "Kolkata", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "Dum Dum Airport"},
+	{Code: "MAA", Name: "Chennai International Airport", City: "Chennai", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "Meenambakkam Airport"},
+	{Code: "PAT", Name: "Jay Prakash Narayan Airport", City: "Patna", Country: "IN", Type: "airport", IsMajorHub: true, Subtitle: "Patna Civil Airport"},
 }
 
 var sampleGodanRoute = []routes.TrainStop{
@@ -110,10 +149,19 @@ func handleLocations(w http.ResponseWriter, r *http.Request) {
 	var matched []LocationItem
 
 	for _, loc := range locationsCatalog {
+		matchedIncluded := false
+		for _, s := range loc.StationsIncluded {
+			if strings.Contains(strings.ToLower(s), query) {
+				matchedIncluded = true
+				break
+			}
+		}
 		if query == "" ||
 			strings.Contains(strings.ToLower(loc.Name), query) ||
 			strings.Contains(strings.ToLower(loc.City), query) ||
-			strings.Contains(strings.ToLower(loc.Code), query) {
+			strings.Contains(strings.ToLower(loc.Code), query) ||
+			strings.Contains(strings.ToLower(loc.Subtitle), query) ||
+			matchedIncluded {
 			matched = append(matched, loc)
 		}
 	}

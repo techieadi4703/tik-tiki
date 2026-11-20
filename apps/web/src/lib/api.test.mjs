@@ -41,7 +41,7 @@ test('searchLocations matches by code, name, and city', () => {
     (s) => s.name.toLowerCase().includes(queryByName.toLowerCase())
   );
   assert.ok(matchByName.length >= 1);
-  assert.strictEqual(matchByName[0].code, 'PRYJ');
+  assert.ok(matchByName.some((s) => s.code === 'PRYJ'));
 });
 
 test('resolveStationDisplayName formats Name and Code cleanly', () => {

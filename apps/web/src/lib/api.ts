@@ -81,12 +81,14 @@ export async function searchLocations(query: string): Promise<LocationItem[]> {
     console.warn('Backend locations lookup fallback to local catalog:', err);
   }
 
-  // Resilient client-side filtering matching code, name, or city
+  // Resilient client-side filtering matching code, name, city, subtitle, or included stations
   return (MAJOR_STATIONS_CATALOG as LocationItem[]).filter(
     (loc) =>
       loc.code.toLowerCase().includes(cleanQuery) ||
       loc.name.toLowerCase().includes(cleanQuery) ||
-      loc.city.toLowerCase().includes(cleanQuery)
+      loc.city.toLowerCase().includes(cleanQuery) ||
+      (loc.subtitle && loc.subtitle.toLowerCase().includes(cleanQuery)) ||
+      (loc.stations_included && loc.stations_included.some((s) => s.toLowerCase().includes(cleanQuery)))
   );
 }
 

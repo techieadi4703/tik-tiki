@@ -7,6 +7,8 @@ export interface LocationItem {
   country: string;
   type: string;
   is_major_hub: boolean;
+  subtitle?: string;
+  stations_included?: string[];
 }
 
 export interface ClassOption {

@@ -25,6 +25,15 @@ type SearchQuery struct {
 	Currency      string    `json:"currency"`
 }
 
+// ClassOption holds fare and availability for a specific railway travel class
+type ClassOption struct {
+	Code   string  `json:"code"` // '1A', '2A', '3A', 'SL'
+	Name   string  `json:"name"`
+	Fare   float64 `json:"fare"`
+	Status string  `json:"status"`
+	Seats  int     `json:"seats"`
+}
+
 // RouteStopInfo holds details of intermediate halts on a train route
 type RouteStopInfo struct {
 	StationCode     string `json:"station_code"`
@@ -61,6 +70,7 @@ type NormalizedOffer struct {
 	DeparturePlatform string          `json:"departure_platform,omitempty"`
 	ArrivalPlatform   string          `json:"arrival_platform,omitempty"`
 	Stops             []RouteStopInfo `json:"stops,omitempty"`
+	Classes           []ClassOption   `json:"classes,omitempty"`
 }
 
 // ProviderAdapter defines the contract every external data source must implement

@@ -25,7 +25,7 @@ func TestStrategy1_UpstreamBooking(t *testing.T) {
 	stops := sampleTrainStops()
 
 	t.Run("Finds upstream stations for Itarsi to Prayagraj within budget", func(t *testing.T) {
-		options := FindUpstreamOptions(stops, "ET", "PRYJ", "3A", 2, 350.0)
+		options := FindUpstreamOptions("Godan Express", "11059", stops, "ET", "PRYJ", "3A", 2, 350.0)
 		if len(options) == 0 {
 			t.Fatalf("expected upstream booking options, got 0")
 		}
@@ -41,14 +41,14 @@ func TestStrategy1_UpstreamBooking(t *testing.T) {
 	})
 
 	t.Run("Returns nil when origin is the starting station (LTT)", func(t *testing.T) {
-		options := FindUpstreamOptions(stops, "LTT", "PRYJ", "3A", 2, 350.0)
+		options := FindUpstreamOptions("Godan Express", "11059", stops, "LTT", "PRYJ", "3A", 2, 350.0)
 		if len(options) != 0 {
 			t.Errorf("expected 0 options when origin is start of line, got %d", len(options))
 		}
 	})
 
 	t.Run("Returns nil when destination comes before origin", func(t *testing.T) {
-		options := FindUpstreamOptions(stops, "PRYJ", "ET", "3A", 2, 350.0)
+		options := FindUpstreamOptions("Godan Express", "11059", stops, "PRYJ", "ET", "3A", 2, 350.0)
 		if len(options) != 0 {
 			t.Errorf("expected nil for reverse direction, got %d", len(options))
 		}

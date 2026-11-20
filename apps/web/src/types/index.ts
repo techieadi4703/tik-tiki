@@ -9,6 +9,14 @@ export interface LocationItem {
   is_major_hub: boolean;
 }
 
+export interface ClassOption {
+  code: string; // '1A' | '2A' | '3A' | 'SL'
+  name: string;
+  fare: number;
+  status: 'AVAILABLE' | 'RAC' | 'WAITLIST' | 'SOLD_OUT';
+  seats: number;
+}
+
 export interface RouteStopInfo {
   station_code: string;
   station_name: string;
@@ -43,6 +51,7 @@ export interface NormalizedOffer {
   departure_platform?: string;
   arrival_platform?: string;
   stops?: RouteStopInfo[];
+  classes?: ClassOption[];
 }
 
 export interface UpstreamBookingOption {

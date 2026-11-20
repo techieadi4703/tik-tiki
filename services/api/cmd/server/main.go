@@ -274,7 +274,7 @@ func handleOptimizeJourneys(w http.ResponseWriter, r *http.Request) {
 
 		// 1. Dynamic Upstream Strategy
 		if len(primaryTrain.Stops) > 0 {
-			upstreamOptions = routes.FindUpstreamOptions(primaryTrain.Stops, origin, dest, classCode, 2, 350.0)
+			upstreamOptions = routes.FindUpstreamOptions(primaryTrain.TrainName, primaryTrain.TrainNumber, primaryTrain.Stops, origin, dest, classCode, 2, 350.0)
 		}
 		if len(upstreamOptions) == 0 && len(primaryTrain.Stops) > 2 {
 			firstStop := primaryTrain.Stops[0]

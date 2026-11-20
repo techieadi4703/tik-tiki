@@ -12,6 +12,8 @@ interface SearchHeaderProps {
   selectedMode: string;
   onSearch: (from: string, to: string, date: string) => void;
   onSelectMode: (mode: string) => void;
+  onOpenLiveStatus?: () => void;
+  onOpenCoachMap?: () => void;
 }
 
 export function SearchHeader({
@@ -21,6 +23,8 @@ export function SearchHeader({
   selectedMode,
   onSearch,
   onSelectMode,
+  onOpenLiveStatus,
+  onOpenCoachMap,
 }: SearchHeaderProps) {
   const [fromCode, setFromCode] = useState(origin);
   const [toCode, setToCode] = useState(destination);
@@ -63,11 +67,34 @@ export function SearchHeader({
               Travel Intelligence
             </span>
           </div>
+          {/* Navigation Items */}
+          <div className="hidden md:flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs font-semibold">
+            <button
+              type="button"
+              className="px-3 py-1 rounded-lg bg-zinc-800 text-white border border-zinc-700/60 shadow-sm"
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={onOpenLiveStatus}
+              className="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors"
+            >
+              Live Running Status
+            </button>
+            <button
+              type="button"
+              onClick={onOpenCoachMap}
+              className="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors"
+            >
+              Seat Maps
+            </button>
+          </div>
+
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-block text-xs text-slate-400 font-medium">Zero-Ad Modern Travel</span>
             <Link
               href="/trips"
-              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-750 transition-colors flex items-center gap-1.5 text-xs font-semibold shadow-sm"
             >
               <Ticket className="w-3.5 h-3.5 text-emerald-400" />
               <span>My Trips</span>

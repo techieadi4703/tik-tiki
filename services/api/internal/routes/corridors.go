@@ -234,6 +234,77 @@ var MasterCorridors = []RealCorridorTrain{
 			{TrainNumber: "12008", StationCode: "MAS", StationName: "Chennai Central", SequenceNumber: 3, DistanceKm: 358, ScheduledArrive: "21:30", PlatformNumber: 1, HaltMinutes: 0},
 		},
 	},
+
+	// ==========================================
+	// 5. RETURN TRUNKS: Delhi -> Mumbai, Varanasi -> Mumbai, Howrah -> Delhi, Chennai -> Bengaluru
+	// ==========================================
+	{
+		TrainNumber:       "12952",
+		TrainName:         "Tejas Rajdhani Express (Return)",
+		TrainType:         "RAJDHANI",
+		SourceCode:        "NDLS",
+		DestCode:          "MMCT",
+		BaseFare3A:        2850.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 96,
+		DeparturePlatform: 1,
+		ArrivalPlatform:   1,
+		Stops: []TrainStop{
+			{TrainNumber: "12952", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "16:55", PlatformNumber: 1, HaltMinutes: 0},
+			{TrainNumber: "12952", StationCode: "KOTA", StationName: "Kota Junction", SequenceNumber: 2, DistanceKm: 466, ScheduledArrive: "21:30", ScheduledDepart: "21:40", PlatformNumber: 1, HaltMinutes: 10},
+			{TrainNumber: "12952", StationCode: "RTM", StationName: "Ratlam Junction", SequenceNumber: 3, DistanceKm: 733, ScheduledArrive: "00:55", ScheduledDepart: "01:00", PlatformNumber: 4, HaltMinutes: 5},
+			{TrainNumber: "12952", StationCode: "BRC", StationName: "Vadodara Junction", SequenceNumber: 4, DistanceKm: 993, ScheduledArrive: "04:18", ScheduledDepart: "04:28", PlatformNumber: 2, HaltMinutes: 10},
+			{TrainNumber: "12952", StationCode: "BVI", StationName: "Borivali", SequenceNumber: 5, DistanceKm: 1354, ScheduledArrive: "07:58", ScheduledDepart: "08:00", PlatformNumber: 7, HaltMinutes: 2},
+			{TrainNumber: "12952", StationCode: "MMCT", StationName: "Mumbai Central", SequenceNumber: 6, DistanceKm: 1386, ScheduledArrive: "08:35", PlatformNumber: 1, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12168",
+		TrainName:         "Banaras - LTT Superfast Express",
+		TrainType:         "SUPERFAST",
+		SourceCode:        "BSBS",
+		DestCode:          "LTT",
+		BaseFare3A:        1530.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"},
+		PantryAvailable:   true,
+		PunctualityRating: 89,
+		DeparturePlatform: 2,
+		ArrivalPlatform:   3,
+		Stops: []TrainStop{
+			{TrainNumber: "12168", StationCode: "BSBS", StationName: "Banaras", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "10:10", PlatformNumber: 2, HaltMinutes: 0},
+			{TrainNumber: "12168", StationCode: "BSB", StationName: "Varanasi Junction", SequenceNumber: 2, DistanceKm: 4, ScheduledArrive: "10:25", ScheduledDepart: "10:35", PlatformNumber: 1, HaltMinutes: 10},
+			{TrainNumber: "12168", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 3, DistanceKm: 125, ScheduledArrive: "12:55", ScheduledDepart: "13:20", PlatformNumber: 7, HaltMinutes: 25},
+			{TrainNumber: "12168", StationCode: "JBP", StationName: "Jabalpur", SequenceNumber: 4, DistanceKm: 499, ScheduledArrive: "18:40", ScheduledDepart: "18:50", PlatformNumber: 2, HaltMinutes: 10},
+			{TrainNumber: "12168", StationCode: "ET", StationName: "Itarsi Junction", SequenceNumber: 5, DistanceKm: 744, ScheduledArrive: "22:20", ScheduledDepart: "22:30", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "12168", StationCode: "BSL", StationName: "Bhusaval Junction", SequenceNumber: 6, DistanceKm: 1051, ScheduledArrive: "02:30", ScheduledDepart: "02:35", PlatformNumber: 3, HaltMinutes: 5},
+			{TrainNumber: "12168", StationCode: "KYN", StationName: "Kalyan Junction", SequenceNumber: 7, DistanceKm: 1440, ScheduledArrive: "08:12", ScheduledDepart: "08:15", PlatformNumber: 5, HaltMinutes: 3},
+			{TrainNumber: "12168", StationCode: "LTT", StationName: "Lokmanya Tilak Terminus", SequenceNumber: 8, DistanceKm: 1475, ScheduledArrive: "09:00", PlatformNumber: 3, HaltMinutes: 0},
+		},
+	},
+	{
+		TrainNumber:       "12301",
+		TrainName:         "Howrah Rajdhani Express (Return)",
+		TrainType:         "RAJDHANI",
+		SourceCode:        "HWH",
+		DestCode:          "NDLS",
+		BaseFare3A:        2980.00,
+		DaysOfRun:         []string{"MON", "TUE", "WED", "THU", "FRI", "SAT"},
+		PantryAvailable:   true,
+		PunctualityRating: 94,
+		DeparturePlatform: 9,
+		ArrivalPlatform:   1,
+		Stops: []TrainStop{
+			{TrainNumber: "12301", StationCode: "HWH", StationName: "Howrah Junction", SequenceNumber: 1, DistanceKm: 0, ScheduledDepart: "16:50", PlatformNumber: 9, HaltMinutes: 0},
+			{TrainNumber: "12301", StationCode: "ASN", StationName: "Asansol Junction", SequenceNumber: 2, DistanceKm: 200, ScheduledArrive: "18:57", ScheduledDepart: "18:59", PlatformNumber: 4, HaltMinutes: 2},
+			{TrainNumber: "12301", StationCode: "DHN", StationName: "Dhanbad Junction", SequenceNumber: 3, DistanceKm: 258, ScheduledArrive: "19:55", ScheduledDepart: "20:00", PlatformNumber: 3, HaltMinutes: 5},
+			{TrainNumber: "12301", StationCode: "GAYA", StationName: "Gaya Junction", SequenceNumber: 4, DistanceKm: 459, ScheduledArrive: "22:19", ScheduledDepart: "22:22", PlatformNumber: 1, HaltMinutes: 3},
+			{TrainNumber: "12301", StationCode: "DDU", StationName: "Pt Deen Dayal Upadhyaya", SequenceNumber: 5, DistanceKm: 664, ScheduledArrive: "00:45", ScheduledDepart: "00:55", PlatformNumber: 4, HaltMinutes: 10},
+			{TrainNumber: "12301", StationCode: "PRYJ", StationName: "Prayagraj Junction", SequenceNumber: 6, DistanceKm: 817, ScheduledArrive: "02:43", ScheduledDepart: "02:45", PlatformNumber: 1, HaltMinutes: 2},
+			{TrainNumber: "12301", StationCode: "CNB", StationName: "Kanpur Central", SequenceNumber: 7, DistanceKm: 1011, ScheduledArrive: "04:50", ScheduledDepart: "04:55", PlatformNumber: 1, HaltMinutes: 5},
+			{TrainNumber: "12301", StationCode: "NDLS", StationName: "New Delhi", SequenceNumber: 8, DistanceKm: 1451, ScheduledArrive: "10:05", PlatformNumber: 1, HaltMinutes: 0},
+		},
+	},
 }
 
 // cityStationGroups resolves multi-station metropolitan cities
@@ -278,6 +349,12 @@ func matchesStation(stopCode string, aliases []string) bool {
 		}
 	}
 	return false
+}
+
+// StationMatchesGroup checks if a station stop code matches a query station code or its metropolitan aliases
+func StationMatchesGroup(stopCode, queryCode string) bool {
+	aliases := getAliases(queryCode)
+	return matchesStation(stopCode, aliases)
 }
 
 // FindAllTrainsBetweenStations searches real corridor schedules for trains serving both stations

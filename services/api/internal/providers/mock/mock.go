@@ -51,12 +51,12 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 		var originStop, destStop *routes.TrainStop
 		for i := range train.Stops {
 			stopCode := strings.ToUpper(train.Stops[i].StationCode)
-			if stopCode == strings.ToUpper(query.OriginCode) || (query.OriginCode == "BOM" && (stopCode == "MMCT" || stopCode == "LTT")) {
+			if routes.StationMatchesGroup(stopCode, query.OriginCode) {
 				if originStop == nil {
 					originStop = &train.Stops[i]
 				}
 			}
-			if stopCode == strings.ToUpper(query.DestCode) || (query.DestCode == "BOM" && (stopCode == "MMCT" || stopCode == "LTT")) {
+			if routes.StationMatchesGroup(stopCode, query.DestCode) {
 				destStop = &train.Stops[i]
 			}
 		}
@@ -119,6 +119,17 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 				punct = 88
 			}
 
+			base3A := train.BaseFare3A
+			if base3A <= 0 {
+				base3A = 1580.0
+			}
+			classes := []providers.ClassOption{
+				{Code: "3A", Name: "AC 3 Tier", Fare: base3A, Status: status, Seats: availSeats},
+				{Code: "2A", Name: "AC 2 Tier", Fare: base3A * 1.35, Status: "AVAILABLE", Seats: 6},
+				{Code: "1A", Name: "AC First Class", Fare: base3A * 1.8, Status: "AVAILABLE", Seats: 2},
+				{Code: "SL", Name: "Sleeper Class", Fare: base3A * 0.42, Status: "WAITLIST", Seats: 18},
+			}
+
 			offer := providers.NormalizedOffer{
 				ProviderID:        "irctc_cris",
 				Mode:              providers.ModeRail,
@@ -142,6 +153,7 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 				DeparturePlatform: depPlat,
 				ArrivalPlatform:   arrPlat,
 				Stops:             stopInfos,
+				Classes:           classes,
 			}
 			offers = append(offers, offer)
 		}

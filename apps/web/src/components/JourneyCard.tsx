@@ -15,8 +15,9 @@ import {
   Zap,
   Clock,
   MapPin,
+  PlugZap,
 } from 'lucide-react';
-import { NormalizedOffer } from '../types';
+import { NormalizedOffer, ClassOption } from '../types';
 
 interface JourneyCardProps {
   offer: NormalizedOffer;
@@ -32,6 +33,21 @@ export function JourneyCard({
   onOpenCoachModal,
 }: JourneyCardProps) {
   const [showHalts, setShowHalts] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<string>('3A');
+
+  const currentClasses: ClassOption[] = offer.classes && offer.classes.length > 0
+    ? offer.classes
+    : [
+        { code: '3A', name: 'AC 3 Tier', fare: offer.price, status: offer.status, seats: offer.available_seats || 8 },
+        { code: '2A', name: 'AC 2 Tier', fare: Math.round(offer.price * 1.35), status: 'AVAILABLE', seats: 6 },
+        { code: '1A', name: 'AC First Class', fare: Math.round(offer.price * 1.8), status: 'AVAILABLE', seats: 2 },
+        { code: 'SL', name: 'Sleeper Class', fare: Math.round(offer.price * 0.42), status: 'WAITLIST', seats: 18 },
+      ];
+
+  const activeClassObj = currentClasses.find((c) => c.code === selectedClass) || currentClasses[0];
+  const activeFare = activeClassObj.fare;
+  const activeStatus = activeClassObj.status;
+  const activeSeats = activeClassObj.seats;
 
   const getModeIcon = () => {
     switch (offer.mode) {
@@ -46,7 +62,7 @@ export function JourneyCard({
     }
   };
 
-  const isWaitlist = offer.status === 'WAITLIST' || offer.status === 'SOLD_OUT';
+  const isWaitlist = activeStatus === 'WAITLIST' || activeStatus === 'SOLD_OUT';
   const allWeekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const dayNameMap: Record<string, number> = {
     MON: 0,
@@ -65,8 +81,8 @@ export function JourneyCard({
   );
 
   return (
-    <div className="w-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700/80 rounded-2xl p-4 sm:p-5 shadow-sm transition-all hover:shadow-lg flex flex-col gap-4">
-      {/* Top Header: Operator, Train Name, Service No, Days of Run, and Journey Score */}
+    <div className="w-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-750 rounded-2xl p-4 sm:p-5 shadow-sm transition-all hover:shadow-lg flex flex-col gap-4">
+      {/* Top Header: Train Name, Service Number, Days of Run & Value Index */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-zinc-850 border border-zinc-750 shrink-0">
@@ -207,25 +223,59 @@ export function JourneyCard({
         <div className="sm:col-span-4 flex sm:flex-col sm:items-end justify-between items-center gap-2 border-t sm:border-t-0 border-zinc-800/60 pt-3 sm:pt-0">
           <div className="text-left sm:text-right">
             <div className="text-2xl font-black text-white">
-              ₹{offer.price.toLocaleString('en-IN')}
+              ₹{Math.round(activeFare).toLocaleString('en-IN')}
             </div>
-            <div className="text-[11px] text-zinc-400 font-medium">Class 3AC · All taxes incl.</div>
+            <div className="text-[11px] text-zinc-400 font-medium">Class {selectedClass} · All taxes incl.</div>
           </div>
 
           <div>
-            {offer.status === 'AVAILABLE' ? (
+            {activeStatus === 'AVAILABLE' ? (
               <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Available ({offer.available_seats || 8})
+                Available ({activeSeats})
               </span>
             ) : (
               <span className="text-xs font-bold text-amber-400 bg-amber-950/80 border border-amber-800/60 px-2.5 py-1 rounded-lg">
-                Waitlist 18
+                Waitlist {activeSeats || 18}
               </span>
             )}
           </div>
         </div>
       </div>
+
+      {/* Class Fare Breakdown Selector Strip */}
+      {offer.mode === 'RAIL' && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-t border-zinc-800/50 pt-2.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mr-1 shrink-0">Class:</span>
+          {currentClasses.map((cls) => {
+            const isSelected = selectedClass === cls.code;
+            return (
+              <button
+                key={cls.code}
+                type="button"
+                onClick={() => setSelectedClass(cls.code)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all ${
+                  isSelected
+                    ? 'bg-emerald-950/80 border-emerald-500 text-white shadow-sm ring-1 ring-emerald-500/50'
+                    : 'bg-zinc-850 hover:bg-zinc-800 border-zinc-750 text-zinc-300'
+                }`}
+              >
+                <span className="font-bold">{cls.code}</span>
+                <span className="text-zinc-400 font-mono text-[11px]">₹{Math.round(cls.fare).toLocaleString('en-IN')}</span>
+                <span
+                  className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
+                    cls.status === 'AVAILABLE'
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-amber-500/20 text-amber-400'
+                  }`}
+                >
+                  {cls.status === 'AVAILABLE' ? `CNF ${cls.seats}` : `WL ${cls.seats}`}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Expandable Route Halts Drawer */}
       {showHalts && offer.stops && offer.stops.length > 0 && (
@@ -282,6 +332,9 @@ export function JourneyCard({
           <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
             <Zap className="w-3 h-3 text-emerald-400" /> e-Catering Available
           </span>
+          <span className="text-[11px] text-zinc-400 bg-zinc-850 border border-zinc-750 px-2 py-0.5 rounded-md flex items-center gap-1">
+            <PlugZap className="w-3 h-3 text-sky-400" /> Charging Sockets
+          </span>
         </div>
 
         {/* Action Buttons */}
@@ -310,7 +363,14 @@ export function JourneyCard({
 
           <button
             type="button"
-            onClick={() => onOpenBookingModal?.(offer)}
+            onClick={() =>
+              onOpenBookingModal?.({
+                ...offer,
+                price: activeFare,
+                status: activeStatus as 'AVAILABLE' | 'WAITLIST',
+                available_seats: activeSeats,
+              })
+            }
             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
           >
             Book Ticket <Ticket className="w-3.5 h-3.5" />

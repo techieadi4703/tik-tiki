@@ -8,6 +8,7 @@ import { JourneyCard } from '../components/JourneyCard';
 import { SeatAlertModal } from '../components/SeatAlertModal';
 import { PassengerBookingModal } from '../components/PassengerBookingModal';
 import { CoachSeatMapModal } from '../components/CoachSeatMapModal';
+import { LiveStatusModal } from '../components/LiveStatusModal';
 import { FilterSortBar, TimeWindow, SortOption, TrainTypeFilter } from '../components/FilterSortBar';
 import { NormalizedOffer, JourneyOptimizationResult } from '../types';
 import { searchJourneys, fetchOptimizedJourneyStrategies } from '../lib/api';
@@ -32,6 +33,7 @@ export default function Home() {
   const [activeAlertOffer, setActiveAlertOffer] = useState<NormalizedOffer | null>(null);
   const [activeBookingOffer, setActiveBookingOffer] = useState<NormalizedOffer | null>(null);
   const [activeCoachOffer, setActiveCoachOffer] = useState<NormalizedOffer | null>(null);
+  const [showLiveStatus, setShowLiveStatus] = useState(false);
 
   const performSearch = async (from: string, to: string, travelDate: string) => {
     if (!from || !to) return;
@@ -118,6 +120,33 @@ export default function Home() {
         selectedMode={mode}
         onSearch={performSearch}
         onSelectMode={setMode}
+        onOpenLiveStatus={() => setShowLiveStatus(true)}
+        onOpenCoachMap={() => {
+          if (offers.length > 0) {
+            setActiveCoachOffer(offers[0]);
+          } else {
+            // Default demo offer for coach visualizer
+            setActiveCoachOffer({
+              provider_id: 'irctc_cris',
+              mode: 'RAIL',
+              operator_name: 'Indian Railways (12951)',
+              service_number: '12951 (Tejas Rajdhani Express)',
+              origin_code: origin || 'MMCT',
+              dest_code: destination || 'NDLS',
+              departure_at: new Date().toISOString(),
+              arrival_at: new Date(Date.now() + 16 * 3600 * 1000).toISOString(),
+              duration_minutes: 960,
+              price: 2850,
+              currency: 'INR',
+              transfers: 0,
+              status: 'AVAILABLE',
+              available_seats: 14,
+              booking_url: '',
+              retrieved_at: new Date().toISOString(),
+              score: 96,
+            });
+          }
+        }}
       />
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 flex flex-col gap-6">
@@ -254,6 +283,12 @@ export default function Home() {
       <CoachSeatMapModal
         offer={activeCoachOffer}
         onClose={() => setActiveCoachOffer(null)}
+      />
+
+      {/* Live Train Running Status Modal */}
+      <LiveStatusModal
+        isOpen={showLiveStatus}
+        onClose={() => setShowLiveStatus(false)}
       />
 
       {/* Seat Alert Sniping Modal */}

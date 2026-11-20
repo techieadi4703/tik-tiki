@@ -80,7 +80,7 @@ type JourneyOptimizationResult struct {
 }
 
 // FindUpstreamOptions searches for earlier stations on the same train route where quota is available
-func FindUpstreamOptions(routeStops []TrainStop, originCode, destCode, classCode string, maxHopLookback int, maxExtraFare float64) []UpstreamBookingOption {
+func FindUpstreamOptions(trainName, trainNumber string, routeStops []TrainStop, originCode, destCode, classCode string, maxHopLookback int, maxExtraFare float64) []UpstreamBookingOption {
 	var originIndex = -1
 	var destIndex = -1
 
@@ -119,10 +119,15 @@ func FindUpstreamOptions(routeStops []TrainStop, originCode, destCode, classCode
 			continue
 		}
 
+		tName := trainName
+		if tName == "" {
+			tName = fmt.Sprintf("Express (%s)", trainNumber)
+		}
+
 		results = append(results, UpstreamBookingOption{
 			Type:                  "UPSTREAM_BOOKING",
-			TrainNumber:           upstreamStop.TrainNumber,
-			TrainName:             "Godan Express (11059)",
+			TrainNumber:           trainNumber,
+			TrainName:             tName,
 			BookFromStation:       fmt.Sprintf("%s (%s)", upstreamStop.StationName, upstreamStop.StationCode),
 			BoardAtStation:        fmt.Sprintf("%s (%s)", routeStops[originIndex].StationName, originCode),
 			DestinationStation:    fmt.Sprintf("%s (%s)", routeStops[destIndex].StationName, destCode),

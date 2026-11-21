@@ -2,9 +2,11 @@ package bookings
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -19,6 +21,34 @@ type Passenger struct {
 	SeniorCitizen   bool   `json:"senior_citizen,omitempty"`   // Senior citizen lower berth priority
 	FoodPreference  string `json:"food_preference,omitempty"`  // VEG, NON_VEG, NO_FOOD
 	BerthAllocated  string `json:"berth_allocated,omitempty"`  // e.g. "Coach B2, Berth 24 (Lower)"
+}
+
+// UnmarshalJSON permits age as either JSON integer or string
+func (p *Passenger) UnmarshalJSON(data []byte) error {
+	type Alias Passenger
+	aux := &struct {
+		RawAge json.RawMessage `json:"age"`
+		*Alias
+	}{
+		Alias: (*Alias)(p),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if len(aux.RawAge) > 0 {
+		var num int
+		if err := json.Unmarshal(aux.RawAge, &num); err == nil {
+			p.Age = num
+		} else {
+			var str string
+			if err := json.Unmarshal(aux.RawAge, &str); err == nil {
+				if parsed, err := strconv.Atoi(strings.TrimSpace(str)); err == nil {
+					p.Age = parsed
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // Booking represents a native confirmed or pending railway reservation

@@ -101,17 +101,20 @@ export function PassengerBookingModal({
   const handlePassengerChange = (index: number, field: keyof Passenger, value: any) => {
     setPassengers((prev) => {
       const updated = [...prev];
-      const pax = { ...updated[index], [field]: value };
+      const parsedValue = field === 'age' ? (parseInt(value, 10) || 0) : value;
+      const pax = { ...updated[index], [field]: parsedValue };
 
       // Auto-detect Senior Citizen eligibility in India (Men >= 60, Women >= 58)
       if (field === 'age' || field === 'gender') {
-        const ageNum = field === 'age' ? parseInt(value) || 0 : pax.age;
+        const ageNum = field === 'age' ? (parseInt(value, 10) || 0) : pax.age;
         const genderVal = field === 'gender' ? value : pax.gender;
         if (ageNum >= 60 || (genderVal === 'FEMALE' && ageNum >= 58)) {
           pax.senior_citizen = true;
           if (pax.berth_preference === 'NO_PREFERENCE' || pax.berth_preference === 'UPPER') {
             pax.berth_preference = 'LOWER';
           }
+        } else {
+          pax.senior_citizen = false;
         }
       }
 
@@ -130,7 +133,8 @@ export function PassengerBookingModal({
         setError(`Please enter the full name for Passenger ${i + 1}`);
         return;
       }
-      if (p.age < 1 || p.age > 120) {
+      const ageVal = parseInt(String(p.age), 10);
+      if (isNaN(ageVal) || ageVal < 1 || ageVal > 120) {
         setError(`Please enter a valid age (1-120) for Passenger ${i + 1}`);
         return;
       }
@@ -145,6 +149,16 @@ export function PassengerBookingModal({
     setError(null);
 
     try {
+      const sanitizedPassengers = passengers.map((p) => ({
+        ...p,
+        full_name: p.full_name.trim(),
+        age: parseInt(String(p.age), 10) || 25,
+        gender: p.gender || 'MALE',
+        berth_preference: p.berth_preference || 'NO_PREFERENCE',
+        senior_citizen: Boolean(p.senior_citizen),
+        food_preference: p.food_preference || 'NO_FOOD',
+      }));
+
       const initiated = await initiateBooking({
         user_id: currentUser?.id,
         train_number: offer.service_number.split(' ')[0],
@@ -157,7 +171,7 @@ export function PassengerBookingModal({
         quota,
         total_fare: totalFare,
         irctc_username: irctcUsername.trim(),
-        passengers,
+        passengers: sanitizedPassengers,
       });
 
       setPendingBooking(initiated);

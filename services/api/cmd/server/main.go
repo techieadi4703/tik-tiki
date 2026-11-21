@@ -686,7 +686,8 @@ func handleInitiateBooking(w http.ResponseWriter, r *http.Request) {
 
 	var req bookings.InitiateBookingRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
+		log.Printf("❌ [BOOKING INITIATE] JSON decode error: %v", err)
+		http.Error(w, fmt.Sprintf(`{"error": "Invalid request body: %s"}`, err.Error()), http.StatusBadRequest)
 		return
 	}
 

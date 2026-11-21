@@ -14,6 +14,7 @@ import (
 	"tik-tiki/services/api/internal/bookings"
 	"tik-tiki/services/api/internal/providers"
 	"tik-tiki/services/api/internal/providers/mock"
+	"tik-tiki/services/api/internal/providers/railway"
 	"tik-tiki/services/api/internal/routes"
 	"tik-tiki/services/api/internal/scoring"
 )
@@ -21,6 +22,7 @@ import (
 var mockAdapter = mock.NewMockAdapter()
 var bookingManager = bookings.NewBookingManager()
 var authManager = auth.NewAuthManager()
+var liveRailwayClient = railway.NewLiveClient()
 
 type AlertRecord struct {
 	ID                  string    `json:"id"`
@@ -824,6 +826,46 @@ func handleLiveTrainStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(status)
 }
 
+func handleRailwayAvailability(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	train := r.URL.Query().Get("train")
+	if train == "" {
+		train = r.URL.Query().Get("train_number")
+	}
+	from := r.URL.Query().Get("from")
+	to := r.URL.Query().Get("to")
+	date := r.URL.Query().Get("date")
+	classType := r.URL.Query().Get("class")
+	quota := r.URL.Query().Get("quota")
+
+	if train == "" {
+		train = "12168"
+	}
+	if from == "" {
+		from = "BSB"
+	}
+	if to == "" {
+		to = "LTT"
+	}
+	if date == "" {
+		date = time.Now().Add(24 * time.Hour).Format("2006-01-02")
+	}
+
+	resp, err := liveRailwayClient.CheckLiveAvailability(r.Context(), train, from, to, date, classType, quota)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
 func main() {
 	mux := http.NewServeMux()
 
@@ -845,6 +887,7 @@ func main() {
 	mux.HandleFunc("/v1/bookings/pnr", handleBookingByPNR)
 	mux.HandleFunc("/v1/pnr/status", handlePNRStatus)
 	mux.HandleFunc("/v1/trains/live", handleLiveTrainStatus)
+	mux.HandleFunc("/v1/railway/availability", handleRailwayAvailability)
 	mux.HandleFunc("/v1/auth/register", handleRegister)
 	mux.HandleFunc("/v1/auth/login", handleLogin)
 	mux.HandleFunc("/v1/auth/me", handleMe)

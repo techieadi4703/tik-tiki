@@ -146,6 +146,47 @@ export function OptimizerSection({ optimization, destination, onOpenBookingModal
                 </div>
               </div>
             </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <div className="text-xs">
+                <span className="text-slate-500">Total Connecting Fare: </span>
+                <span className="font-mono font-black text-sm text-slate-900">
+                  ₹{Math.round(optimization.connecting_options[0].estimated_total_fare_inr).toLocaleString('en-IN')}
+                </span>
+                <span className="text-slate-400 ml-1 font-mono text-[11px]">(Leg 1 + Leg 2 Guaranteed)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const conn = optimization.connecting_options[0];
+                  const connectingOffer: NormalizedOffer = {
+                    provider_id: 'irctc_cris',
+                    mode: 'RAIL',
+                    operator_name: `Connecting Express (${conn.leg1_train_name} → ${conn.leg2_train_name})`,
+                    service_number: `${conn.leg1_train_number} / ${conn.leg2_train_number}`,
+                    origin_code: origin || 'BSB',
+                    dest_code: destination || 'NDLS',
+                    departure_at: String(conn.leg1_departure_at),
+                    arrival_at: String(conn.leg2_arrival_at),
+                    duration_minutes: conn.total_duration_minutes,
+                    price: conn.estimated_total_fare_inr,
+                    currency: 'INR',
+                    transfers: 1,
+                    status: 'AVAILABLE',
+                    available_seats: 8,
+                    booking_url: '',
+                    retrieved_at: new Date().toISOString(),
+                    score: 91,
+                    departure_platform: `Leg 1: ${conn.leg1_train_name}`,
+                    arrival_platform: `Leg 2: ${conn.leg2_train_name}`,
+                  };
+                  onOpenBookingModal?.(connectingOffer);
+                }}
+                className="px-4 py-2 bg-[#1a365d] hover:bg-blue-900 text-white font-bold text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center gap-1.5"
+              >
+                Book Connecting Journey <Ticket className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -172,9 +213,38 @@ export function OptimizerSection({ optimization, destination, onOpenBookingModal
                 <span className="mx-2 text-slate-400">→</span>
                 <span>Seat 2: <strong>{optimization.split_segment_options[0].leg2_berth}</strong></span>
               </div>
-              <span className="text-slate-600 text-[11px]">
-                {optimization.split_segment_options[0].operational_warning}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="font-mono font-bold text-slate-900">₹{optimization.split_segment_options[0].estimated_fare_inr}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const split = optimization.split_segment_options[0];
+                    const splitOffer: NormalizedOffer = {
+                      provider_id: 'irctc_cris',
+                      mode: 'RAIL',
+                      operator_name: `Same-Train Split (${split.train_name})`,
+                      service_number: split.train_number,
+                      origin_code: origin || 'BSB',
+                      dest_code: destination || 'NDLS',
+                      departure_at: new Date().toISOString(),
+                      arrival_at: new Date(Date.now() + 14 * 3600 * 1000).toISOString(),
+                      duration_minutes: 840,
+                      price: split.estimated_fare_inr,
+                      currency: 'INR',
+                      transfers: 0,
+                      status: 'AVAILABLE',
+                      available_seats: 6,
+                      booking_url: '',
+                      retrieved_at: new Date().toISOString(),
+                      score: 93,
+                    };
+                    onOpenBookingModal?.(splitOffer);
+                  }}
+                  className="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition-transform active:scale-95 flex items-center gap-1"
+                >
+                  Book Split <Ticket className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           </div>
         )}

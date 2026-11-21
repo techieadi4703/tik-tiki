@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Train, ShieldCheck, QrCode, Copy, Check, Calendar, Clock, User, Download, Printer } from 'lucide-react';
 import { Booking } from '../types';
 import { formatIndianStandardTime } from '../lib/api';
+import { ElectronicReservationSlipModal } from './ElectronicReservationSlipModal';
 
 interface TicketPassbookProps {
   booking: Booking;
@@ -11,6 +12,7 @@ interface TicketPassbookProps {
 
 export function TicketPassbook({ booking }: TicketPassbookProps) {
   const [copied, setCopied] = useState(false);
+  const [showERSModal, setShowERSModal] = useState(false);
 
   const handleCopyPNR = () => {
     navigator.clipboard.writeText(booking.pnr);
@@ -181,14 +183,14 @@ export function TicketPassbook({ booking }: TicketPassbookProps) {
 
           <div className="w-full flex items-center justify-between gap-2 pt-2 border-t border-slate-200">
             <button
-              onClick={() => window.print()}
+              onClick={() => setShowERSModal(true)}
               className="flex-1 py-2 px-3 rounded-xl bg-[#1a365d] hover:bg-blue-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-sm"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print ERS Slip</span>
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={() => setShowERSModal(true)}
               className="py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
               title="Download Ticket PDF"
             >
@@ -201,6 +203,13 @@ export function TicketPassbook({ booking }: TicketPassbookProps) {
           </div>
         </div>
       </div>
+
+      {/* Official CRIS Electronic Reservation Slip (ERS) Printable Modal */}
+      <ElectronicReservationSlipModal
+        booking={booking}
+        isOpen={showERSModal}
+        onClose={() => setShowERSModal(false)}
+      />
     </div>
   );
 }

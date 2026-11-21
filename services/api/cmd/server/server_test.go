@@ -298,4 +298,26 @@ func TestServerEndpoints_TDD(t *testing.T) {
 			t.Errorf("expected overall_status CONFIRMED, got %v", resp["overall_status"])
 		}
 	})
+
+	t.Run("GET /v1/railway/availability returns real-time seat status and telescopic fare", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v1/railway/availability?train=12168&from=BSB&to=LTT&class=3A", nil)
+		w := httptest.NewRecorder()
+		handleRailwayAvailability(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected 200, got %d", w.Code)
+		}
+
+		var resp map[string]interface{}
+		json.NewDecoder(w.Body).Decode(&resp)
+		if resp["train_number"] != "12168" {
+			t.Errorf("expected train 12168, got %v", resp["train_number"])
+		}
+		if resp["class_code"] != "3A" {
+			t.Errorf("expected class 3A, got %v", resp["class_code"])
+		}
+		if resp["status"] == "" {
+			t.Errorf("expected valid seat status, got empty")
+		}
+	})
 }

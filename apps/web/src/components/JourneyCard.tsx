@@ -36,9 +36,23 @@ export function JourneyCard({
 }: JourneyCardProps) {
   const [showHalts, setShowHalts] = useState(false);
 
-  // Initialize selected class (default to 3A if available, or first class)
+  // Initialize selected class accurately according to train archetype
+  const isVandeBharatOrShatabdi = /vande|shatabdi/i.test(offer.operator_name || '') || /vande|shatabdi/i.test(offer.service_number || '');
+  const isRajdhani = /rajdhani/i.test(offer.operator_name || '') || /rajdhani/i.test(offer.service_number || '');
+
   const defaultClasses: ClassOption[] = offer.classes && offer.classes.length > 0
     ? offer.classes
+    : isVandeBharatOrShatabdi
+    ? [
+        { code: 'CC', name: 'AC Chair Car', fare: offer.price, status: offer.status, seats: offer.available_seats || 14 },
+        { code: 'EC', name: 'Exec Chair Car', fare: Math.round(offer.price * 1.85), status: 'AVAILABLE', seats: 4 },
+      ]
+    : isRajdhani
+    ? [
+        { code: '3A', name: 'AC 3 Tier', fare: offer.price, status: offer.status, seats: offer.available_seats || 8 },
+        { code: '2A', name: 'AC 2 Tier', fare: Math.round(offer.price * 1.35), status: 'AVAILABLE', seats: 6 },
+        { code: '1A', name: 'AC First Class', fare: Math.round(offer.price * 1.8), status: 'AVAILABLE', seats: 2 },
+      ]
     : [
         { code: '3A', name: 'AC 3 Tier', fare: offer.price, status: offer.status, seats: offer.available_seats || 8 },
         { code: '2A', name: 'AC 2 Tier', fare: Math.round(offer.price * 1.35), status: 'AVAILABLE', seats: 6 },
@@ -47,7 +61,7 @@ export function JourneyCard({
       ];
 
   const [selectedClass, setSelectedClass] = useState<string>(
-    defaultClasses.find((c) => c.code === '3A')?.code || defaultClasses[0].code
+    defaultClasses.find((c) => c.code === '3A')?.code || defaultClasses[0]?.code || '3A'
   );
 
   const currentClasses = offer.classes && offer.classes.length > 0 ? offer.classes : defaultClasses;

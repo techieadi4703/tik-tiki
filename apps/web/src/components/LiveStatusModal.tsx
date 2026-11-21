@@ -21,12 +21,19 @@ export function LiveStatusModal({ isOpen, onClose, initialTrain = '12168' }: Liv
     const q = (queryToTrack || trainQuery).trim();
     if (!q) return;
 
+    if (!isNaN(Number(q)) && q.length !== 5) {
+      setError(`"${q}" is not a valid train number. Indian Railways trains have 5-digit numbers (e.g. 12168, 12951, 22435, 20608).`);
+      setStatusData(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const data = await fetchLiveTrainStatus(q);
       setStatusData(data);
     } catch (err: any) {
+      setStatusData(null);
       setError(err.message || 'Unable to fetch live NTES tracking status.');
     } finally {
       setLoading(false);

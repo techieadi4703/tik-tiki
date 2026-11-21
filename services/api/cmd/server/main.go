@@ -822,6 +822,10 @@ func handleLiveTrainStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := routes.GetLiveTrainStatus(train)
+	if status == nil {
+		http.Error(w, fmt.Sprintf(`{"error": "Train '%s' was not found in Indian Railways NTES directory. Indian Railways train numbers are 5 digits (e.g. 12168, 12951, 22435, 20608). Please check the train number and retry."}`, train), http.StatusNotFound)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(status)
 }

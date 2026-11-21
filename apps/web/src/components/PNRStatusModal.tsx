@@ -24,9 +24,10 @@ interface PNRStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialPNR?: string;
+  onOpenCoachMap?: (trainNumber: string, pnr?: string, coach?: string, seat?: number) => void;
 }
 
-export function PNRStatusModal({ isOpen, onClose, initialPNR = '' }: PNRStatusModalProps) {
+export function PNRStatusModal({ isOpen, onClose, initialPNR = '', onOpenCoachMap }: PNRStatusModalProps) {
   const [pnrInput, setPnrInput] = useState(initialPNR || '284-9182741');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -293,7 +294,7 @@ export function PNRStatusModal({ isOpen, onClose, initialPNR = '' }: PNRStatusMo
                 </span>
                 <div className="flex items-center gap-1.5 overflow-x-auto py-2">
                   {pnrData.coach_layout.map((coach, idx) => {
-                    const isAllocated = coach === 'B2';
+                    const isAllocated = pnrData.passengers.some((p) => p.allocated_coach === coach);
                     return (
                       <div
                         key={idx}
@@ -312,11 +313,23 @@ export function PNRStatusModal({ isOpen, onClose, initialPNR = '' }: PNRStatusMo
               </div>
 
               {/* Actions Footer */}
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                 <span className="text-[10px] text-slate-400 font-mono">
                   CRIS Timestamp: {new Date(pnrData.last_updated).toLocaleString()}
                 </span>
                 <div className="flex items-center gap-2">
+                  {onOpenCoachMap && (
+                    <button
+                      onClick={() => {
+                        const firstP = pnrData.passengers[0];
+                        onOpenCoachMap(pnrData.train_number, pnrData.pnr, firstP?.allocated_coach, firstP?.allocated_berth);
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+                    >
+                      <Compass className="w-3.5 h-3.5" />
+                      <span>View on Coach Map</span>
+                    </button>
+                  )}
                   <button
                     onClick={handlePrint}
                     className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors"

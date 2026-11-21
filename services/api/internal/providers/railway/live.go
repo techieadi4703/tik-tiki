@@ -123,11 +123,31 @@ func (a *LiveRailwayAdapter) Search(ctx context.Context, query providers.SearchQ
 				seats3A = 0
 			}
 
-			classes := []providers.ClassOption{
-				{Code: "3A", Name: "AC 3 Tier", Fare: fare3A, Status: status3A, Seats: seats3A},
-				{Code: "2A", Name: "AC 2 Tier", Fare: fare2A, Status: "AVAILABLE", Seats: 6},
-				{Code: "1A", Name: "AC First Class", Fare: fare1A, Status: "AVAILABLE", Seats: 2},
-				{Code: "SL", Name: "Sleeper Class", Fare: fareSL, Status: "WAITLIST", Seats: 24},
+			var classes []providers.ClassOption
+			switch train.TrainType {
+			case "VANDE_BHARAT", "SHATABDI":
+				classes = []providers.ClassOption{
+					{Code: "CC", Name: "AC Chair Car", Fare: fare3A, Status: status3A, Seats: seats3A},
+					{Code: "EC", Name: "Exec Chair Car", Fare: fare3A * 1.85, Status: "AVAILABLE", Seats: 4},
+				}
+			case "RAJDHANI":
+				classes = []providers.ClassOption{
+					{Code: "3A", Name: "AC 3 Tier", Fare: fare3A, Status: status3A, Seats: seats3A},
+					{Code: "2A", Name: "AC 2 Tier", Fare: fare2A, Status: "AVAILABLE", Seats: 6},
+					{Code: "1A", Name: "AC First Class", Fare: fare1A, Status: "AVAILABLE", Seats: 2},
+				}
+			case "GARIB_RATH":
+				classes = []providers.ClassOption{
+					{Code: "3E", Name: "AC 3 Economy", Fare: fare3A * 0.75, Status: status3A, Seats: seats3A},
+					{Code: "CC", Name: "AC Chair Car", Fare: fare3A * 0.90, Status: "AVAILABLE", Seats: 12},
+				}
+			default:
+				classes = []providers.ClassOption{
+					{Code: "3A", Name: "AC 3 Tier", Fare: fare3A, Status: status3A, Seats: seats3A},
+					{Code: "2A", Name: "AC 2 Tier", Fare: fare2A, Status: "AVAILABLE", Seats: 6},
+					{Code: "1A", Name: "AC First Class", Fare: fare1A, Status: "AVAILABLE", Seats: 2},
+					{Code: "SL", Name: "Sleeper Class", Fare: fareSL, Status: "WAITLIST", Seats: 24},
+				}
 			}
 
 			var stopInfos []providers.RouteStopInfo

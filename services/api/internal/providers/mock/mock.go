@@ -186,11 +186,31 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 			if base3A <= 0 {
 				base3A = 1580.0
 			}
-			classes := []providers.ClassOption{
-				{Code: "3A", Name: "AC 3 Tier", Fare: base3A, Status: status, Seats: availSeats},
-				{Code: "2A", Name: "AC 2 Tier", Fare: base3A * 1.35, Status: "AVAILABLE", Seats: 6},
-				{Code: "1A", Name: "AC First Class", Fare: base3A * 1.8, Status: "AVAILABLE", Seats: 2},
-				{Code: "SL", Name: "Sleeper Class", Fare: base3A * 0.42, Status: "WAITLIST", Seats: 18},
+			var classes []providers.ClassOption
+			switch train.TrainType {
+			case "VANDE_BHARAT", "SHATABDI":
+				classes = []providers.ClassOption{
+					{Code: "CC", Name: "AC Chair Car", Fare: base3A, Status: status, Seats: availSeats},
+					{Code: "EC", Name: "Exec Chair Car", Fare: base3A * 1.85, Status: "AVAILABLE", Seats: 4},
+				}
+			case "RAJDHANI":
+				classes = []providers.ClassOption{
+					{Code: "3A", Name: "AC 3 Tier", Fare: base3A, Status: status, Seats: availSeats},
+					{Code: "2A", Name: "AC 2 Tier", Fare: base3A * 1.35, Status: "AVAILABLE", Seats: 6},
+					{Code: "1A", Name: "AC First Class", Fare: base3A * 1.8, Status: "AVAILABLE", Seats: 2},
+				}
+			case "GARIB_RATH":
+				classes = []providers.ClassOption{
+					{Code: "3E", Name: "AC 3 Economy", Fare: base3A * 0.75, Status: status, Seats: availSeats},
+					{Code: "CC", Name: "AC Chair Car", Fare: base3A * 0.90, Status: "AVAILABLE", Seats: 12},
+				}
+			default:
+				classes = []providers.ClassOption{
+					{Code: "3A", Name: "AC 3 Tier", Fare: base3A, Status: status, Seats: availSeats},
+					{Code: "2A", Name: "AC 2 Tier", Fare: base3A * 1.35, Status: "AVAILABLE", Seats: 6},
+					{Code: "1A", Name: "AC First Class", Fare: base3A * 1.8, Status: "AVAILABLE", Seats: 2},
+					{Code: "SL", Name: "Sleeper Class", Fare: base3A * 0.42, Status: "WAITLIST", Seats: 18},
+				}
 			}
 
 			offer := providers.NormalizedOffer{

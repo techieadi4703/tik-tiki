@@ -44,6 +44,13 @@ export default function Home() {
   const [showLiveStatus, setShowLiveStatus] = useState(false);
   const [showPNRStatus, setShowPNRStatus] = useState(false);
 
+  // Deep Coach Seat Map Modal state
+  const [showCoachModal, setShowCoachModal] = useState(false);
+  const [coachModalTrain, setCoachModalTrain] = useState('');
+  const [coachModalPNR, setCoachModalPNR] = useState('');
+  const [coachModalCoach, setCoachModalCoach] = useState('');
+  const [coachModalSeat, setCoachModalSeat] = useState<number | undefined>(undefined);
+
   // Restore authenticated session from localStorage on mount
   useEffect(() => {
     try {
@@ -353,8 +360,20 @@ export default function Home() {
 
       {/* Interactive Coach Seat Map Visualizer Modal */}
       <CoachSeatMapModal
+        isOpen={Boolean(activeCoachOffer) || showCoachModal}
         offer={activeCoachOffer}
-        onClose={() => setActiveCoachOffer(null)}
+        initialTrainNumber={coachModalTrain}
+        initialPNR={coachModalPNR}
+        initialCoach={coachModalCoach}
+        initialSeat={coachModalSeat}
+        onClose={() => {
+          setActiveCoachOffer(null);
+          setShowCoachModal(false);
+          setCoachModalPNR('');
+          setCoachModalTrain('');
+          setCoachModalCoach('');
+          setCoachModalSeat(undefined);
+        }}
       />
 
       {/* Live Train Running Status Modal */}
@@ -367,6 +386,14 @@ export default function Home() {
       <PNRStatusModal
         isOpen={showPNRStatus}
         onClose={() => setShowPNRStatus(false)}
+        onOpenCoachMap={(train, pnr, coach, seat) => {
+          setShowPNRStatus(false);
+          setCoachModalTrain(train);
+          setCoachModalPNR(pnr || '');
+          setCoachModalCoach(coach || '');
+          setCoachModalSeat(seat);
+          setShowCoachModal(true);
+        }}
       />
 
       {/* Seat Alert Sniping Modal */}

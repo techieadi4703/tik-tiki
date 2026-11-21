@@ -381,6 +381,19 @@ func (bm *BookingManager) GetPNRStatus(pnrInput string) (*PNRStatusResponse, err
 			className = "Sleeper Class (SL)"
 		}
 
+		coachLayout := []string{"LOCO", "EOG", "B1", "B2", "B3", "B4", "A1", "H1", "EOG"}
+		if b.ClassCode == "CC" {
+			coachLayout = []string{"LOCO", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "E1", "EOG"}
+		} else if b.ClassCode == "EC" {
+			coachLayout = []string{"LOCO", "C1", "C2", "C3", "C4", "E1", "EOG"}
+		} else if b.ClassCode == "2A" {
+			coachLayout = []string{"LOCO", "B1", "B2", "B3", "A1", "A2", "H1", "EOG"}
+		} else if b.ClassCode == "1A" {
+			coachLayout = []string{"LOCO", "B1", "B2", "A1", "H1", "EOG"}
+		} else if b.ClassCode == "SL" {
+			coachLayout = []string{"LOCO", "GS", "S1", "S2", "S3", "S4", "S5", "B1", "GS", "SLR"}
+		}
+
 		return &PNRStatusResponse{
 			PNR:                 formattedPNR,
 			TrainNumber:         b.TrainNumber,
@@ -402,7 +415,7 @@ func (bm *BookingManager) GetPNRStatus(pnrInput string) (*PNRStatusResponse, err
 			OverallStatus:       "CONFIRMED",
 			ConfirmationChance:  "100% Guaranteed Confirmation",
 			Passengers:          pStatuses,
-			CoachLayout:         []string{"LOCO", "EOG", "B1", "B2", "B3", "B4", "A1", "H1", "EOG"},
+			CoachLayout:         coachLayout,
 			LastUpdated:         time.Now().UTC(),
 		}, nil
 	}
@@ -476,12 +489,45 @@ func (bm *BookingManager) GetPNRStatus(pnrInput string) (*PNRStatusResponse, err
 		chartStatus = "CHART PREPARED"
 	}
 
+	// Determine coach & seating layout according to class & train type
+	allocatedCoach := "B2"
+	allocatedBerthType := "LOWER"
+	coachLayout := []string{"LOCO", "EOG", "B1", "B2", "B3", "B4", "A1", "H1", "EOG"}
+
+	if classCode == "CC" {
+		allocatedCoach = "C2"
+		allocatedBerthType = "WINDOW"
+		coachLayout = []string{"LOCO", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "E1", "EOG"}
+	} else if classCode == "EC" {
+		allocatedCoach = "E1"
+		allocatedBerthType = "WINDOW"
+		coachLayout = []string{"LOCO", "C1", "C2", "C3", "C4", "E1", "EOG"}
+	} else if classCode == "2A" {
+		allocatedCoach = "A1"
+		allocatedBerthType = "LOWER"
+		coachLayout = []string{"LOCO", "B1", "B2", "B3", "A1", "A2", "H1", "EOG"}
+	} else if classCode == "1A" {
+		allocatedCoach = "H1"
+		allocatedBerthType = "COUPE_LOWER"
+		coachLayout = []string{"LOCO", "B1", "B2", "A1", "H1", "EOG"}
+	} else if classCode == "SL" {
+		allocatedCoach = "S4"
+		allocatedBerthType = "LOWER"
+		coachLayout = []string{"LOCO", "GS", "S1", "S2", "S3", "S4", "S5", "B1", "GS", "SLR"}
+	}
+
 	passengersCount := (sum % 3) + 1
 	var passengers []PNRPassengerStatus
 
+	seatLabel := "Berth"
+	if classCode == "CC" || classCode == "EC" {
+		seatLabel = "Seat"
+	}
+
 	for i := 1; i <= passengersCount; i++ {
 		bStatus := "WL 14"
-		cStatus := fmt.Sprintf("Coach B2, Berth %d (Lower)", 20+(i*3))
+		seatNum := 20 + (i * 3)
+		cStatus := fmt.Sprintf("Coach %s, %s %d (%s)", allocatedCoach, seatLabel, seatNum, allocatedBerthType)
 		prob := 95
 
 		if sum%3 == 1 {
@@ -502,10 +548,10 @@ func (bm *BookingManager) GetPNRStatus(pnrInput string) (*PNRStatusResponse, err
 			PassengerIndex:          i,
 			BookingStatus:           bStatus,
 			CurrentStatus:           cStatus,
-			BerthPreference:         "LOWER",
-			AllocatedCoach:          "B2",
-			AllocatedBerth:          20 + (i * 3),
-			AllocatedBerthType:      "LOWER",
+			BerthPreference:         allocatedBerthType,
+			AllocatedCoach:          allocatedCoach,
+			AllocatedBerth:          seatNum,
+			AllocatedBerthType:      allocatedBerthType,
 			ConfirmationProbability: prob,
 		})
 	}
@@ -533,7 +579,7 @@ func (bm *BookingManager) GetPNRStatus(pnrInput string) (*PNRStatusResponse, err
 		OverallStatus:       overallStatus,
 		ConfirmationChance:  confChance,
 		Passengers:          passengers,
-		CoachLayout:         []string{"LOCO", "EOG", "B1", "B2", "B3", "B4", "A1", "H1", "EOG"},
+		CoachLayout:         coachLayout,
 		LastUpdated:         time.Now().UTC(),
 	}, nil
 }

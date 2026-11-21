@@ -43,12 +43,117 @@ type LiveClient struct {
 
 // NewLiveClient constructs the live railway client
 func NewLiveClient() *LiveClient {
+	apiKey := os.Getenv("RAPIDAPI_KEY")
+	if apiKey == "" {
+		apiKey = os.Getenv("RAPIDAPI_RAIL_KEY")
+	}
+	if apiKey == "" {
+		apiKey = os.Getenv("IRCTC_API_KEY")
+	}
+
 	return &LiveClient{
 		httpClient: &http.Client{Timeout: 6 * time.Second},
-		apiKey:     os.Getenv("RAPIDAPI_KEY"),
+		apiKey:     apiKey,
 		apiHost:    getEnvOrDefault("RAPIDAPI_HOST", "irctc1.p.rapidapi.com"),
 		customURL:  os.Getenv("RAIL_API_URL"),
 	}
+}
+
+// HasLiveAPIKey returns true if a real external API key or custom gateway URL is provided
+func (c *LiveClient) HasLiveAPIKey() bool {
+	return c.apiKey != "" || c.customURL != ""
+}
+
+// QueryExternalPNR queries live Indian Railways PRS via RapidAPI or custom gateway
+func (c *LiveClient) QueryExternalPNR(ctx context.Context, pnr string) (map[string]interface{}, error) {
+	if !c.HasLiveAPIKey() {
+		return nil, fmt.Errorf("no live API key configured")
+	}
+
+	baseURL := c.customURL
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("https://%s/api/v3/getPNRStatus", c.apiHost)
+	}
+
+	clean := strings.ReplaceAll(pnr, "-", "")
+	reqURL := fmt.Sprintf("%s?pnrNumber=%s", baseURL, clean)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.apiKey != "" {
+		req.Header.Set("X-RapidAPI-Key", c.apiKey)
+		req.Header.Set("X-RapidAPI-Host", c.apiHost)
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("external PNR API responded with HTTP %d", res.StatusCode)
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var raw map[string]interface{}
+	if err := json.Unmarshal(body, &raw); err != nil {
+		return nil, err
+	}
+	return raw, nil
+}
+
+// QueryExternalLiveRunningStatus queries live NTES GPS feed via RapidAPI or custom gateway
+func (c *LiveClient) QueryExternalLiveRunningStatus(ctx context.Context, trainNo string) (map[string]interface{}, error) {
+	if !c.HasLiveAPIKey() {
+		return nil, fmt.Errorf("no live API key configured")
+	}
+
+	baseURL := c.customURL
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("https://%s/api/v1/liveTrainStatus", c.apiHost)
+	}
+
+	clean := strings.TrimSpace(trainNo)
+	reqURL := fmt.Sprintf("%s?trainNo=%s&startDay=1", baseURL, clean)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.apiKey != "" {
+		req.Header.Set("X-RapidAPI-Key", c.apiKey)
+		req.Header.Set("X-RapidAPI-Host", c.apiHost)
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("external live running API responded with HTTP %d", res.StatusCode)
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var raw map[string]interface{}
+	if err := json.Unmarshal(body, &raw); err != nil {
+		return nil, err
+	}
+	return raw, nil
 }
 
 func getEnvOrDefault(key, fallback string) string {

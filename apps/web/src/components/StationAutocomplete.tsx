@@ -161,8 +161,8 @@ export function StationAutocomplete({
           isOpen ? 'border-blue-600 ring-2 ring-blue-100 bg-white' : 'border-slate-300 hover:border-slate-400'
         }`}
       >
-        <span className="text-xs font-bold text-slate-500 uppercase w-12 tracking-wider flex items-center gap-1">
-          <Train className="w-3 h-3 text-orange-600" />
+        <span className="text-xs font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5 shrink-0 mr-2.5 pr-2.5 border-r border-slate-200 select-none">
+          <Train className="w-3.5 h-3.5 text-orange-600 shrink-0" />
           {label}
         </span>
         <input
@@ -173,7 +173,7 @@ export function StationAutocomplete({
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full bg-transparent text-slate-900 font-semibold focus:outline-none text-sm placeholder-slate-400 truncate"
+          className="w-full bg-transparent text-slate-900 font-semibold focus:outline-none text-sm placeholder-slate-400 truncate pl-0.5"
         />
         {inputValue && (
           <button

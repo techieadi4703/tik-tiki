@@ -178,22 +178,20 @@ export function JourneyCard({
           </div>
 
           {/* Duration Graphic */}
-          <div className="flex-1 flex flex-col items-center px-3">
-            <span className="text-xs font-bold text-slate-600 mb-1 font-mono">
+          <div className="flex-1 flex flex-col items-center px-3 min-w-[120px]">
+            <span className="text-xs font-extrabold text-slate-700 font-mono mb-2.5 tracking-tight">
               {Math.floor(offer.duration_minutes / 60)}h {offer.duration_minutes % 60}m
             </span>
-            <div className="w-full flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-slate-400" />
-              <div className="h-0.5 flex-1 bg-slate-300 relative">
+            <div className="w-full flex items-center gap-1 relative py-0.5">
+              <div className="h-2 w-2 rounded-full bg-slate-400 shrink-0" />
+              <div className="h-0.5 flex-1 bg-slate-300 relative flex items-center justify-center">
                 {offer.transfers === 0 && (
-                  <span className="absolute inset-0 flex items-center justify-center -top-2.5">
-                    <span className="text-[10px] uppercase font-black text-slate-600 tracking-wider bg-white border border-slate-200 px-2 py-0.2 rounded-full shadow-sm">
-                      Direct
-                    </span>
+                  <span className="text-[10px] uppercase font-black text-slate-600 tracking-wider bg-white border border-slate-200 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap z-10">
+                    Direct
                   </span>
                 )}
               </div>
-              <div className="h-2 w-2 rounded-full bg-emerald-600" />
+              <div className="h-2 w-2 rounded-full bg-emerald-600 shrink-0" />
             </div>
 
             {/* Halts Button */}

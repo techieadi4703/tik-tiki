@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -18,6 +19,36 @@ import (
 	"tik-tiki/services/api/internal/routes"
 	"tik-tiki/services/api/internal/scoring"
 )
+
+func loadEnvFile(paths ...string) {
+	for _, p := range paths {
+		data, err := os.ReadFile(p)
+		if err != nil {
+			continue
+		}
+		lines := strings.Split(string(data), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+			parts := strings.SplitN(line, "=", 2)
+			if len(parts) == 2 {
+				k := strings.TrimSpace(parts[0])
+				v := strings.Trim(strings.TrimSpace(parts[1]), `"'`)
+				if os.Getenv(k) == "" {
+					_ = os.Setenv(k, v)
+				}
+			}
+		}
+		log.Printf("📄 [ENV] Loaded environment config from %s", p)
+		break
+	}
+}
+
+func init() {
+	loadEnvFile(".env", "../.env", "../../.env")
+}
 
 var mockAdapter = mock.NewMockAdapter()
 var bookingManager = bookings.NewBookingManager()

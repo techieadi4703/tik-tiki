@@ -13,7 +13,9 @@ tik-tiki/
 │   ├── PRD.md              # Unified Product Requirements Document
 │   ├── ARCHITECTURE.md     # High-Level & Low-Level Design (HLD/LLD)
 │   ├── API.md              # REST API Contracts & Endpoint Schemas
-│   └── RUNBOOK.md          # Operations, Daemon Management & Incident SOPs
+│   ├── RUNBOOK.md          # Operations, Daemon Management & Incident SOPs
+│   └── INVESTOR_MEMO.md    # Commercial Positioning & Unit Economics
+├── CHANGELOG.md            # Versioned Platform Releases & Release Notes
 ├── infrastructure/
 │   └── migrations/
 │       └── 001_initial_schema.sql  # PostgreSQL 16 + PostGIS schema
@@ -97,7 +99,20 @@ make docker-up
   - [x] State transition detection (`WAITLIST` $\to$ `AVAILABLE`) with 15-minute debounce guard.
   - [x] Multi-channel dispatcher (WhatsApp with pre-filled deep-links, Web Push, Email).
   - [x] Frictionless 1-click WhatsApp Seat Alert opt-in modal (`SeatAlertModal.tsx`).
-- [ ] **Phase 4: Open Timetable Data Ingestion**
-  - [ ] Ingest all-India station and stop sequence data (~8,500 stations, ~12,000 trains) into PostgreSQL.
-- [ ] **Phase 5: Coach & Berth Physical Layout Visualizer**
-  - [ ] Interactive SVG coach layout (LHB/ICF coaches, side lower, coupe/cabin).
+- [x] **Phase 4: Decoupled National Timetable & Corridor Engine**
+  - [x] Ingest authentic national timetable data ([national_trains.json](services/api/data/national_trains.json)) with stops, sequence, and platform details.
+  - [x] Thread-safe in-memory indexer with metropolitan alias normalization ([store.go](services/api/internal/timetable/store.go)).
+- [x] **Phase 5: Real-Time Dynamic Coach & Berth Layout Visualizer**
+  - [x] Interactive coach visualizer ([CoachSeatMapModal.tsx](apps/web/src/components/CoachSeatMapModal.tsx)) with real-time Train Number / PNR lookup.
+  - [x] Authentic **Vande Bharat & Shatabdi Chair Car layout** (78 seats 3+2 layout, 52 seats 2+2 Executive, zero sleeper berths).
+  - [x] Authentic **Rajdhani LHB layout** (3A, 2A, 1A, no Sleeper class).
+  - [x] Authentic **Superfast/Express layout** (SL, 3A, 2A, 1A) and Garib Rath (3E).
+  - [x] Automatic PNR passenger seat jumping with animated pulsing indicator.
+- [x] **Phase 6: Live Railway API Gateway & In-App Booking Engine**
+  - [x] Dual-layer live client ([live_client.go](services/api/internal/providers/railway/live_client.go)) integrating RapidAPI IRCTC with offline timetable fallback.
+  - [x] Auto-loading `.env` configuration on server startup.
+  - [x] Live PNR Status tracking with CRIS PRS manifest and coach layout highlight ([PNRStatusModal.tsx](apps/web/src/components/PNRStatusModal.tsx)).
+  - [x] Live NTES GPS running status tracker with strict 5-digit validation ([LiveStatusModal.tsx](apps/web/src/components/LiveStatusModal.tsx)).
+  - [x] In-app railway ticket reservation flow ([PassengerBookingModal.tsx](apps/web/src/components/PassengerBookingModal.tsx)) with quota selection.
+  - [x] Printable Electronic Reservation Slip (ERS) modal ([ElectronicReservationSlipModal.tsx](apps/web/src/components/ElectronicReservationSlipModal.tsx)).
+  - [x] Interactive passenger ticket passbook ([TicketPassbook.tsx](apps/web/src/components/TicketPassbook.tsx)).

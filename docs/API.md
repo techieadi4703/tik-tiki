@@ -316,7 +316,150 @@ Retrieves a specific booking by its 10-digit PNR.
 
 ---
 
-## 7. System Health
+## 7. Live Railway Gateways (CRIS & NTES Feeds)
+
+### `GET /v1/pnr/status?pnr=612-4914214`
+Queries live Indian Railways PRS status for any 10-digit PNR. Calls external RapidAPI IRCTC gateway if configured, with graceful fallback to the local PRS engine.
+
+#### Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `pnr` | string | Yes | 10-digit Indian Railways PNR (e.g. `612-4914214` or `6124914214`) |
+
+#### Response (200 OK)
+```json
+{
+  "pnr": "612-4914214",
+  "train_number": "20608",
+  "train_name": "Vande Bharat Express",
+  "origin_code": "SBC",
+  "origin_name": "KSR Bengaluru",
+  "dest_code": "MAS",
+  "dest_name": "MGR Chennai Central",
+  "boarding_station_code": "SBC",
+  "boarding_station_name": "KSR Bengaluru",
+  "date_of_journey": "28 Nov 2026",
+  "departure_time": "05:45",
+  "arrival_time": "10:10",
+  "class_code": "CC",
+  "class_name": "AC Chair Car (CC)",
+  "quota": "GN",
+  "chart_status": "CHART PREPARED",
+  "platform_number": "Platform 5",
+  "overall_status": "CONFIRMED",
+  "confirmation_chance": "98% High Chance of Confirmation",
+  "passengers": [
+    {
+      "passenger_index": 1,
+      "booking_status": "WL 25",
+      "current_status": "Coach C2, Seat 23 (Window)",
+      "berth_preference": "WINDOW",
+      "allocated_coach": "C2",
+      "allocated_berth": 23,
+      "allocated_berth_type": "WINDOW",
+      "confirmation_probability": 98
+    }
+  ],
+  "coach_layout": ["LOCO", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "E1", "EOG"],
+  "last_updated": "2026-11-21T17:00:00Z"
+}
+```
+
+---
+
+### `GET /v1/trains/live?train=12168`
+Queries live NTES running position and GPS signal tracking for any 5-digit Indian Railways service.
+
+#### Query Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `train` | string | Yes | Valid 5-digit Indian Railways Train Number (e.g. `12168`, `12951`, `22435`) |
+
+#### Response (200 OK)
+```json
+{
+  "train_number": "12168",
+  "train_name": "Banaras - LTT Superfast Express",
+  "train_type": "SUPERFAST",
+  "source_code": "BSBS",
+  "dest_code": "LTT",
+  "current_speed": 104,
+  "signal_status": "Clear Green",
+  "delay_minutes": 0,
+  "punctuality_text": "Right Time",
+  "current_station": "Departed Jabalpur (JBP) · Platform 2",
+  "next_station": "Next: Itarsi Junction (ET) · 245 km remaining",
+  "halts": [
+    {
+      "station_code": "BSBS",
+      "station_name": "Banaras",
+      "scheduled_depart": "10:10",
+      "platform_number": 2,
+      "halt_minutes": 0,
+      "distance_km": 0,
+      "status": "PASSED"
+    },
+    {
+      "station_code": "JBP",
+      "station_name": "Jabalpur",
+      "scheduled_arrive": "18:40",
+      "scheduled_depart": "18:50",
+      "platform_number": 2,
+      "halt_minutes": 10,
+      "distance_km": 499,
+      "status": "CURRENT"
+    },
+    {
+      "station_code": "LTT",
+      "station_name": "Lokmanya Tilak Terminus",
+      "scheduled_arrive": "09:00",
+      "platform_number": 3,
+      "halt_minutes": 0,
+      "distance_km": 1475,
+      "status": "UPCOMING"
+    }
+  ],
+  "last_updated": "2026-11-21T17:00:00Z"
+}
+```
+
+---
+
+### `GET /v1/railway/availability`
+Queries real-time seat availability and computes authentic telescopic CRIS fares.
+
+#### Query Parameters
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `train` | string | Yes | `12168` | Train Number |
+| `from` | string | Yes | `BSB` | Origin Station Code |
+| `to` | string | Yes | `LTT` | Destination Station Code |
+| `date` | string | No | Next Day | Date of Journey (`YYYY-MM-DD`) |
+| `class` | string | No | `3A` | Travel Class (`CC`, `EC`, `3A`, `2A`, `1A`, `SL`, `3E`) |
+| `quota` | string | No | `GN` | Quota (`GN`, `SS`, `LD`, `TQ`) |
+
+#### Response (200 OK)
+```json
+{
+  "train_number": "12168",
+  "train_name": "Banaras - LTT Superfast Express",
+  "from_station": "BSB",
+  "to_station": "LTT",
+  "travel_date": "2026-12-15",
+  "class_code": "3A",
+  "quota": "GN",
+  "status": "AVAILABLE",
+  "available_seats": 14,
+  "fare_amount_inr": 1645.00,
+  "chart_status": "CHART_NOT_PREPARED",
+  "data_source": "RAPIDAPI_IRCTC",
+  "retrieved_at": "2026-11-21T17:00:00Z"
+}
+```
+
+---
+
+## 8. System Health
 
 ### `GET /v1/health`
 Checks API server liveliness and subsystem connectivity.

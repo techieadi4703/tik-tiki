@@ -48,6 +48,7 @@ func loadEnvFile(paths ...string) {
 
 func init() {
 	loadEnvFile(".env", "../.env", "../../.env")
+	liveRailwayClient = railway.NewLiveClient()
 }
 
 var mockAdapter = mock.NewMockAdapter()
@@ -291,10 +292,45 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🔎 [SEARCH] Origin=%s Destination=%s Date=%s", req.OriginCode, req.DestCode, req.DepartureDate.Format("2006-01-02"))
 
-	offers, err := mockAdapter.Search(r.Context(), req)
-	if err != nil {
-		http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusInternalServerError)
-		return
+	var offers []providers.NormalizedOffer
+	var err error
+
+	// If live external railway client is configured, fetch live trains between stations from RapidAPI
+	if liveRailwayClient != nil && liveRailwayClient.HasLiveAPIKey() {
+		dateStr := req.DepartureDate.Format("2006-01-02")
+		liveTrains, liveErr := liveRailwayClient.QueryExternalTrainsBetweenStations(r.Context(), req.OriginCode, req.DestCode, dateStr)
+		if liveErr == nil && len(liveTrains) > 0 {
+			log.Printf("🚄 [LIVE CRIS/RAPIDAPI] Successfully fetched %d real trains between %s and %s", len(liveTrains), req.OriginCode, req.DestCode)
+			offers = railway.ConvertExternalTrainsToOffers(liveTrains, req.DepartureDate)
+
+			// Append multimodal flight and bus options for complete multimodal comparison
+			multimodal := mockAdapter.GetMultimodalAirAndBus(req)
+			offers = append(offers, multimodal...)
+
+			// Filter by requested modes if specified
+			if len(req.Modes) > 0 {
+				var filtered []providers.NormalizedOffer
+				for _, o := range offers {
+					for _, m := range req.Modes {
+						if o.Mode == m || strings.EqualFold(string(o.Mode), string(m)) {
+							filtered = append(filtered, o)
+							break
+						}
+					}
+				}
+				offers = filtered
+			}
+		} else {
+			log.Printf("⚠️ [LIVE CRIS/RAPIDAPI] External train search failed (%v), falling back to local timetable store", liveErr)
+		}
+	}
+
+	if len(offers) == 0 {
+		offers, err = mockAdapter.Search(r.Context(), req)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": "%s"}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	scoredOffers := scoring.CalculateScores(offers)

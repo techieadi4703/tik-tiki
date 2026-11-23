@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"tik-tiki/services/api/internal/providers"
+	"tik-tiki/services/api/internal/providers/railway"
 	"tik-tiki/services/api/internal/routes"
 )
 
@@ -182,35 +183,51 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 				punct = 88
 			}
 
-			base3A := train.BaseFare3A
-			if base3A <= 0 {
-				base3A = 1580.0
+			isSF := train.TrainType == "SUPERFAST" || train.TrainType == "RAJDHANI" || train.TrainType == "VANDE_BHARAT"
+			calDist := distKm
+			if calDist <= 0 {
+				calDist = 450
 			}
+
+			fare3A := railway.CalculateIndianRailwaysFare(calDist, "3A", isSF)
+			fare2A := railway.CalculateIndianRailwaysFare(calDist, "2A", isSF)
+			fare1A := railway.CalculateIndianRailwaysFare(calDist, "1A", isSF)
+			fareSL := railway.CalculateIndianRailwaysFare(calDist, "SL", isSF)
+			fareCC := railway.CalculateIndianRailwaysFare(calDist, "CC", isSF)
+			fareEC := railway.CalculateIndianRailwaysFare(calDist, "EC", isSF)
+			fare3E := railway.CalculateIndianRailwaysFare(calDist, "3E", isSF)
+
 			var classes []providers.ClassOption
+			var primaryFare float64
+
 			switch train.TrainType {
 			case "VANDE_BHARAT", "SHATABDI":
 				classes = []providers.ClassOption{
-					{Code: "CC", Name: "AC Chair Car", Fare: base3A, Status: status, Seats: availSeats},
-					{Code: "EC", Name: "Exec Chair Car", Fare: base3A * 1.85, Status: "AVAILABLE", Seats: 4},
+					{Code: "CC", Name: "AC Chair Car", Fare: fareCC, Status: status, Seats: availSeats},
+					{Code: "EC", Name: "Exec Chair Car", Fare: fareEC, Status: "AVAILABLE", Seats: 4},
 				}
+				primaryFare = fareCC
 			case "RAJDHANI":
 				classes = []providers.ClassOption{
-					{Code: "3A", Name: "AC 3 Tier", Fare: base3A, Status: status, Seats: availSeats},
-					{Code: "2A", Name: "AC 2 Tier", Fare: base3A * 1.35, Status: "AVAILABLE", Seats: 6},
-					{Code: "1A", Name: "AC First Class", Fare: base3A * 1.8, Status: "AVAILABLE", Seats: 2},
+					{Code: "3A", Name: "AC 3 Tier", Fare: fare3A, Status: status, Seats: availSeats},
+					{Code: "2A", Name: "AC 2 Tier", Fare: fare2A, Status: "AVAILABLE", Seats: 6},
+					{Code: "1A", Name: "AC First Class", Fare: fare1A, Status: "AVAILABLE", Seats: 2},
 				}
+				primaryFare = fare3A
 			case "GARIB_RATH":
 				classes = []providers.ClassOption{
-					{Code: "3E", Name: "AC 3 Economy", Fare: base3A * 0.75, Status: status, Seats: availSeats},
-					{Code: "CC", Name: "AC Chair Car", Fare: base3A * 0.90, Status: "AVAILABLE", Seats: 12},
+					{Code: "3E", Name: "AC 3 Economy", Fare: fare3E, Status: status, Seats: availSeats},
+					{Code: "CC", Name: "AC Chair Car", Fare: fareCC, Status: "AVAILABLE", Seats: 12},
 				}
+				primaryFare = fare3E
 			default:
 				classes = []providers.ClassOption{
-					{Code: "3A", Name: "AC 3 Tier", Fare: base3A, Status: status, Seats: availSeats},
-					{Code: "2A", Name: "AC 2 Tier", Fare: base3A * 1.35, Status: "AVAILABLE", Seats: 6},
-					{Code: "1A", Name: "AC First Class", Fare: base3A * 1.8, Status: "AVAILABLE", Seats: 2},
-					{Code: "SL", Name: "Sleeper Class", Fare: base3A * 0.42, Status: "WAITLIST", Seats: 18},
+					{Code: "3A", Name: "AC 3 Tier", Fare: fare3A, Status: status, Seats: availSeats},
+					{Code: "2A", Name: "AC 2 Tier", Fare: fare2A, Status: "AVAILABLE", Seats: 6},
+					{Code: "1A", Name: "AC First Class", Fare: fare1A, Status: "AVAILABLE", Seats: 2},
+					{Code: "SL", Name: "Sleeper Class", Fare: fareSL, Status: "WAITLIST", Seats: 18},
 				}
+				primaryFare = fare3A
 			}
 
 			offer := providers.NormalizedOffer{
@@ -223,7 +240,7 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 				DepartureAt:       tDepart,
 				ArrivalAt:         tArrive,
 				DurationMinutes:   durationMins,
-				Price:             train.BaseFare3A,
+				Price:             primaryFare,
 				Currency:          "INR",
 				Transfers:         0,
 				Status:            status,
@@ -241,6 +258,33 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 			offers = append(offers, offer)
 		}
 	}
+
+	offers = append(offers, m.GetMultimodalAirAndBus(query)...)
+
+	// Filter by requested modes if specified
+	if len(query.Modes) > 0 {
+		var filtered []providers.NormalizedOffer
+		for _, o := range offers {
+			for _, m := range query.Modes {
+				if o.Mode == m || strings.EqualFold(string(o.Mode), string(m)) {
+					filtered = append(filtered, o)
+					break
+				}
+			}
+		}
+		return filtered, nil
+	}
+
+	return offers, nil
+}
+
+// GetMultimodalAirAndBus provides realistic flight and bus alternative options for multimodal comparison
+func (m *MockAdapter) GetMultimodalAirAndBus(query providers.SearchQuery) []providers.NormalizedOffer {
+	depDate := query.DepartureDate
+	if depDate.IsZero() {
+		depDate = time.Now().Add(24 * time.Hour)
+	}
+	var offers []providers.NormalizedOffer
 
 	// 2. Real Multi-Modal Air Travel Options (Real Airport Codes & Realistic Fares)
 	origAirCode, origAirName := resolveAirport(query.OriginCode)
@@ -382,21 +426,9 @@ func (m *MockAdapter) Search(ctx context.Context, query providers.SearchQuery) (
 		ArrivalPlatform:   "Dropping: City Bypass Terminal",
 	})
 
-	// Filter by requested modes if specified
-	if len(query.Modes) > 0 {
-		var filtered []providers.NormalizedOffer
-		for _, o := range offers {
-			for _, m := range query.Modes {
-				if o.Mode == m || strings.EqualFold(string(o.Mode), string(m)) {
-					filtered = append(filtered, o)
-					break
-				}
-			}
-		}
-		return filtered, nil
-	}
+	return offers
 
-	return offers, nil
+	return offers
 }
 
 func (m *MockAdapter) CheckAvailability(ctx context.Context, serviceNo string, date time.Time, travelClass string) (string, int, error) {

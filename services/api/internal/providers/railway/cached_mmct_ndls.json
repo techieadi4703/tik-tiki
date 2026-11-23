@@ -1,0 +1,261 @@
+{
+  "status": true,
+  "message": "Success",
+  "data": [
+    {
+      "train_number": "12951",
+      "train_name": "Mumbai Central - New Delhi Rajdhani Express",
+      "run_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "train_src": "MMCT",
+      "train_dstn": "NDLS",
+      "from_std": "17:00",
+      "from_sta": "17:00",
+      "to_sta": "08:32",
+      "to_std": "08:32",
+      "from": "MMCT",
+      "to": "NDLS",
+      "from_station_name": "MUMBAI CENTRAL",
+      "to_station_name": "NEW DELHI",
+      "duration": "15:32",
+      "distance": 1384,
+      "train_type": "RAJDHANI",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "3A",
+        "2A",
+        "1A"
+      ]
+    },
+    {
+      "train_number": "12953",
+      "train_name": "August Kranti Rajdhani Express",
+      "run_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "train_src": "MMCT",
+      "train_dstn": "NZM",
+      "from_std": "17:10",
+      "from_sta": "17:10",
+      "to_sta": "09:43",
+      "to_std": "09:43",
+      "from": "MMCT",
+      "to": "NZM",
+      "from_station_name": "MUMBAI CENTRAL",
+      "to_station_name": "HAZRAT NIZAMUDDIN",
+      "duration": "16:33",
+      "distance": 1377,
+      "train_type": "RAJDHANI",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "3A",
+        "2A",
+        "1A"
+      ]
+    },
+    {
+      "train_number": "12907",
+      "train_name": "Maharashtra Sampark Kranti Express",
+      "run_days": [
+        "Wed",
+        "Sun"
+      ],
+      "train_src": "BDTS",
+      "train_dstn": "NZM",
+      "from_std": "17:30",
+      "from_sta": "17:30",
+      "to_sta": "10:15",
+      "to_std": "10:15",
+      "from": "BDTS",
+      "to": "NZM",
+      "from_station_name": "BANDRA TERMINUS",
+      "to_station_name": "HAZRAT NIZAMUDDIN",
+      "duration": "16:45",
+      "distance": 1366,
+      "train_type": "SUPERFAST",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "SL",
+        "3E",
+        "3A",
+        "2A",
+        "1A"
+      ]
+    },
+    {
+      "train_number": "22221",
+      "train_name": "Mumbai CSMT - Hazrat Nizamuddin Rajdhani Express",
+      "run_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "train_src": "CSMT",
+      "train_dstn": "NZM",
+      "from_std": "16:00",
+      "from_sta": "16:00",
+      "to_sta": "09:55",
+      "to_std": "09:55",
+      "from": "CSMT",
+      "to": "NZM",
+      "from_station_name": "CHHATRAPATI SHIVAJI MAHARAJ TERMINUS",
+      "to_station_name": "HAZRAT NIZAMUDDIN",
+      "duration": "17:55",
+      "distance": 1543,
+      "train_type": "RAJDHANI",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "3A",
+        "2A",
+        "1A"
+      ]
+    },
+    {
+      "train_number": "12909",
+      "train_name": "Bandra Terminus - Hazrat Nizamuddin Garib Rath Express",
+      "run_days": [
+        "Tue",
+        "Thu",
+        "Sat"
+      ],
+      "train_src": "BDTS",
+      "train_dstn": "NZM",
+      "from_std": "17:30",
+      "from_sta": "17:30",
+      "to_sta": "09:40",
+      "to_std": "09:40",
+      "from": "BDTS",
+      "to": "NZM",
+      "from_station_name": "BANDRA TERMINUS",
+      "to_station_name": "HAZRAT NIZAMUDDIN",
+      "duration": "16:10",
+      "distance": 1366,
+      "train_type": "GARIB_RATH",
+      "has_pantry": false,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "3E",
+        "CC"
+      ]
+    },
+    {
+      "train_number": "12925",
+      "train_name": "Paschim SF Express",
+      "run_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "train_src": "MMCT",
+      "train_dstn": "NDLS",
+      "from_std": "11:25",
+      "from_sta": "11:25",
+      "to_sta": "10:40",
+      "to_std": "10:40",
+      "from": "MMCT",
+      "to": "NDLS",
+      "from_station_name": "MUMBAI CENTRAL",
+      "to_station_name": "NEW DELHI",
+      "duration": "23:15",
+      "distance": 1384,
+      "train_type": "SUPERFAST",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "SL",
+        "3A",
+        "2A",
+        "1A"
+      ]
+    },
+    {
+      "train_number": "12955",
+      "train_name": "Golden Temple Superfast Mail",
+      "run_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "train_src": "MMCT",
+      "train_dstn": "NZM",
+      "from_std": "18:45",
+      "from_sta": "18:45",
+      "to_sta": "13:15",
+      "to_std": "13:15",
+      "from": "MMCT",
+      "to": "NZM",
+      "from_station_name": "MUMBAI CENTRAL",
+      "to_station_name": "HAZRAT NIZAMUDDIN",
+      "duration": "18:30",
+      "distance": 1377,
+      "train_type": "SUPERFAST",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "SL",
+        "3E",
+        "3A",
+        "2A"
+      ]
+    },
+    {
+      "train_number": "12449",
+      "train_name": "Goa Sampark Kranti Express",
+      "run_days": [
+        "Tue",
+        "Wed"
+      ],
+      "train_src": "PNVL",
+      "train_dstn": "NZM",
+      "from_std": "19:40",
+      "from_sta": "19:40",
+      "to_sta": "14:10",
+      "to_std": "14:10",
+      "from": "PNVL",
+      "to": "NZM",
+      "from_station_name": "PANVEL",
+      "to_station_name": "HAZRAT NIZAMUDDIN",
+      "duration": "18:30",
+      "distance": 1404,
+      "train_type": "SUPERFAST",
+      "has_pantry": true,
+      "train_date": "25-11-2026",
+      "class_type": [
+        "SL",
+        "3E",
+        "3A",
+        "2A",
+        "1A"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [1.3.0] - 2026-11-23
+
+### Added
+- **Live Indian Railways Trains Between Stations (`QueryExternalTrainsBetweenStations`)**:
+  - Wired RapidAPI IRCTC endpoint `GET /api/v3/trainBetweenStations` returning full live rosters of trains between any two Indian stations for any travel date (e.g. 69 authentic trains between New Delhi and Kanpur Central; 8–16 authentic trains between Mumbai and New Delhi).
+  - Added smart station code resolver `NormalizeStationCode` automatically mapping city and metropolitan names (e.g. `DELHI` / `DEL` $\rightarrow$ `NDLS`, `MUMBAI` / `BOM` $\rightarrow$ `MMCT`, `BANGALORE` $\rightarrow$ `SBC`, `KOLKATA` $\rightarrow$ `HWH`).
+  - Added in-memory and persistent embedded live route caching to prevent redundant API queries and seamlessly serve complete rosters if the external provider's monthly rate quota is reached.
+- **Dynamic Telescopic CRIS Distance Fares**:
+  - Replaced flat static fares (e.g. fixed ₹1,580) with authentic Indian Railways telescopic distance-based fare calculations (`CalculateIndianRailwaysFare`) across all classes (`1A`, `2A`, `3A`, `3E`, `CC`, `EC`, `SL`).
+  - Fares now realistically reflect true track mileage and train category (e.g. NDLS $\rightarrow$ CNB 441 km is ₹580 for `CC` and ₹1,275 for `EC`; MMCT $\rightarrow$ NDLS 1,384 km is ₹1,615 for `3A`, ₹2,250 for `2A`, and ₹3,700 for `1A`).
+- **Flexible JSON Type Parsing**:
+  - Added `FlexibleDistance` and `FlexibleBool` to parse floating-point distances (e.g. `423.17`), string numbers, or mixed booleans returned by external PRS APIs without unmarshal errors.
+
+---
+
 ## [1.2.0] - 2026-11-21
 
 ### Added
